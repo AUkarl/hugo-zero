@@ -9,8 +9,8 @@
 # ============================================================
 
 baseURL = "https://example.com/"      # 站点完整 URL（含协议，末尾带 /）
-title = "示例站点"                    # 网站标题（显示在浏览器标签页）
-theme = "hugo-theme-molyun"           # 使用的主题名称（对应 themes/ 下的目录名）
+title = "阿伏伽德罗的云端"                    # 网站标题（显示在浏览器标签页）
+theme = "hugo-zero"           # 使用的主题名称（对应 themes/ 下的目录名）
 locale = "zh-CN"                      # 站点语言区域标识
 enableRobotsTXT = true                # 是否生成 robots.txt（允许搜索引擎爬虫访问）
 defaultContentLanguage = "zh"         # 默认内容语言（未指定语言时使用）

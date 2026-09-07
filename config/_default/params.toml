@@ -32,21 +32,21 @@ logo_en = "/img/logo.png"           # 英文 Logo（留空则使用 logo）
 
 # --- 网站名称 ---
 show_site_name = true               # 是否在导航栏显示网站名称
-site_name = "示例站点"              # 网站名称（默认显示）
-site_name_zh = "示例站点"           # 中文名称（留空则使用 site_name）
-site_name_en = "Example Site"       # 英文名称（留空则使用 site_name）
+site_name = "阿伏伽德罗的云端"              # 网站名称（默认显示）
+site_name_zh = "阿伏伽德罗的云端"           # 中文名称（留空则使用 site_name）
+site_name_en = "Mol-Yun"       # 英文名称（留空则使用 site_name）
 
 # --- 作者 ---
 show_author = true                  # 是否显示全局作者信息
-author = "示例作者"                 # 默认作者名
-author_zh = "示例作者"              # 中文作者名（留空则使用 author）
-author_en = "Example Author"        # 英文作者名（留空则使用 author）
+author = "知 止"                 # 默认作者名
+author_zh = "知 止"              # 中文作者名（留空则使用 author）
+author_en = "知 止"        # 英文作者名（留空则使用 author）
 default_author = "zhizhi"           # 文章默认作者 ID（对应 data/authors.yaml 中的 key）
 
 # --- 其他 ---
-description = "一个极简个人站点"     # 站点描述（用于 SEO）
-keywords = ["blog", "tech", "design"]  # 站点关键词（数组）
-favicon = "/img/avatar.png"         # 网站图标路径（相对于 static 目录，留空使用默认）
+description = "阿伏伽德罗的云端 | 以常数为名，收藏无常的瞬间。一位开发者兼写作者的个人数字花园，收录技术实践、日常散文与生活影像。"     # 站点描述（用于 SEO）
+keywords = ["blog", "tech", "design", "阿伏伽德罗的云端", "阿伏的云", "个人博客", "技术分享", "编程", "日常随笔", "摄影", "生活记录", "Molyun", "摩尔", "阿伏伽德罗常数"]  # 站点关键词（数组）
+favicon = "/img/favicon.png"         # 网站图标路径（相对于 static 目录，留空使用默认）
 
 
 # --------------------------------------------
@@ -65,9 +65,9 @@ default_theme = "auto"
 
 # 导航栏显示名（留空则使用 site_name）
 # navName_en 切换英文后显示的名称
-navName = "示例站点"
-navName_zh = "示例站点"
-navName_en = "Example Site"
+navName = "阿伏伽德罗的云端"
+navName_zh = "阿伏伽德罗的云端"
+navName_en = "Mol-Yun"
 
 
 # --------------------------------------------
@@ -102,7 +102,7 @@ navName_en = "Example Site"
 
   # --- 背景图片 ---
   show_background = true            # 是否显示背景图片
-  background_image = "img/bj2.jpg"  # 背景图片路径（相对于 static 目录）
+  background_image = "img/bj.jpg"  # 背景图片路径（相对于 static 目录）
 
 
 # --------------------------------------------
@@ -120,8 +120,8 @@ navName_en = "Example Site"
 
   # 主页描述文字（显示在页面标题下方）
   show_desc = true                  # 是否显示主页描述
-  desc_zh = "这里是主页描述文字。"
-  desc_en = "This is the home page description."
+  desc_zh = "这里永远有一摩尔的不确定性"
+  desc_en = "There is always a mole of uncertainty here."
 
 
 # --------------------------------------------
@@ -135,7 +135,7 @@ navName_en = "Example Site"
   show_word_count = true            # 是否显示字数统计
   show_author_box = true            # 是否显示作者信息框
   show_license = true               # 是否显示 CC 许可协议
-  donate_max_qr = 6                 # 赞赏弹窗最多显示二维码数量
+  donate_max_qr = 3                 # 赞赏弹窗最多显示二维码数量
 
 
 # --------------------------------------------
@@ -156,8 +156,8 @@ math = true                         # 是否全局启用数学公式（KaTeX）
 
   # 归档页描述文字（显示在页面标题下方）
   show_desc = true                  # 是否显示归档页描述
-  desc_zh = "浏览所有文章归档。"
-  desc_en = "Browse all archived articles."
+  desc_zh = "一摩尔的思想微粒在此归档"
+  desc_en = "One Mole's thought particles are archived here."
 
 
 # --------------------------------------------
@@ -173,11 +173,11 @@ math = true                         # 是否全局启用数学公式（KaTeX）
   # === 在线发布模式配置 ===
   # 整个时刻页变为一个评论区，仅保留顶部横幅
   [moment.online]
-    comment_provider = "twikoo"       # 选择: waline / twikoo / artalk
+    comment_provider = "waline"       # 选择: waline / twikoo / artalk
 
     # Waline — 基于 Leancloud 的评论系统
     # 文档: https://waline.js.org/
-    waline_server_url = "https://your-waline-server.example.com"
+    waline_server_url = "https://waline-molyun.molyun.com"
     waline_emoji = ["https://cdn.jsdelivr.net/npm/@waline/emojis/weibo"]
 
     # Twikoo — 基于云开发的评论系统
@@ -193,26 +193,26 @@ math = true                         # 是否全局启用数学公式（KaTeX）
     # 在线模式横幅配置
     [moment.online.banner]
       show_background = true          # 是否显示背景图
-      background_image = "img/bj.jpg" # 背景图路径（相对于 static 目录）
-      show_avatar = true              # 是否显示头像
-      show_nickname = true            # 是否显示昵称
+      background_image = "img/bj2.jpg" # 背景图路径（相对于 static 目录）
+      show_avatar = false              # 是否显示头像
+      show_nickname = false            # 是否显示昵称
       nickname = "知 止"              # 横幅显示的昵称
-      show_signature = true           # 是否显示签名
+      show_signature = false           # 是否显示签名
       signature = "记录生活，分享感悟" # 横幅显示的签名文字
 
   # === 离线展示模式配置 ===
   # 展示通过 Hugo 内容文件手动上传的说说
   [moment.offline]
-    comment_provider = " "             # 空=禁用评论, 或选: waline / twikoo / artalk
+    comment_provider = "waline"             # 空=禁用评论, 或选: waline / twikoo / artalk
     paginate = 10                     # 每次加载的时刻数量（无限滚动）
 
     # Waline
-    waline_server_url = ""
+    waline_server_url = "https://waline-molyun.molyun.com"
     waline_emoji = ["https://cdn.jsdelivr.net/npm/@waline/emojis/weibo"]
 
     # Twikoo
-    twikoo_env_id = ""
-    twikoo_region = ""
+    twikoo_env_id = "https://twikoo-molyun.molyun.com"
+    twikoo_region = "ap-east-1"
 
     # Artalk
     artalk_server = ""
@@ -250,7 +250,7 @@ math = true                         # 是否全局启用数学公式（KaTeX）
     # Waline — 基于 Leancloud 的评论系统
     # 文档: https://waline.js.org/
     # 部署后可获得 serverURL，格式如 https://your-app.vercel.app
-    waline_server_url = "https://your-waline-server.example.com"  # Waline 服务端 URL（必填）
+    waline_server_url = "https://waline-molyun.molyun.com"  # Waline 服务端 URL（必填）
     waline_emoji = ["https://cdn.jsdelivr.net/npm/@waline/emojis/weibo"]  # 表情包 CDN
     waline_visitor = true           # 是否启用访问量统计
     waline_comment_sorting = "latest"  # 评论排序: latest / oldest / hottest
@@ -268,8 +268,8 @@ math = true                         # 是否全局启用数学公式（KaTeX）
     # Twikoo — 基于云开发的评论系统
     # 文档: https://twikoo.js.org/
     # 在腾讯云开发控制台创建环境后获得 envId
-    twikoo_env_id = ""                # 环境 ID（必填）
-    twikoo_region = ""                # 区域（如 ap-shanghai / ap-guangzhou）
+    twikoo_env_id = "https://twikoo-molyun.molyun.com"                # 环境 ID（必填）
+    twikoo_region = "ap-east-1"                # 区域（如 ap-shanghai / ap-guangzhou）
 
     # Artalk — 自托管评论系统
     # 文档: https://artalk.js.org/
@@ -286,8 +286,8 @@ math = true                         # 是否全局启用数学公式（KaTeX）
 [analytics]
   enable_google = false             # 是否启用 Google Analytics
   google_ga_id = ""                 # Google Analytics ID（格式: G-XXXXXXXXXX）
-  enable_baidu = false              # 是否启用百度统计
-  baidu_site_id = ""                # 百度统计站点 ID
+  enable_baidu = true              # 是否启用百度统计
+  baidu_site_id = "b1055626e1670a6aece51ed7414689e9"                # 百度统计站点 ID
 
 
 # --------------------------------------------
@@ -296,12 +296,12 @@ math = true                         # 是否全局启用数学公式（KaTeX）
 # 页脚版权信息、服务链接、社交链接。
 
 [footer]
-  copyright_text = "2025-{year} 示例站点"  # 版权文字（{year} 自动替换为当前年份）
-  icp = "ICP 自备100010010"                            # ICP 备案号（留空则不显示）
+  copyright_text = "2025-{year} MolYun"  # 版权文字（{year} 自动替换为当前年份）
+  icp = "ICP 自备6022140761023"                            # ICP 备案号（留空则不显示）
 
   # powered by 行（显示在 "designed by XXX" 下方）
   show_powered_by = true              # 是否显示 powered by 行
-  powered_by_text = "powered by HuGo" # 自定义文字（可改为任意内容）
+  powered_by_text = "当前在阿伏伽德罗的云端" # 自定义文字（可改为任意内容）
 
   # 技术服务链接（页脚中间区域）
   # 增减方法: 复制一个 [[footer.services]] 块并修改内容
@@ -309,11 +309,11 @@ math = true                         # 是否全局启用数学公式（KaTeX）
   [[footer.services]]
     name = "Hugo"
     icon = "fa-brands fa-hugo"
-    link = "https://example.com"
+    link = "https://gohugo.io/"
   [[footer.services]]
     name = "GitHub"
     icon = "fa-brands fa-github"
-    link = "https://gohugo.io/"
+    link = "https://github.com/"
   [[footer.services]]
     name = "Cloudflare"
     icon = "fa-brands fa-cloudflare"
@@ -325,34 +325,34 @@ math = true                         # 是否全局启用数学公式（KaTeX）
   [[footer.social_row1]]
     name = "Instagram"
     icon = "fa-brands fa-instagram"
-    link = "https://www.instagram.com/example"
+    link = "https://www.instagram.com/eastlisi?igsh=MWlwNmNuZGZwYTdqMg=="
   [[footer.social_row1]]
     name = "Twitter"
     icon = "fa-brands fa-twitter"
-    link = "https://x.com/example"
+    link = "https://x.com/EastLisi"
   [[footer.social_row1]]
     name = "GitHub"
     icon = "fa-brands fa-github"
-    link = "https://github.com/example"
+    link = "https://github.com/aukarl"
   [[footer.social_row1]]
     name = "Email"
     icon = "fa-solid fa-envelope"
-    link = "mailto:example@example.com"
+    link = "mailto:x@molyun.com"
 
   # 社交链接第二行
   # 增减方法: 复制一个 [[footer.social_row2]] 块并修改内容
   [[footer.social_row2]]
     name = "微博"
     icon = "fa-brands fa-weibo"
-    link = "#"
+    link = "https://weibo.com/u/5518868886"
   [[footer.social_row2]]
     name = "B站"
     icon = "fa-brands fa-bilibili"
-    link = "#"
+    link = "https://space.bilibili.com/224662929"
   [[footer.social_row2]]
     name = "知乎"
     icon = "fa-brands fa-zhihu"
-    link = "#"
+    link = "https://www.zhihu.com/profile/dhdu-heng?share_code=DVXa2YEJh9TG&zh_hide_nav_bar=true"
   [[footer.social_row2]]
     name = "RSS"
     icon = "fa-solid fa-rss"
@@ -378,8 +378,8 @@ math = true                         # 是否全局启用数学公式（KaTeX）
 
   # 关于页描述（显示在页面标题下方）
   show_desc = true                  # 是否显示描述
-  desc_zh = "关于我与这个站点。"
-  desc_en = "About me and this site."
+  desc_zh = "云朵会散，但摩尔永恒"
+  desc_en = "Clouds may disperse, but Moore is eternal."
 
   # 个性签名（显示在名称下方）
   tagline_zh = "独立创作者 · 极简主义践行者 · 数字花园园丁"
@@ -420,13 +420,13 @@ math = true                         # 是否全局启用数学公式（KaTeX）
 
 # 关于页头像和名称（覆盖全局设置）
 aboutAvatar = "img/avatar.png"
-aboutName = "示例名称"
+aboutName = "知 止"
 
 # --- 友情链接列表 ---
 # 增减方法: 复制一个 [[friends]] 块并修改内容
 [[friends]]
-  name = "示例博客"
-  url = "https://blog.example.com"
+  name = "Z'BLOGS"
+  url = "https://blog.molyun.com"
   
 
 # --- 站点联盟列表 ---
@@ -447,8 +447,20 @@ aboutName = "示例名称"
 [[aboutContacts]]
   label = "Email"
   labelKey = "about-findme-email"   # i18n 键名（用于多语言翻译）
-  url = "mailto:example@example.com"
-  text = "example@example.com"
+  url = "mailto:x@molyun.com"
+  text = "x@molyun.com"
+  external = true                   # 是否外链
+[[aboutContacts]]
+  label = "Email"
+  labelKey = "about-findme-email"   # i18n 键名（用于多语言翻译）
+  url = "mailto:hdywong@gmail.com"
+  text = "hdywong@gmail.com"
+  external = true                   # 是否外链
+[[aboutContacts]]
+  label = "公众号"
+  labelKey = "about-findme-email"   # i18n 键名（用于多语言翻译）
+  url = "https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzA5NTY4OTg0Nw==&action=getalbum&album_id=1340101389716078593&subscene=159&subscene=&scenenote=https%3A%2F%2Fmp.weixin.qq.com%2Fs%2FnWmm3WAVod8NpOyeXyDlIA&nolastread=1#wechat_redirect"
+  text = "简 分"
   external = true                   # 是否外链
 
 # --- 支持服务 ---
@@ -462,7 +474,10 @@ aboutName = "示例名称"
   name = "Cloudflare"
   url = "https://cloudflare.com"
   icon = "fas fa-cloud"
-
+[[supports]]
+  name = "HUGO"
+  url = "https://gohugo.io/"
+  icon = "fas fa-hugo"
 
 # --------------------------------------------
 # 12. 邮件页面（/email/）
@@ -470,7 +485,7 @@ aboutName = "示例名称"
 # 邮件登录页配置，包括邮箱跳转地址和 API 接口。
 
 [email]
-  enable = true                     # 是否启用邮件页面
+  enable = false                     # 是否启用邮件页面
   mail_domain = "mail.example.com"  # 登录成功后跳转的邮箱域名
 
   # --- 第三方登录 ---
@@ -498,8 +513,8 @@ aboutName = "示例名称"
 
   # 工具页描述文字（显示在页面标题下方）
   show_desc = true                  # 是否显示工具页描述
-  desc_zh = "收藏与分享常用工具。"
-  desc_en = "A collection of useful tools."
+  desc_zh = "计量我的数字宇宙"
+  desc_en = "Measure my digital universe."
 
 
 # --------------------------------------------
@@ -512,22 +527,40 @@ aboutName = "示例名称"
 
   # 工坊页描述文字（显示在页面标题下方）
   show_desc = true                  # 是否显示工坊页描述
-  desc_zh = "我的项目与作品。"
-  desc_en = "My projects and works."
+  desc_zh = "每一朵云都由思想摩尔组成"
+  desc_en = "Every cloud is composed of thought Moors."
 
 # --- 工坊项目列表 ---
 # 增减方法: 复制一个 [[works]] 块并修改内容
 # url 字段: 填写项目链接（外部 URL 或站内路径），留空则无链接
 
 [[works]]
-  i18nKey = "work-item2"
+  i18nKey = "work-item1"
   titleZh = "Hugo 主题"
   descZh = "为 Hugo 静态站点设计的极简主题"
-  statusZh = "草稿"
+  statusZh = "已发布"
   titleEn = "Hugo Theme"
   descEn = "Minimal theme for Hugo static sites"
   statusEn = "Draft"
-  url = ""
+  url = "https://github.com/AUkarl/hugo-zero"
+[[works]]
+  i18nKey = "work-item2"
+  titleZh = "摩尔邮箱"
+  descZh = "一个基于开源项目的自建邮箱"
+  statusZh = "进行中"
+  titleEn = "Mol Mail"
+  descEn = "A self-built email account based on an open-source project"
+  statusEn = "Draft"
+  url = "https://mail.molx.net/login"
+[[works]]
+  i18nKey = "work-item3"
+  titleZh = "Mol新标签页"
+  descZh = "一个极简标签页"
+  statusZh = "已发布"
+  titleEn = "Mol Tab"
+  descEn = "A minimalist TAB page"
+  statusEn = "Draft"
+  url = "https://tab.molx.net/moltab"
 
 
 # --------------------------------------------
@@ -544,11 +577,11 @@ aboutName = "示例名称"
 # 搜索引擎优化配置，控制 meta 标签和结构化数据。
 
 [seo]
-  default_description = "示例站点 - 极简个人站点"  # 默认描述（用于无 description 的页面）
-  default_keywords = ["博客", "设计", "技术", "极简"]  # 默认关键词
+  default_description = "阿伏伽德罗的云端 | 以常数为名，收藏无常的瞬间。一位开发者兼写作者的个人数字花园，收录技术实践、日常散文与生活影像。"  # 默认描述（用于无 description 的页面）
+  default_keywords = ["博客", "设计", "技术", "极简", "阿伏伽德罗的云端", "阿伏的云", "个人博客", "技术分享", "编程", "日常随笔", "摄影", "生活记录", "Molyun", "摩尔", "阿伏伽德罗常数"]  # 默认关键词
   enable_og = true                  # 是否输出 Open Graph 标签
   enable_twitter = true             # 是否输出 Twitter Card 标签
-  site_author = "示例作者"          # 站点作者（用于 meta author 标签）
+  site_author = "知 止"          # 站点作者（用于 meta author 标签）
 
 
 # --------------------------------------------
@@ -572,8 +605,8 @@ aboutName = "示例名称"
 
 [author_profile]
   avatar = "img/avatar.png"         # 默认作者头像路径
-  nickname = "示例昵称"             # 作者昵称
-  nickname_en = "Example"           # 英文作者昵称
+  nickname = "知 止"             # 作者昵称
+  nickname_en = "知 止"           # 英文作者昵称
   bio_zh = "独立创作者 · 极简主义践行者 · 数字花园园丁"  # 中文简介
   bio_en = "Independent Creator · Minimalist · Digital Gardener"  # 英文简介
   show_cc_license = true           # 是否显示 CC 开源协议
@@ -581,11 +614,14 @@ aboutName = "示例名称"
   # 作者赞赏码（也可在 data/authors.yaml 中按作者配置）
   # 增减方法: 复制一个 [[author_profile.donate]] 块并修改内容
   [[author_profile.donate]]
-    qr = "img/donate-alipay.svg"    # 二维码图片路径
-    name = "支付宝"                  # 平台名称
+    qr = "img/donate-wechat.svg"    # 二维码图片路径
+    name = "赞赏"                  # 平台名称
   [[author_profile.donate]]
-    qr = "img/donate-wechat.svg"
-    name = "微信"
+    qr = "img/donate-paypal.svg"
+    name = "PayPal"
+  [[author_profile.donate]]
+    qr = "img/donate-philanthropy.svg"
+    name = "快来快来扫一下"
   
   
 
@@ -594,23 +630,24 @@ aboutName = "示例名称"
   [[author_profile.contacts]]
     name = "GitHub"
     icon = "fab fa-github"
-    url = "https://github.com/example"
+    url = "https://github.com/aukarl"
   [[author_profile.contacts]]
     name = "Twitter"
     icon = "fab fa-twitter"
-    url = "https://x.com/example"
+    url = "https://x.com/EastLisi"
   [[author_profile.contacts]]
     name = "Instagram"
     icon = "fab fa-instagram"
-    url = "https://www.instagram.com/example"
+    url = "https://www.instagram.com/eastlisi?igsh=MWlwNmNuZGZwYTdqMg=="
+  [[social]]
+  name = "微博"
+  url = "https://weibo.com/u/5518868886"
+  icon = "fab fa-weibo"
   [[author_profile.contacts]]
     name = "B站"
     icon = "fab fa-bilibili"
-    url = "#"
-  [[author_profile.contacts]]
-    name = "知乎"
-    icon = "fab fa-zhihu"
-    url = "#"
+    url = "https://space.bilibili.com/224662929"
+
 
 
 # --------------------------------------------
@@ -621,25 +658,22 @@ aboutName = "示例名称"
 
 [[social]]
   name = "GitHub"
-  url = "https://github.com/example"
+  url = "https://github.com/aukarl"
   icon = "fab fa-github"
 [[social]]
   name = "Twitter"
-  url = "https://x.com/example"
+  url = "https://x.com/EastLisi"
   icon = "fab fa-twitter"
 [[social]]
   name = "Instagram"
-  url = "https://www.instagram.com/example"
+  url = "hhttps://www.instagram.com/eastlisi?igsh=MWlwNmNuZGZwYTdqMg=="
   icon = "fab fa-instagram"
 [[social]]
   name = "微博"
-  url = "#"
+  url = "https://weibo.com/u/5518868886"
   icon = "fab fa-weibo"
 [[social]]
   name = "B站"
-  url = "#"
+  url = "https://space.bilibili.com/224662929"
   icon = "fab fa-bilibili"
-[[social]]
-  name = "知乎"
-  url = "#"
-  icon = "fab fa-zhihu"
+
