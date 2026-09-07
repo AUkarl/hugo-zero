@@ -1,0 +1,17 @@
+# Hugo 构建产物
+public/
+resources/_gen/
+.hugo_build.lock
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project

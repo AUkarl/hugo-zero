@@ -1,0 +1,21 @@
+{{- /*
+  audio.html — HTML5 音频播放器短代码
+  用法: {{< audio src="music.mp3" title="歌曲名" artist="艺术家" >}}
+  支持: 多种音频格式、自动播放控制、循环
+*/ -}}
+<div class="audio-player">
+  {{- with .Get "title" }}
+  <div class="audio-info">
+    <span class="audio-title">{{ . }}</span>
+    {{- with $.Get "artist" }}
+    <span class="audio-artist">{{ . }}</span>
+    {{- end }}
+  </div>
+  {{- end }}
+  <audio controls preload="metadata" {{ if .Get "autoplay" }}autoplay{{ end }} {{ if .Get "loop" }}loop{{ end }}>
+    <source src="{{ .Get "src" }}" {{ with .Get "type" }}type="{{ . }}"{{ else }}type="audio/mpeg"{{ end }} />
+    {{- with .Get "ogg" }}<source src="{{ . }}" type="audio/ogg" />{{ end }}
+    {{- with .Get "wav" }}<source src="{{ . }}" type="audio/wav" />{{ end }}
+    您的浏览器不支持音频播放。
+  </audio>
+</div>

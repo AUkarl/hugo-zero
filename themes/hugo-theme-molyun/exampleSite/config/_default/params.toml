@@ -1,0 +1,425 @@
+# ============================================================
+# exampleSite/config/_default/params.toml — 主题参数示例
+# ============================================================
+# 这是完整的参数参考，复制后按需修改。
+# 所有参数都有注释说明，按编号分区方便查找。
+# ============================================================
+
+
+# --------------------------------------------
+# 1. 站点基本信息
+# --------------------------------------------
+
+show_logo = true
+logo = "/img/logo.png"
+logo_zh = "/img/logo.png"
+logo_en = "/img/logo.png"
+
+show_site_name = true
+site_name = "我的站点"
+site_name_zh = "我的站点"
+site_name_en = "My Site"
+
+show_author = true
+author = "作者名"
+author_zh = "作者名"
+author_en = "Author Name"
+default_author = "default"
+
+description = "一个极简个人站点"
+keywords = ["blog", "tech", "design"]
+favicon = "/img/avatar.png"
+
+
+# --------------------------------------------
+# 2. 导航栏
+# --------------------------------------------
+
+enable_theme_switch = true
+enable_lang_switch = true
+default_theme = "auto"
+
+navName = "我的站点"
+navName_zh = "我的站点"
+navName_en = "My Site"
+
+
+# --------------------------------------------
+# 3. 首页落地页（/）
+# --------------------------------------------
+
+[landing]
+  show_quotes = true
+  quotes_zh = [
+    "海上生明月 & 天涯共此时",
+    "江南无所有 & 聊赠一枝春",
+    "今夕复何夕 & 共此灯烛光"
+  ]
+  quotes_en = [
+    "The moon rises over the sea, we share this moment",
+    "In the south I have nothing to give, but a spring branch",
+    "What night is tonight, together by this candlelight"
+  ]
+
+  show_welcome = true
+  welcome_zh = "Hey，好久不见"
+  welcome_en = "Hey, long time no see"
+
+  show_background = true
+  background_image = "img/bj.jpg"
+
+
+# --------------------------------------------
+# 4. 主页（/home/）
+# --------------------------------------------
+
+[home]
+  paginate = 20
+  columns = 4
+  width_ratio = 90
+  show_images = true
+  show_summary = true
+  summary_length = 120
+
+  show_desc = true
+  desc_zh = "这里是主页描述文字。"
+  desc_en = "This is the home page description."
+
+
+# --------------------------------------------
+# 5. 文章详情页
+# --------------------------------------------
+
+[article]
+  show_toc = true
+  toc_levels = ["h2", "h3"]
+  show_word_count = true
+  show_author_box = true
+  show_license = true
+  donate_max_qr = 6
+
+math = true
+
+
+# --------------------------------------------
+# 6. 归档页（/archive/）
+# --------------------------------------------
+
+[archive]
+  group_by_year = true
+  enable_tag_danmaku = true
+  danmaku_lanes = 5
+
+  show_desc = true
+  desc_zh = "浏览所有文章归档。"
+  desc_en = "Browse all archived articles."
+
+
+# --------------------------------------------
+# 7. 时刻页（/moments/）
+# --------------------------------------------
+# online_publish = true  → 整页评论区（waline/twikoo/artalk）
+# online_publish = false → 展示 data/moments.yaml 说说卡片
+
+[moment]
+  online_publish = false
+
+  [moment.online]
+    comment_provider = "waline"
+    waline_server_url = "https://your-waline-server.example.com"
+    waline_emoji = ["https://cdn.jsdelivr.net/npm/@waline/emojis/weibo"]
+    twikoo_env_id = ""
+    twikoo_region = ""
+    artalk_server = ""
+    artalk_site = "default"
+
+    [moment.online.banner]
+      show_background = true
+      background_image = "img/bj.jpg"
+      show_avatar = true
+      show_nickname = true
+      nickname = "昵称"
+      show_signature = true
+      signature = "记录生活，分享感悟"
+
+  [moment.offline]
+    comment_provider = ""
+    paginate = 10
+    waline_server_url = ""
+    waline_emoji = ["https://cdn.jsdelivr.net/npm/@waline/emojis/weibo"]
+    twikoo_env_id = ""
+    twikoo_region = ""
+    artalk_server = ""
+    artalk_site = "default"
+
+    [moment.offline.banner]
+      show_background = true
+      background_image = "img/bj.jpg"
+
+    [moment.offline.profile]
+      default_nickname = "昵称"
+      default_avatar = "img/avatar.png"
+      show_avatar = true
+      show_nickname = true
+      show_signature = true
+      signature = "记录生活，分享感悟"
+
+
+# --------------------------------------------
+# 8. 评论系统（文章页）
+# --------------------------------------------
+# 选择一种: waline / giscus / twikoo / artalk
+
+[comment]
+  enable = true
+
+  [comment.article]
+    provider = "giscus"
+
+    # Waline
+    waline_server_url = "https://your-waline-server.example.com"
+    waline_emoji = ["https://cdn.jsdelivr.net/npm/@waline/emojis/weibo"]
+    waline_visitor = true
+    waline_comment_sorting = "latest"
+    waline_pageview = true
+
+    # Giscus（从 https://giscus.app/ 获取 ID）
+    giscus_repo = "your-username/your-repo"
+    giscus_repo_id = "R_kgDOXXXXXXXX"
+    giscus_category = "Announcements"
+    giscus_category_id = "DIC_kwDOXXXXXXXXXXXX"
+    giscus_mapping = "pathname"
+    giscus_label = "comment"
+
+    # Twikoo
+    twikoo_env_id = ""
+    twikoo_region = ""
+
+    # Artalk
+    artalk_server = ""
+    artalk_site = "default"
+
+
+# --------------------------------------------
+# 9. 网站统计
+# --------------------------------------------
+
+[analytics]
+  enable_google = false
+  google_ga_id = ""
+  enable_baidu = false
+  baidu_site_id = ""
+
+
+# --------------------------------------------
+# 10. 页脚
+# --------------------------------------------
+
+[footer]
+  copyright_text = "2025-{year} 我的站点"
+  icp = ""
+  show_powered_by = true
+  powered_by_text = "powered by Hugo"
+
+  [[footer.services]]
+    name = "Hugo"
+    icon = "fa-brands fa-hugo"
+    link = "https://gohugo.io/"
+  [[footer.services]]
+    name = "GitHub"
+    icon = "fa-brands fa-github"
+    link = "https://github.com/"
+
+  [[footer.social_row1]]
+    name = "GitHub"
+    icon = "fa-brands fa-github"
+    link = "https://github.com/your-username"
+  [[footer.social_row1]]
+    name = "Email"
+    icon = "fa-solid fa-envelope"
+    link = "mailto:hello@example.com"
+
+  [[footer.social_row2]]
+    name = "RSS"
+    icon = "fa-solid fa-rss"
+    link = "/index.xml"
+
+
+# --------------------------------------------
+# 11. 关于页面（/about/）
+# --------------------------------------------
+
+[about]
+  enable = true
+  show_avatar = true
+  show_name = true
+  show_bio = true
+  show_social = true
+  show_friends = true
+  show_declaration = true
+  show_supports = true
+  show_alliance = true
+  show_site = true
+
+  show_desc = true
+  desc_zh = "关于我与这个站点。"
+  desc_en = "About me and this site."
+
+  tagline_zh = "独立创作者 · 极简主义践行者"
+  tagline_en = "Independent Creator · Minimalist"
+
+  [[about.bio]]
+    text_zh = "热爱技术、设计与写作。"
+    text_en = "Passionate about technology, design, and writing."
+
+  [[about.site]]
+    text_zh = "这是一个用 Hugo 搭建的个人站点。"
+    text_en = "A personal site built with Hugo."
+
+  [[about.declaration]]
+    text_zh = "本站所有原创文章均采用 MIT 许可协议。"
+    text_en = "All original articles are licensed under MIT."
+
+aboutAvatar = "img/avatar.png"
+aboutName = "我的名字"
+
+[[friends]]
+  name = "友链示例"
+  url = "https://example.com"
+
+[[alliance]]
+  name = "十年之约"
+  url = "https://www.foreverblog.cn/"
+  icon = "fas fa-ring"
+
+[[aboutContacts]]
+  label = "Email"
+  labelKey = "about-findme-email"
+  url = "mailto:hello@example.com"
+  text = "hello@example.com"
+  external = true
+
+[[supports]]
+  name = "GitHub"
+  url = "https://github.com/"
+  icon = "fa-brands fa-github"
+
+
+# --------------------------------------------
+# 12. 邮件页面（/email/）
+# --------------------------------------------
+
+[email]
+  enable = true
+  mail_domain = "mail.example.com"
+  third_party_login = ["github", "google"]
+
+  [email.api]
+    enabled = false
+    base_url = ""
+    login_endpoint = "/api/login"
+    register_endpoint = "/api/user/add"
+    redirect_url = ""
+    success_code = 200
+
+
+# --------------------------------------------
+# 13. 工具页面（/tools/）
+# --------------------------------------------
+
+[tools]
+  enable = true
+  show_desc = true
+  desc_zh = "收藏与分享常用工具。"
+  desc_en = "A collection of useful tools."
+
+
+# --------------------------------------------
+# 14. 工坊页面（/work/）
+# --------------------------------------------
+
+[work]
+  enable = true
+  show_desc = true
+  desc_zh = "我的项目与作品。"
+  desc_en = "My projects and works."
+
+[[works]]
+  i18nKey = "work-item1"
+  titleZh = "示例项目"
+  descZh = "一个示例项目描述"
+  statusZh = "进行中"
+  titleEn = "Example Project"
+  descEn = "An example project description"
+  statusEn = "In Progress"
+  url = ""
+
+
+# --------------------------------------------
+# 15. RSS
+# --------------------------------------------
+
+[rss]
+  enable = true
+
+
+# --------------------------------------------
+# 16. SEO
+# --------------------------------------------
+
+[seo]
+  default_description = "我的站点 - 极简个人站点"
+  default_keywords = ["博客", "设计", "技术", "极简"]
+  enable_og = true
+  enable_twitter = true
+  site_author = "作者名"
+
+
+# --------------------------------------------
+# 17. 自定义扩展
+# --------------------------------------------
+
+[custom]
+  head_html = ""
+  footer_html = ""
+  extra_css = []
+  extra_js = []
+
+
+# --------------------------------------------
+# 18. 文章作者栏
+# --------------------------------------------
+
+[author_profile]
+  avatar = "img/avatar.png"
+  nickname = "作者昵称"
+  nickname_en = "Author Nickname"
+  bio_zh = "独立创作者"
+  bio_en = "Independent Creator"
+  show_cc_license = true
+
+  [[author_profile.donate]]
+    qr = "img/donate-alipay.svg"
+    name = "支付宝"
+  [[author_profile.donate]]
+    qr = "img/donate-wechat.svg"
+    name = "微信"
+
+  [[author_profile.contacts]]
+    name = "GitHub"
+    icon = "fab fa-github"
+    url = "https://github.com/your-username"
+
+
+# --------------------------------------------
+# 社交链接（全局备用）
+# --------------------------------------------
+
+[[social]]
+  name = "GitHub"
+  url = "https://github.com/your-username"
+  icon = "fab fa-github"
+[[social]]
+  name = "Email"
+  url = "mailto:hello@example.com"
+  icon = "fas fa-envelope"

@@ -1,0 +1,7 @@
+{{- /* video-youtube.html — YouTube视频嵌入 */ -}}
+{{- $id := .Get "id" -}}
+<div class="shortcode-embed youtube-video">
+  <iframe style="width:100%;aspect-ratio:16/9;border:none;"
+    src="https://www.youtube.com/embed/{{ $id }}"
+    allowfullscreen allow="autoplay; encrypted-media"></iframe>
+</div>

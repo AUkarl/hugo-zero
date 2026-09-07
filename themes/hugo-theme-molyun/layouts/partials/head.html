@@ -1,0 +1,62 @@
+{{- /* ============================================================
+  head.html — <head> 部分
+  包含 meta 标签、标题、SEO、CSS 引入
+  ============================================================ */ -}}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+{{- /* 防闪烁：在 CSS 加载前立即应用主题 */ -}}
+<script>
+(function(){
+  var t = localStorage.getItem('theme');
+  if (t) document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+
+{{- /* 页面标题 */ -}}
+<title>
+  {{- if .IsHome -}}
+    {{ .Site.Title | default "molyun" }}
+  {{- else if .Params.seoTitle -}}
+    {{ .Params.seoTitle }} · {{ .Site.Title | default "molyun" }}
+  {{- else -}}
+    {{ .Title }} · {{ .Site.Title | default "molyun" }}
+  {{- end -}}
+</title>
+
+{{- /* SEO 元数据 */ -}}
+{{- partial "seo.html" . -}}
+
+{{- /* 多语言 alternate links */ -}}
+{{- if .IsTranslated -}}
+  {{- range .Translations -}}
+<link rel="alternate" hreflang="{{ .Language.Lang }}" href="{{ .Permalink }}">
+  {{- end -}}
+{{- end -}}
+
+{{- /* Favicon */ -}}
+{{- if .Site.Params.favicon -}}
+<link rel="icon" href="{{ .Site.Params.favicon | relURL }}">
+{{- else -}}
+<link rel="icon" href="{{ "img/logo.png" | relURL }}">
+{{- end -}}
+
+{{- /* Google Fonts */ -}}
+<link href="https://fonts.googleapis.com/css?family=Cantarell:400,700|Lato:300,400,900" rel="stylesheet">
+
+{{- /* Font Awesome 图标库 */ -}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+{{- /* 公共样式 */ -}}
+{{- $commonCSS := resources.Get "css/common.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $commonCSS.RelPermalink }}">
+
+{{- /* 自定义 extra_css */ -}}
+{{- range .Site.Params.custom.extra_css -}}
+<link rel="stylesheet" href="{{ . | relURL }}">
+{{- end -}}
+
+{{- /* 自定义 head_html */ -}}
+{{- with .Site.Params.custom.head_html -}}
+{{ . | safeHTML }}
+{{- end -}}

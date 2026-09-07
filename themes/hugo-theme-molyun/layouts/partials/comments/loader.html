@@ -1,0 +1,21 @@
+{{- /* ============================================================
+  comments/loader.html — 文章页评论系统加载器
+  根据 params.comment.article.provider 分发到对应评论系统
+  时刻页评论由 moments/list.html 模板自行处理
+  ============================================================ */ -}}
+{{- $provider := .Site.Params.comment.article.provider | default "" -}}
+{{- $commentCfg := .Site.Params.comment.article -}}
+
+{{- if and .Site.Params.comment.enable (ne $provider "") -}}
+<section class="comments-section" id="comments">
+  {{- if eq $provider "waline" -}}
+    {{- partial "comments/waline.html" (dict "page" . "cfg" $commentCfg) -}}
+  {{- else if eq $provider "giscus" -}}
+    {{- partial "comments/giscus.html" (dict "page" . "cfg" $commentCfg) -}}
+  {{- else if eq $provider "twikoo" -}}
+    {{- partial "comments/twikoo.html" (dict "page" . "cfg" $commentCfg) -}}
+  {{- else if eq $provider "artalk" -}}
+    {{- partial "comments/artalk.html" (dict "page" . "cfg" $commentCfg) -}}
+  {{- end -}}
+</section>
+{{- end -}}

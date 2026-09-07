@@ -1,0 +1,46 @@
+{{- /* ============================================================
+  footer.html — 页脚（三栏布局）
+  左：版权 + 设计者 | 中：服务图标+文字 + ICP | 右：两排社交图标
+  ============================================================ */ -}}
+<footer class="footer">
+  {{- /* 左栏：版权 */ -}}
+  <div class="footer-left">
+    <span class="copyright">&copy;{{ replace ( .Site.Params.footer.copyright_text | default "2023-{year} Molyun" ) "{year}" (string now.Year) }}</span>
+    <span class="designer">designed by 知止</span>
+    {{- if .Site.Params.footer.show_powered_by | default true }}
+    <span class="powered-by">{{ .Site.Params.footer.powered_by_text | default "powered by HuGo" }}</span>
+    {{- end }}
+  </div>
+
+  {{- /* 中栏：支持服务 + ICP */ -}}
+  <div class="footer-center">
+    {{- with .Site.Params.footer.services }}
+    <div class="footer-services">
+      {{- range . }}
+      <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}"><i class="{{ .icon }}"></i> {{ .name }}</a>
+      {{- end }}
+    </div>
+    {{- end }}
+    {{- with .Site.Params.footer.icp }}
+    <span class="footer-icp"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">{{ . }}</a></span>
+    {{- end }}
+  </div>
+
+  {{- /* 右栏：两排社交图标 */ -}}
+  <div class="footer-right">
+    {{- with .Site.Params.footer.social_row1 }}
+    <div class="social-row">
+      {{- range . }}
+      <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}"><i class="{{ .icon }}"></i></a>
+      {{- end }}
+    </div>
+    {{- end }}
+    {{- with .Site.Params.footer.social_row2 }}
+    <div class="social-row">
+      {{- range . }}
+      <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}"><i class="{{ .icon }}"></i></a>
+      {{- end }}
+    </div>
+    {{- end }}
+  </div>
+</footer>

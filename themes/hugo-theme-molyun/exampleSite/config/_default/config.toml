@@ -1,0 +1,49 @@
+# ============================================================
+# exampleSite/config/_default/config.toml — 示例站点基础配置
+# ============================================================
+# 复制整个 exampleSite/ 到你的项目根目录后即可使用。
+# 修改 baseURL 为你的实际域名。
+# ============================================================
+
+baseURL = "https://example.com/"
+title = "我的站点"
+theme = "hugo-theme-molyun"
+themesDir = "../.."
+locale = "zh-CN"
+enableRobotsTXT = true
+defaultContentLanguage = "zh"
+defaultContentLanguageInSubdir = false
+
+[pagination]
+  pagerSize = 20
+
+[languages]
+  [languages.zh]
+    label = "中文"
+    contentDir = "content/zh"
+    weight = 1
+  [languages.en]
+    label = "English"
+    contentDir = "content/en"
+    weight = 2
+
+[taxonomies]
+  category = "categories"
+  tag = "tags"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.highlight]
+    style = "monokai"
+    lineNos = false
+    guessSyntax = true
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 3
+
+[sitemap]
+  changefreq = "weekly"
+  priority = 0.5
+  filename = "sitemap.xml"

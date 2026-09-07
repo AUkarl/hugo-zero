@@ -1,0 +1,84 @@
+{{- /* ============================================================
+  seo.html — SEO 元数据（OG / Twitter Card / meta）
+  由 head.html 调用，读取 params.seo 配置
+  ============================================================ */ -}}
+{{- $seo := .Site.Params.seo -}}
+{{- $desc := .Description | default .Summary | plainify | truncate 160 | default $seo.default_description -}}
+{{- $keywords := .Params.keywords | default $seo.default_keywords -}}
+{{- $image := .Params.image | default .Params.img | default "/img/og-image.jpg" -}}
+{{- $author := .Site.Params.author | default $seo.site_author -}}
+
+{{- if $seo.enable_og | default true }}
+<meta property="og:title" content="{{ .Title | default .Site.Title }}">
+<meta property="og:description" content="{{ $desc }}">
+<meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
+<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:image" content="{{ $image | absURL }}">
+<meta property="og:site_name" content="{{ .Site.Title }}">
+{{- if .IsPage }}
+<meta property="article:published_time" content="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+<meta property="article:modified_time" content="{{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" }}">
+<meta property="article:author" content="{{ $author }}">
+{{- with .Params.categories }}<meta property="article:section" content="{{ index . 0 }}">{{ end }}
+{{- with .Params.tags }}{{ range . }}<meta property="article:tag" content="{{ . }}">{{ end }}{{ end }}
+{{- end }}
+{{- end }}
+
+{{- if $seo.enable_twitter | default true }}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ .Title | default .Site.Title }}">
+<meta name="twitter:description" content="{{ $desc }}">
+<meta name="twitter:image" content="{{ $image | absURL }}">
+{{- end }}
+
+<meta name="description" content="{{ $desc }}">
+{{- with $keywords }}
+<meta name="keywords" content="{{ delimit . ", " }}">
+{{- end }}
+<meta name="author" content="{{ $author }}">
+
+{{- /* JSON-LD 结构化数据 */ -}}
+{{- if .IsPage }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": {{ .Title | jsonify }},
+  "description": {{ $desc | jsonify }},
+  "image": {{ $image | absURL | jsonify }},
+  "author": {
+    "@type": "Person",
+    "name": {{ $author | jsonify }}
+  },
+  "datePublished": {{ .Date.Format "2006-01-02T15:04:05Z07:00" | jsonify }},
+  "dateModified": {{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" | jsonify }},
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": {{ .Permalink | jsonify }}
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": {{ .Site.Title | jsonify }},
+    "logo": {
+      "@type": "ImageObject",
+      "url": {{ (default "/img/logo.png" .Site.Params.logo) | absURL | jsonify }}
+    }
+  }
+}
+</script>
+{{- else }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": {{ .Site.Title | jsonify }},
+  "url": {{ .Site.BaseURL | jsonify }},
+  "description": {{ ($seo.default_description | default "") | jsonify }},
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "{{ .Site.BaseURL }}archive/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+{{- end }}

@@ -1,0 +1,22 @@
+{{- /*
+  video.html — HTML5 视频播放器短代码
+  用法: {{< video src="video.mp4" poster="cover.jpg" caption="视频说明" >}}
+  支持: 多种视频格式、封面图、字幕、自动播放控制
+*/ -}}
+<div class="video-player{{ with .Get "class" }} {{ . }}{{ end }}">
+  <video controls preload="metadata"
+    {{ with .Get "poster" }}poster="{{ . }}"{{ end }}
+    {{ if .Get "autoplay" }}autoplay{{ end }}
+    {{ if .Get "loop" }}loop{{ end }}
+    {{ if .Get "muted" }}muted{{ end }}
+    {{ with .Get "width" }}width="{{ . }}"{{ end }}
+    playsinline>
+    <source src="{{ .Get "src" }}" {{ with .Get "type" }}type="{{ . }}"{{ else }}type="video/mp4"{{ end }} />
+    {{- with .Get "webm" }}<source src="{{ . }}" type="video/webm" />{{ end }}
+    {{- with .Get "ogg" }}<source src="{{ . }}" type="video/ogg" />{{ end }}
+    您的浏览器不支持视频播放。
+  </video>
+  {{- with .Get "caption" }}
+  <div class="video-caption">{{ . }}</div>
+  {{- end }}
+</div>

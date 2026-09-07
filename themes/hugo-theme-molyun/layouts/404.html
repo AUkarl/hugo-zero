@@ -1,0 +1,139 @@
+{{- /*
+  404.html — 404 错误页面
+  极简风格：居中文字 + 返回首页链接，保留主题/语言切换
+*/ -}}
+{{- /* 2026-09-06: 修复 Cloudflare 构建错误，Locale -> Lang */ -}}
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Lang | default "zh-CN" }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>404 · {{ .Site.Title }}</title>
+  <link href="https://fonts.googleapis.com/css?family=Cantarell:400,700|Lato:300,400,900" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  {{- $commonCSS := resources.Get "css/common.css" | minify | fingerprint }}
+  <link rel="stylesheet" href="{{ $commonCSS.RelPermalink }}">
+  <style>
+    /* ===== 404 页面特有样式 ===== */
+    .error-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 20px;
+      min-height: calc(100vh - var(--nav-height) - 80px);
+    }
+
+    .error-code {
+      font-size: 6rem;
+      font-weight: 900;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 16px;
+      opacity: 0.15;
+      letter-spacing: -4px;
+    }
+
+    .error-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .error-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      max-width: 400px;
+      line-height: 1.6;
+    }
+
+    .error-home-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 28px;
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 0.92rem;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .error-home-link:hover {
+      background: var(--tag-active-bg);
+      border-color: var(--text);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    @media (max-width: 500px) {
+      .error-code {
+        font-size: 4rem;
+      }
+      .error-title {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== 导航（独立，不依赖 baseof） ===== -->
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <img src="{{ .Site.Params.logo | default "img/logo.png" | relURL }}" alt="Logo">
+        <span>{{ .Site.Title }}</span>
+      </div>
+      <div class="nav-controls" style="margin-left:auto;">
+        <button class="ctrl-btn" id="themeToggle" title="切换主题"><i class="fas fa-sun"></i></button>
+        <button class="ctrl-btn" id="langToggle" title="切换语言"><i class="fas fa-globe"></i></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== 主内容 ===== -->
+  <main class="main">
+    <div class="error-page">
+      <div class="error-code">404</div>
+      <div class="error-title" data-i18n="error-title">页面走丢了</div>
+      <div class="error-desc" data-i18n="error-desc">你访问的页面不存在，可能已被移除或地址有误。</div>
+      <a href="{{ "/" | relURL }}" class="error-home-link">
+        <i class="fas fa-home"></i>
+        <span data-i18n="error-back-home">返回首页</span>
+      </a>
+    </div>
+  </main>
+
+  <!-- ===== 底部 ===== -->
+  {{- partial "footer.html" . }}
+
+  <!-- ===== 滚动按钮 ===== -->
+  {{- partial "scroll-buttons.html" . }}
+
+  <!-- ===== 脚本 ===== -->
+  {{- $commonJS := resources.Get "js/common.js" | minify | fingerprint }}
+  <script src="{{ $commonJS.RelPermalink }}"></script>
+  <script>
+    /* 404 页面国际化 */
+    window.i18nMap = {
+      'zh': {
+        'error-title': '页面走丢了',
+        'error-desc': '你访问的页面不存在，可能已被移除或地址有误。',
+        'error-back-home': '返回首页'
+      },
+      'en': {
+        'error-title': 'Page Not Found',
+        'error-desc': 'The page you are looking for does not exist. It may have been removed or the URL is incorrect.',
+        'error-back-home': 'Back to Home'
+      }
+    };
+  </script>
+</body>
+</html>

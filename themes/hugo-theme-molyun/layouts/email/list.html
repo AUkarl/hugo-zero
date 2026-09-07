@@ -1,0 +1,105 @@
+{{- /* ============================================================
+  page/email.html — 邮件页
+  登录/注册表单，支持切换标签页
+  ============================================================ */ -}}
+{{- define "styles" -}}
+{{- $emailCSS := resources.Get "css/email.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $emailCSS.RelPermalink }}">
+{{- end -}}
+
+{{- define "main" -}}
+<main class="main">
+  <section class="section">
+    <div class="mail-wrapper">
+      <div class="mail-box">
+        <div class="mail-tabs">
+          <button class="active-tab" data-tab="login" data-i18n="email-login-tab">{{ i18n "email-login-tab" | default "登陆" }}</button>
+          <button data-tab="register" data-i18n="email-register-tab">{{ i18n "email-register-tab" | default "注册" }}</button>
+        </div>
+        <form class="mail-form" id="mailForm">
+          <div id="mailFormContent"></div>
+          <div class="error-msg" id="mailError"></div>
+          <div class="success-msg" id="mailSuccess"></div>
+          <button type="submit" class="btn-mail" id="mailSubmitBtn" data-i18n="email-submit-login">{{ i18n "email-submit-login" | default "登 陆" }}</button>
+        </form>
+        {{- $emailCfg := .Site.Params.email -}}
+        {{- if $emailCfg.third_party_login }}
+        <div class="mail-third-party">
+          <div class="mail-divider"><span data-i18n="email-or">{{ i18n "email-or" | default "或" }}</span></div>
+          <div class="mail-third-btns">
+            {{- range $emailCfg.third_party_login }}
+            <button type="button" class="third-party-btn" data-provider="{{ . }}">
+              {{- if eq . "github" -}}
+                <i class="fa-brands fa-github"></i>
+              {{- else if eq . "google" -}}
+                <i class="fa-brands fa-google"></i>
+              {{- end }}
+              <span>{{ . | title }}</span>
+            </button>
+            {{- end }}
+          </div>
+        </div>
+        {{- end }}
+      </div>
+    </div>
+  </section>
+</main>
+{{- end -}}
+
+{{- define "scripts" -}}
+<script>
+  /* 邮件页配置 */
+  {{- $emailCfg := .Site.Params.email -}}
+  window.emailConfig = {
+    mailDomain: {{ $emailCfg.mail_domain | default "mail.molx.net" | jsonify }},
+    thirdPartyLogin: {{ $emailCfg.third_party_login | default (slice) | jsonify }},
+    api: {
+      enabled: {{ $emailCfg.api.enabled | default false }},
+      baseUrl: {{ $emailCfg.api.base_url | default "" | jsonify }},
+      loginEndpoint: {{ $emailCfg.api.login_endpoint | default "/api/login" | jsonify }},
+      registerEndpoint: {{ $emailCfg.api.register_endpoint | default "/api/user/add" | jsonify }},
+      redirectUrl: {{ $emailCfg.api.redirect_url | default "" | jsonify }},
+      successCode: {{ $emailCfg.api.success_code | default 200 }}
+    }
+  };
+  /* 邮件页 i18n 数据 */
+  window.i18nMap = {
+    'zh': {
+      'email-login-tab': '{{ i18n "email-login-tab-zh" | default "登陆" }}',
+      'email-register-tab': '{{ i18n "email-register-tab-zh" | default "注册" }}',
+      'email-submit-login': '{{ i18n "email-submit-login-zh" | default "登 陆" }}',
+      'email-label-email': '{{ i18n "email-label-email-zh" | default "邮箱地址" }}',
+      'email-label-password': '{{ i18n "email-label-password-zh" | default "密码" }}',
+      'email-label-confirm': '{{ i18n "email-label-confirm-zh" | default "确认密码" }}',
+      'email-label-regcode': '{{ i18n "email-label-regcode-zh" | default "注册码" }}',
+      'email-err-fill': '{{ i18n "email-err-fill-zh" | default "请填写完整信息" }}',
+      'email-err-login': '{{ i18n "email-err-login-zh" | default "账号或密码错误" }}',
+      'email-err-pwmatch': '{{ i18n "email-err-pwmatch-zh" | default "两次密码输入不一致" }}',
+      'email-err-pwlen': '{{ i18n "email-err-pwlen-zh" | default "密码长度至少6位" }}',
+      'email-err-reg': '{{ i18n "email-err-reg-zh" | default "注册失败，请稍后重试" }}',
+      'email-err-network': '{{ i18n "email-err-network-zh" | default "网络错误，请稍后重试" }}',
+      'email-login-ok': '{{ i18n "email-login-ok-zh" | default "登录成功！正在跳转至邮箱..." }}',
+      'email-reg-ok': '{{ i18n "email-reg-ok-zh" | default "注册成功！正在跳转到登录..." }}'
+    },
+    'en': {
+      'email-login-tab': '{{ i18n "email-login-tab-en" | default "Login" }}',
+      'email-register-tab': '{{ i18n "email-register-tab-en" | default "Register" }}',
+      'email-submit-login': '{{ i18n "email-submit-login-en" | default "Login" }}',
+      'email-label-email': '{{ i18n "email-label-email-en" | default "Email" }}',
+      'email-label-password': '{{ i18n "email-label-password-en" | default "Password" }}',
+      'email-label-confirm': '{{ i18n "email-label-confirm-en" | default "Confirm Password" }}',
+      'email-label-regcode': '{{ i18n "email-label-regcode-en" | default "Registration Code" }}',
+      'email-err-fill': '{{ i18n "email-err-fill-en" | default "Please fill in all fields" }}',
+      'email-err-login': '{{ i18n "email-err-login-en" | default "Invalid email or password" }}',
+      'email-err-pwmatch': '{{ i18n "email-err-pwmatch-en" | default "Passwords do not match" }}',
+      'email-err-pwlen': '{{ i18n "email-err-pwlen-en" | default "Password must be at least 6 characters" }}',
+      'email-err-reg': '{{ i18n "email-err-reg-en" | default "Registration failed, please try again" }}',
+      'email-err-network': '{{ i18n "email-err-network-en" | default "Network error, please try again" }}',
+      'email-login-ok': '{{ i18n "email-login-ok-en" | default "Login successful! Redirecting..." }}',
+      'email-reg-ok': '{{ i18n "email-reg-ok-en" | default "Registration successful! Redirecting to login..." }}'
+    }
+  };
+</script>
+{{- $emailJS := resources.Get "js/email.js" | minify | fingerprint -}}
+<script src="{{ $emailJS.RelPermalink }}"></script>
+{{- end -}}

@@ -1,0 +1,10 @@
+default:
+  name: "作者"
+  name_en: "Author"
+  avatar: "img/avatar.png"
+  bio_zh: "独立创作者"
+  bio_en: "Independent Creator"
+  social:
+    - name: "GitHub"
+      url: "https://github.com/your-username"
+      icon: "fab fa-github"

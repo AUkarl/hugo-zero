@@ -1,0 +1,15 @@
+{{- /* comments/waline.html — Waline 评论系统 */ -}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@latest/dist/waline.css">
+<div id="waline"></div>
+<script type="module">
+  import { init } from 'https://cdn.jsdelivr.net/npm/@waline/client@latest/dist/waline.mjs';
+  init({
+    el: '#waline',
+    serverURL: '{{ .cfg.waline_server_url }}',
+    emoji: {{ .cfg.waline_emoji | default (slice "https://cdn.jsdelivr.net/npm/@waline/emojis/weibo") | jsonify }},
+    visitor: {{ .cfg.waline_visitor | default true }},
+    commentSorting: '{{ .cfg.waline_comment_sorting | default "latest" }}',
+    pageview: {{ .cfg.waline_pageview | default true }},
+    lang: document.documentElement.lang || 'zh'
+  });
+</script>

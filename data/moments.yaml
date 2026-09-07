@@ -1,0 +1,28 @@
+# ============================================================
+# moments.yaml — 时刻数据（微信朋友圈风格）
+# 时刻页从 content/zh/moments/ 读取，此文件作为备用数据源
+# ============================================================
+
+- id: moment-1
+  text: "今天天气真好，阳光透过窗帘洒在桌面上，适合写点东西。"
+  images:
+    - "https://picsum.photos/seed/moment1/400/400"
+    - "https://picsum.photos/seed/moment2/400/400"
+  music: ""
+  video: ""
+  date: 2026-02-25T10:30:00+08:00
+
+- id: moment-2
+  text: "发现一首很好听的歌，循环播放了一下午。"
+  images: []
+  music: "https://music.163.com/song?id=1234567890"
+  video: ""
+  date: 2026-02-20T18:00:00+08:00
+
+- id: moment-3
+  text: "读完了一本关于极简主义的书，收获很多。断舍离不只是整理物品，更是整理内心。"
+  images:
+    - "https://picsum.photos/seed/moment3/400/400"
+  music: ""
+  video: ""
+  date: 2026-02-15T09:00:00+08:00

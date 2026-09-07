@@ -1,0 +1,110 @@
+{{- /* ============================================================
+  home/list.html — 主页模板（文章卡片瀑布流）
+  展示所有文章的卡片列表，支持分页、分类筛选、搜索
+  数据由 Hugo 从 content/posts/ 目录自动生成
+  ============================================================ */ -}}
+
+{{- define "styles" -}}
+{{- $home := .Site.Params.home -}}
+{{- $columns := $home.columns | default 4 -}}
+{{- $widthRatio := $home.width_ratio | default 100 -}}
+{{- $homeCSS := resources.Get "css/home.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $homeCSS.RelPermalink }}">
+<style>
+  /* 从配置注入的 CSS 变量 */
+  .garden-grid { column-count: {{ $columns }}; }
+  .main { max-width: {{ $widthRatio }}%; margin-left: auto; margin-right: auto; }
+</style>
+{{- end -}}
+
+{{- define "main" -}}
+{{- $home := .Site.Params.home -}}
+{{- $paginate := $home.paginate | default 20 -}}
+{{- $summaryLen := $home.summary_length | default 120 -}}
+{{- $showImages := $home.show_images | default true -}}
+{{- $showSummary := $home.show_summary | default true -}}
+{{- $showDesc := $home.show_desc | default true -}}
+{{- $widthRatio := $home.width_ratio | default 100 -}}
+{{- $columns := $home.columns | default 4 -}}
+<main class="main">
+  <section class="section">
+    <h1 class="section-title" data-i18n="home-title">{{ i18n "home-title" | default "主页" }}</h1>
+    {{- if $showDesc }}
+    <p class="section-desc" data-i18n="home-desc">{{ i18n "home-desc" | default "这里生长着我关于设计、技术与生活的思考片段，随缘修剪，静待花开。" }}</p>
+    {{- end }}
+    <div class="garden-wrapper">
+      <div class="garden-grid" id="gardenGrid"></div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+    <script type="application/json" id="gardenData">
+    {{- $pages := where .Site.RegularPages "Section" "posts" -}}
+    {{- $data := slice -}}
+    {{- range $page := $pages -}}
+      {{- $cat := "" -}}
+      {{- with $page.Params.categories }}{{ $cat = index . 0 }}{{ end -}}
+      {{- $item := dict
+        "title" $page.Title
+        "desc" ($page.Description | default $page.Summary | plainify | truncate $summaryLen)
+        "date" ($page.Date.Format "2006-01-02")
+        "category" $cat
+        "tags" ($page.Params.tags | default slice)
+        "image" $page.Params.image
+        "permalink" $page.RelPermalink
+        "titleZh" "" "descZh" "" "categoryZh" "" "tagsZh" slice
+        "titleEn" "" "descEn" "" "categoryEn" "" "tagsEn" slice
+        "permalinkZh" "" "permalinkEn" ""
+      -}}
+      {{- if eq $page.Language.Lang "zh" -}}
+        {{- $item = merge $item (dict "titleZh" $page.Title "descZh" ($page.Description | default $page.Summary | plainify | truncate $summaryLen) "categoryZh" $cat "tagsZh" ($page.Params.tags | default slice) "permalinkZh" $page.RelPermalink) -}}
+      {{- else -}}
+        {{- $item = merge $item (dict "titleEn" $page.Title "descEn" ($page.Description | default $page.Summary | plainify | truncate $summaryLen) "categoryEn" $cat "tagsEn" ($page.Params.tags | default slice) "permalinkEn" $page.RelPermalink) -}}
+      {{- end -}}
+      {{- range $page.Translations -}}
+        {{- if eq .Language.Lang "en" -}}
+          {{- $enCat := "" -}}
+          {{- with .Params.categories }}{{ $enCat = index . 0 }}{{ end -}}
+          {{- $item = merge $item (dict "titleEn" .Title "descEn" (.Description | default .Summary | plainify | truncate $summaryLen) "categoryEn" $enCat "tagsEn" (.Params.tags | default slice) "permalinkEn" .RelPermalink) -}}
+        {{- else if eq .Language.Lang "zh" -}}
+          {{- $zhCat := "" -}}
+          {{- with .Params.categories }}{{ $zhCat = index . 0 }}{{ end -}}
+          {{- $item = merge $item (dict "titleZh" .Title "descZh" (.Description | default .Summary | plainify | truncate $summaryLen) "categoryZh" $zhCat "tagsZh" (.Params.tags | default slice) "permalinkZh" .RelPermalink) -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $data = $data | append $item -}}
+    {{- end -}}
+    {{ $data | jsonify | safeJS }}
+    </script>
+    <!-- 主页配置注入 JS -->
+    <script>
+      window.homeConfig = {
+        paginate: {{ $paginate }},
+        showImages: {{ $showImages }},
+        showSummary: {{ $showSummary }}
+      };
+    </script>
+  </section>
+</main>
+{{- end -}}
+
+{{- define "scripts" -}}
+{{- $home := .Site.Params.home -}}
+<script>
+  /* 主页 i18n 数据 */
+  window.i18nMap = {
+    'zh': {
+      'home-title': '{{ i18n "home-title-zh" | default "主页" }}',
+      'home-desc': '{{ $home.desc_zh | default (i18n "home-desc-zh" | default "这里生长着我关于设计、技术与生活的思考片段，随缘修剪，静待花开。") }}',
+      'prev': '{{ i18n "prev-zh" | default "上一页" }}', 'next': '{{ i18n "next-zh" | default "下一页" }}',
+      'page': '{{ i18n "page-zh" | default "第" }}', 'page-suffix': '{{ i18n "page-suffix-zh" | default "页" }}'
+    },
+    'en': {
+      'home-title': '{{ i18n "home-title-en" | default "Home" }}',
+      'home-desc': '{{ $home.desc_en | default (i18n "home-desc-en" | default "Thoughts on design, technology, and life, growing organically.") }}',
+      'prev': '{{ i18n "prev-en" | default "Prev" }}', 'next': '{{ i18n "next-en" | default "Next" }}',
+      'page': '{{ i18n "page-en" | default "Page" }}', 'page-suffix': '{{ i18n "page-suffix-en" | default "" }}'
+    }
+  };
+</script>
+{{- $homeJS := resources.Get "js/home.js" | minify | fingerprint -}}
+<script src="{{ $homeJS.RelPermalink }}"></script>
+{{- end -}}

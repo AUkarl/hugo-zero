@@ -1,0 +1,22 @@
+# ============================================================
+# authors.yaml — 作者数据
+# 模板通过 index .Site.Data.authors "id" 查找
+# ============================================================
+
+zhizhi:
+  id: zhizhi
+  name: 知止
+  name_en: Zhizhi
+  avatar: "/img/avatar.png"
+  bio_zh: "独立创作者 · 极简主义践行者 · 数字花园园丁"
+  bio_en: "Independent Creator · Minimalist · Digital Gardener"
+  social:
+    github: "https://github.com/AUkarl"
+    twitter: "https://x.com/EastLisi"
+    zhihu: "#"
+    email: "mailto:x@molyun.com"
+  donate:
+    - name: 支付宝
+      qr: "/img/donate-alipay.svg"
+    - name: 微信
+      qr: "/img/donate-wechat.svg"

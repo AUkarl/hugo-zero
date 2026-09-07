@@ -1,0 +1,21 @@
+# ============================================================
+# works.yaml — 工坊项目数据
+# 工坊页从 params.works 读取（已配置在 params.toml）
+# 此文件作为备用数据源
+# ============================================================
+
+- title_zh: "极简标签页"
+  title_en: "Minimal New Tab"
+  desc_zh: "为浏览器打造的极简新标签页"
+  desc_en: "A minimalist new tab page for browsers"
+  status_zh: "进行中"
+  status_en: "In progress"
+  link: ""
+
+- title_zh: "Hugo 主题"
+  title_en: "Hugo Theme"
+  desc_zh: "为 Hugo 静态站点设计的极简主题"
+  desc_en: "Minimal theme for Hugo static sites"
+  status_zh: "草稿"
+  status_en: "Draft"
+  link: ""

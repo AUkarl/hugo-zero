@@ -1,0 +1,52 @@
+{{- /* ============================================================
+  header.html — 导航栏
+  包含 Logo、导航链接、主题/语言切换按钮
+  支持 show_logo / show_site_name 开关
+  ============================================================ */ -}}
+<nav class="site-nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      {{- if .Site.Params.show_logo | default true -}}
+        {{- if .Site.Params.logo -}}
+      <a href="{{ "home/" | relLangURL }}"><img src="{{ .Site.Params.logo | relURL }}" alt="Logo"></a>
+        {{- else -}}
+      <a href="{{ "home/" | relLangURL }}"><img src="{{ "img/logo.png" | relURL }}" alt="Logo"></a>
+        {{- end -}}
+      {{- end -}}
+      {{- if .Site.Params.show_site_name | default true -}}
+      <span data-i18n="nav-site-name">{{ .Site.Params.navName | default .Site.Title }}</span>
+      {{- end -}}
+    </div>
+    <button class="nav-toggle" aria-label="{{ i18n "nav-menu" | default "菜单" }}"><i class="fas fa-bars"></i></button>
+    <div class="nav-links" id="navLinks">
+      <button class="nav-close" aria-label="{{ i18n "nav-close" | default "关闭菜单" }}">&times;</button>
+      {{- range .Site.Menus.main -}}
+        {{- if .Params.external -}}
+      <a class="nav-link blog-link" href="{{ .URL }}" target="_blank" rel="noopener" data-i18n="nav-{{ .Name }}">{{ .Name }}</a>
+        {{- else -}}
+      <a class="nav-link{{ if $.IsMenuCurrent "main" . }} active{{ end }}" data-section="{{ .Name }}" data-i18n="nav-{{ .Name }}" href="{{ .URL | relLangURL }}">{{ .Name }}</a>
+        {{- end -}}
+      {{- end -}}
+      <div class="nav-controls">
+        {{- if .Site.Params.enable_theme_switch | default true }}
+        <button class="ctrl-btn" id="themeToggle" title="{{ i18n "theme-toggle" | default "切换主题" }}"><i class="fas fa-sun"></i></button>
+        {{- end }}
+        {{- if .Site.Params.enable_lang_switch | default true }}
+        <button class="ctrl-btn" id="langToggle" title="{{ i18n "lang-toggle" | default "切换语言" }}"><i class="fas fa-globe"></i></button>
+        {{- end }}
+      </div>
+    </div>
+  </div>
+  <div class="nav-overlay" id="navOverlay"></div>
+</nav>
+<script>
+(function(){
+  if(!window.i18nMap) window.i18nMap = {};
+  var zh = '{{ .Site.Params.navName_zh | default .Site.Params.navName | default .Site.Title }}';
+  var en = '{{ .Site.Params.navName_en | default .Site.Params.navName | default .Site.Title }}';
+  if(!window.i18nMap['zh']) window.i18nMap['zh'] = {};
+  if(!window.i18nMap['en']) window.i18nMap['en'] = {};
+  window.i18nMap['zh']['nav-site-name'] = zh;
+  window.i18nMap['en']['nav-site-name'] = en;
+})();
+</script>
