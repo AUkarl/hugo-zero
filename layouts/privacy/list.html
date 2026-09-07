@@ -1,0 +1,21 @@
+{{- /* ============================================================
+  privacy/list.html — 隐私政策页
+  ============================================================ */ -}}
+{{- define "main" -}}
+<main class="main">
+  <section class="section">
+    <div class="privacy-content">
+      <h1 class="section-title" data-i18n="privacy-title">{{ i18n "privacy-title" | default "隐私政策" }}</h1>
+      <div class="privacy-body">
+        {{- if .Content }}
+          {{ .Content }}
+        {{- else }}
+        <p data-i18n="privacy-p1">{{ i18n "privacy-p1" | default "本站不收集用户隐私数据。" }}</p>
+        <p data-i18n="privacy-p2">{{ i18n "privacy-p2" | default "评论系统由第三方提供服务，其隐私政策请参阅对应平台的说明。" }}</p>
+        <p data-i18n="privacy-p3">{{ i18n "privacy-p3" | default "本站使用 Cookie 仅用于主题偏好和语言设置的本地存储。" }}</p>
+        {{- end }}
+      </div>
+    </div>
+  </section>
+</main>
+{{- end -}}

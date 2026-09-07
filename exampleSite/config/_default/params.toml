@@ -1,0 +1,645 @@
+# ============================================================
+# params.toml — zero 主题完整配置文件
+# ============================================================
+#
+# 本文件是主题的全部可配置项汇总。
+# 所有参数均有详细注释，按编号分区，方便查找和修改。
+#
+# 使用方式：
+#   1. 根据需要修改各项参数值
+#   2. 运行 hugo server 预览效果
+#
+# 注意事项：
+#   - 字符串值用双引号包裹，如 "hello"
+#   - 布尔值直接写 true / false（不加引号）
+#   - 数组用方括号，如 ["a", "b"]
+#   - 空字符串 "" 表示该功能未配置/未启用
+#   - 修改后需重启 hugo server 才能生效
+#
+# ============================================================
+
+
+# --------------------------------------------
+# 1. 站点基本信息
+# --------------------------------------------
+# 控制网站 Logo、名称、作者的全局显示与多语言文本。
+
+# --- Logo ---
+show_logo = true                    # 是否显示 Logo（true=显示 / false=隐藏）
+logo = "/img/logo.svg"              # Logo 图片路径（相对于 static 目录）
+logo_zh = "/img/logo.svg"           # 中文 Logo（留空则使用 logo）
+logo_en = "/img/logo.svg"           # 英文 Logo（留空则使用 logo）
+
+# --- 网站名称 ---
+show_site_name = true               # 是否在导航栏显示网站名称
+site_name = "示例站点"              # 网站名称（默认显示）
+site_name_zh = "示例站点"           # 中文名称（留空则使用 site_name）
+site_name_en = "Example Site"       # 英文名称（留空则使用 site_name）
+
+# --- 作者 ---
+show_author = true                  # 是否显示全局作者信息
+author = "知 止"                 # 默认作者名
+author_zh = "知 止"              # 中文作者名（留空则使用 author）
+author_en = "Example Author"        # 英文作者名（留空则使用 author）
+default_author = "zhizhi"           # 文章默认作者 ID（对应 data/authors.yaml 中的 key）
+
+# --- 其他 ---
+description = "一个极简个人站点"     # 站点描述（用于 SEO）
+keywords = ["blog", "tech", "design"]  # 站点关键词（数组）
+favicon = "/img/avatar.svg"         # 网站图标路径（相对于 static 目录，留空使用默认）
+
+
+# --------------------------------------------
+# 2. 导航栏
+# --------------------------------------------
+# 控制导航栏的显示行为、主题切换、语言切换。
+# 导航菜单项在 menus.toml 中配置。
+
+enable_theme_switch = true          # 是否显示主题切换按钮（暗色/亮色/跟随系统）
+enable_lang_switch = true           # 是否显示语言切换按钮（中/英）
+
+# 当主题切换关闭时，选择默认主题模式
+# 可选值: "auto"（跟随系统）/ "light"（亮色）/ "dark"（暗色）
+# 仅当 enable_theme_switch = false 时生效
+default_theme = "auto"
+
+# 导航栏显示名（留空则使用 site_name）
+# navName_en 切换英文后显示的名称
+navName = "示例站点"
+navName_zh = "示例站点"
+navName_en = "Example Site"
+
+
+# --------------------------------------------
+# 3. 首页 index 跳转页（/）
+# --------------------------------------------
+# 访问根路径时显示的诗词轮播页。
+
+[landing]
+  # --- 诗词轮播 ---
+  show_quotes = true                # 是否显示诗词轮播
+  quotes_zh = [
+    "海上生明月 & 天涯共此时",
+    "碧山幽人来 & 清酒酌满杯",
+    "江南无所有 & 聊赠一枝春",
+    "今夕复何夕 & 共此灯烛光",
+    "相逢且同乐 & 何必旧相知",
+    "不辞山路远 & 踏雪也相过"
+  ]
+  quotes_en = [
+    "The moon rises over the sea, we share this moment",
+    "A hermit comes from the green hills, wine cups filled",
+    "In the south I have nothing to give, but a spring branch",
+    "What night is tonight, together by this candlelight",
+    "Let us rejoice together, why must we be old friends?",
+    "I'll not fear the mountain road, even through snow I'll come"
+  ]
+
+  # --- 欢迎语 ---
+  show_welcome = true               # 是否显示欢迎语
+  welcome_zh = "Hey，好久不见"       # 中文欢迎语
+  welcome_en = "Hey, long time no see"  # 英文欢迎语
+
+  # --- 背景图片 ---
+  show_background = false           # 是否显示背景图片（需自行添加 img/bj.jpg 到 static 目录）
+  background_image = ""             # 背景图片路径（相对于 static 目录）
+
+
+# --------------------------------------------
+# 4. 主页 home（/home/）
+# --------------------------------------------
+# 文章卡片列表页的显示配置。
+
+[home]
+  paginate = 20                     # 每页最多显示文章数量
+  columns = 4                       # 卡片列数（1-4）
+  width_ratio = 90                  # 内容区域宽度占比（1-100，100=全宽）
+  show_images = true                # 是否显示文章封面图
+  show_summary = true               # 是否显示文章摘要
+  summary_length = 120              # 摘要最大字数
+
+  # 主页描述文字（显示在页面标题下方）
+  show_desc = true                  # 是否显示主页描述
+  desc_zh = "这里是主页描述文字。"
+  desc_en = "This is the home page description."
+
+
+# --------------------------------------------
+# 5. 文章详情页
+# --------------------------------------------
+# 控制文章正文页面的显示元素。
+
+[article]
+  show_toc = true                   # 是否显示目录（Table of Contents）
+  toc_levels = ["h2", "h3"]        # 目录包含的标题层级
+  show_word_count = true            # 是否显示字数统计
+  show_author_box = true            # 是否显示作者信息框
+  show_license = true               # 是否显示 CC 许可协议
+  donate_max_qr = 6                 # 赞赏弹窗最多显示二维码数量
+
+
+# --------------------------------------------
+# 5b. 数学公式
+# --------------------------------------------
+
+math = true                         # 是否全局启用数学公式（KaTeX）
+
+
+# --------------------------------------------
+# 6. 归档页（/archive/）
+# --------------------------------------------
+
+[archive]
+  group_by_year = true              # 是否按年份分组
+  enable_tag_danmaku = true         # 是否启用弹幕标签云
+  danmaku_lanes = 5                 # 弹幕轨道数
+
+  # 归档页描述文字（显示在页面标题下方）
+  show_desc = true                  # 是否显示归档页描述
+  desc_zh = "浏览所有文章归档。"
+  desc_en = "Browse all archived articles."
+
+
+# --------------------------------------------
+# 7. 时刻页（/moments/）
+# --------------------------------------------
+# 两种模式：
+#   online_publish = true  → 整页变为评论区（waline/twikoo/artalk），仅保留顶部横幅
+#   online_publish = false → 展示手动上传的说说卡片（通过 Hugo 内容文件），无发布框和点赞
+
+[moment]
+  online_publish = true              # true=在线发布模式 / false=离线展示模式
+
+  # === 在线发布模式配置 ===
+  # 整个时刻页变为一个评论区，仅保留顶部横幅
+  [moment.online]
+    comment_provider = "twikoo"       # 选择: waline / twikoo / artalk
+
+    # Waline — 基于 Leancloud 的评论系统
+    # 文档: https://waline.js.org/
+    waline_server_url = "https://your-waline-server.example.com"
+    waline_emoji = ["https://cdn.jsdelivr.net/npm/@waline/emojis/weibo"]
+
+    # Twikoo — 基于云开发的评论系统
+    # 文档: https://twikoo.js.org/
+    twikoo_env_id = "https://your-twikoo-server.example.com"                # 环境 ID（必填）
+    twikoo_region = " "                # 区域（如 ap-shanghai / ap-guangzhou）
+
+    # Artalk — 自托管评论系统（该系统未测试）
+    # 文档: https://artalk.js.org/
+    artalk_server = ""                # Artalk 服务端 URL（必填）
+    artalk_site = "default"           # 站点名称
+
+    # 在线模式横幅配置
+    [moment.online.banner]
+      show_background = false         # 是否显示背景图（需自行添加 img/bj2.jpg 到 static 目录）
+      background_image = ""            # 背景图路径（相对于 static 目录）
+      show_avatar = true              # 是否显示头像
+      show_nickname = true            # 是否显示昵称
+      nickname = "知 止"              # 横幅显示的昵称
+      show_signature = true           # 是否显示签名
+      signature = "记录生活，分享感悟" # 横幅显示的签名文字
+
+  # === 离线展示模式配置 ===
+  # 展示通过 Hugo 内容文件手动上传的说说
+  [moment.offline]
+    comment_provider = " "             # 空=禁用评论, 或选: waline / twikoo / artalk
+    paginate = 10                     # 每次加载的时刻数量（无限滚动）
+
+    # Waline
+    waline_server_url = ""
+    waline_emoji = ["https://cdn.jsdelivr.net/npm/@waline/emojis/weibo"]
+
+    # Twikoo
+    twikoo_env_id = ""
+    twikoo_region = ""
+
+    # Artalk
+    artalk_server = ""
+    artalk_site = "default"
+
+    # 离线模式横幅配置
+    [moment.offline.banner]
+      show_background = false         # 是否显示背景图（需自行添加 img/bj.jpg 到 static 目录）
+      background_image = ""           # 背景图路径
+
+    # 离线模式默认资料（显示在横幅中）
+    [moment.offline.profile]
+      default_nickname = "示例昵称"   # 默认昵称
+      default_avatar = "img/avatar.svg" # 默认头像路径
+      show_avatar = true              # 是否显示头像
+      show_nickname = true            # 是否显示昵称
+      show_signature = true           # 是否显示签名
+      signature = "记录生活，分享感悟"  # 签名文字
+
+
+# --------------------------------------------
+# 8. 评论系统（文章页）
+# --------------------------------------------
+# 支持 4 种评论提供商，设置 provider 选择对应系统。
+# 时刻页评论配置请参见上方第 7 节 [moment] 部分。
+# 只需填写所选提供商的配置项，其他留空即可。
+
+[comment]
+  enable = true                     # 是否启用评论功能（总开关）
+
+  # --- 文章页评论 ---
+  [comment.article]
+    provider = "waline"             # 选择: waline / giscus / twikoo / artalk
+
+    # Waline — 基于 Leancloud 的评论系统
+    # 文档: https://waline.js.org/
+    # 部署后可获得 serverURL，格式如 https://your-app.vercel.app
+    waline_server_url = "https://your-waline-server.example.com"  # Waline 服务端 URL（必填）
+    waline_emoji = ["https://cdn.jsdelivr.net/npm/@waline/emojis/weibo"]  # 表情包 CDN
+    waline_visitor = true           # 是否启用访问量统计
+    waline_comment_sorting = "latest"  # 评论排序: latest / oldest / hottest
+    waline_pageview = true          # 是否启用浏览量统计
+
+    # Giscus — 基于 GitHub Discussions 的评论系统
+    # 配置工具: https://giscus.app/ （可视化获取以下所有 ID）
+    giscus_repo = "your-username/your-repo"          # GitHub 仓库（格式: user/repo，需启用 Discussions）
+    giscus_repo_id = "R_kgDOXXXXXXXX"                # 仓库 ID（从 giscus.app 获取）
+    giscus_category = "Announcements"                 # Discussion 分类名
+    giscus_category_id = "DIC_kwDOXXXXXXXXXXXX"       # 分类 ID（从 giscus.app 获取）
+    giscus_mapping = "pathname"       # 页面映射方式: pathname / url / title / og:title
+    giscus_label = "comment"          # Issue 标签
+
+    # Twikoo — 基于云开发的评论系统
+    # 文档: https://twikoo.js.org/
+    # 在腾讯云开发控制台创建环境后获得 envId
+    twikoo_env_id = ""                # 环境 ID（必填）
+    twikoo_region = ""                # 区域（如 ap-shanghai / ap-guangzhou）
+
+    # Artalk — 自托管评论系统
+    # 文档: https://artalk.js.org/
+    # 部署后获得服务端 URL
+    artalk_server = ""                # Artalk 服务端 URL（必填，如 https://artalk.example.com）
+    artalk_site = "default"           # 站点名称（在 Artalk 后台创建）
+
+
+# --------------------------------------------
+# 9. 网站统计
+# --------------------------------------------
+# 启用网站访问统计工具。
+
+[analytics]
+  enable_google = false             # 是否启用 Google Analytics
+  google_ga_id = ""                 # Google Analytics ID（格式: G-XXXXXXXXXX）
+  enable_baidu = false              # 是否启用百度统计
+  baidu_site_id = ""                # 百度统计站点 ID
+
+
+# --------------------------------------------
+# 10. 页脚
+# --------------------------------------------
+# 页脚版权信息、服务链接、社交链接。
+
+[footer]
+  copyright_text = "2025-{year} 示例站点"  # 版权文字（{year} 自动替换为当前年份）
+  icp = "ICP 自备6022140761023"                            # ICP 备案号（留空则不显示）
+
+  # powered by 行（显示在 "designed by XXX" 下方）
+  show_powered_by = true              # 是否显示 powered by 行
+  powered_by_text = "powered by HuGo" # 自定义文字（可改为任意内容）
+
+  # 技术服务链接（页脚中间区域）
+  # 增减方法: 复制一个 [[footer.services]] 块并修改内容
+  
+  [[footer.services]]
+    name = "Hugo"
+    icon = "fa-brands fa-hugo"
+    link = "https://gohugo.io/"
+  [[footer.services]]
+    name = "GitHub"
+    icon = "fa-brands fa-github"
+    link = "https://github.com"
+  [[footer.services]]
+    name = "Cloudflare"
+    icon = "fa-brands fa-cloudflare"
+    link = "https://cloudflare.com"
+  
+
+  # 社交链接第一行
+  # 增减方法: 复制一个 [[footer.social_row1]] 块并修改内容
+  [[footer.social_row1]]
+    name = "Instagram"
+    icon = "fa-brands fa-instagram"
+    link = "https://www.instagram.com/example"
+  [[footer.social_row1]]
+    name = "Twitter"
+    icon = "fa-brands fa-twitter"
+    link = "https://x.com/example"
+  [[footer.social_row1]]
+    name = "GitHub"
+    icon = "fa-brands fa-github"
+    link = "https://github.com/example"
+  [[footer.social_row1]]
+    name = "Email"
+    icon = "fa-solid fa-envelope"
+    link = "mailto:example@example.com"
+
+  # 社交链接第二行
+  # 增减方法: 复制一个 [[footer.social_row2]] 块并修改内容
+  [[footer.social_row2]]
+    name = "微博"
+    icon = "fa-brands fa-weibo"
+    link = "#"
+  [[footer.social_row2]]
+    name = "B站"
+    icon = "fa-brands fa-bilibili"
+    link = "#"
+  [[footer.social_row2]]
+    name = "知乎"
+    icon = "fa-brands fa-zhihu"
+    link = "#"
+  [[footer.social_row2]]
+    name = "RSS"
+    icon = "fa-solid fa-rss"
+    link = "/index.xml"
+
+
+# --------------------------------------------
+# 11. 关于页面（/about/）
+# --------------------------------------------
+# 控制关于页的各区域显示开关和内容编辑。
+
+[about]
+  enable = true                    # 是否启用关于页面
+  show_avatar = true               # 是否显示头像
+  show_name = true                 # 是否显示名称
+  show_bio = true                  # 是否显示个人简介
+  show_social = true               # 是否显示社交链接
+  show_friends = true               # 是否显示友情链接
+  show_declaration = true           # 是否显示站点声明
+  show_supports = true             # 是否显示支持服务
+  show_alliance = true             # 是否显示站点联盟
+  show_site = true                 # 是否显示关于本站
+
+  # 关于页描述（显示在页面标题下方）
+  show_desc = true                  # 是否显示描述
+  desc_zh = "关于我与这个站点。"
+  desc_en = "About me and this site."
+
+  # 个性签名（显示在名称下方）
+  tagline_zh = "独立创作者 · 极简主义践行者 · 数字花园园丁"
+  tagline_en = "Independent Creator · Minimalist · Digital Gardener"
+
+  # --- 个人简介内容 ---
+  # 增减方法: 复制一个 [[about.bio]] 块并修改内容（支持无限段落）
+  [[about.bio]]
+    text_zh = "相信好的设计是隐形的，好的文字是真诚的。"
+    text_en = "I believe good design is invisible, and good writing is honest."
+  [[about.bio]]
+    text_zh = "热爱技术、设计与写作，喜欢在代码与文字之间寻找平衡。"
+    text_en = "Passionate about technology, design, and writing."
+  [[about.bio]]
+    text_zh = "在这里用文字搭建一个安静的精神角落，分享思考、工具与生活。"
+    text_en = "Here I build a quiet corner for the mind."
+
+  # --- 关于本站内容 ---
+  # 增减方法: 复制一个 [[about.site]] 块并修改内容（支持无限段落）
+  [[about.site]]
+    text_zh = "这是一个用 Hugo 搭建的个人站点。"
+    text_en = "A personal site built with Hugo."
+  [[about.site]]
+    text_zh = "站点包含文章归档、说说、邮件等板块。"
+    text_en = "Includes articles, moments, mail, and more."
+
+  # --- 站点声明内容 ---
+  # 增减方法: 复制一个 [[about.declaration]] 块并修改内容（支持无限段落）
+  [[about.declaration]]
+    text_zh = "本站所有原创文章均采用 MIT 许可协议，转载请注明出处。"
+    text_en = "All original articles are licensed under MIT."
+  [[about.declaration]]
+    text_zh = "本站不收集用户隐私数据，评论使用 Giscus（基于 GitHub）。外部链接内容不代表本站观点。"
+    text_en = "This site does not collect user privacy data."
+  [[about.declaration]]
+    text_zh = "本站部分图片来自 Unsplash / Picsum，如有侵权请联系删除。"
+    text_en = "Some images are from Unsplash / Picsum."
+
+# 关于页头像和名称（覆盖全局设置）
+aboutAvatar = "img/avatar.svg"
+aboutName = "示例名称"
+
+# --- 友情链接列表 ---
+# 增减方法: 复制一个 [[friends]] 块并修改内容
+[[friends]]
+  name = "示例博客"
+  url = "https://blog.example.com"
+  
+
+# --- 站点联盟列表 ---
+# 增减方法: 复制一个 [[alliance]] 块并修改内容
+[[alliance]]
+  name = "十年之约"
+  url = "https://www.foreverblog.cn/"
+  icon = "fas fa-ring"
+
+[[alliance]]
+  name = "博友圈"
+  url = "https://www.boyouquan.com/"
+  icon = "fas fa-users"
+
+# --- 联系方式列表 ---
+# 按 label 分组显示，相同 label 的条目归为一组
+# 增减方法: 复制一个 [[aboutContacts]] 块并修改内容
+[[aboutContacts]]
+  label = "Email"
+  labelKey = "about-findme-email"   # i18n 键名（用于多语言翻译）
+  url = "mailto:example@example.com"
+  text = "example@example.com"
+  external = true                   # 是否外链
+
+# --- 支持服务 ---
+# 显示在关于页的"本站由以下服务支持"列表
+# 增减方法: 复制一个 [[supports]] 块并修改内容
+[[supports]]
+  name = "GitHub"
+  url = "https://github.com/"
+  icon = "fa-brands fa-github"
+[[supports]]
+  name = "Cloudflare"
+  url = "https://cloudflare.com"
+  icon = "fas fa-cloud"
+
+
+# --------------------------------------------
+# 12. 邮件页面（/email/）
+# --------------------------------------------
+# 邮件登录页配置，包括邮箱跳转地址和 API 接口。
+
+[email]
+  enable = true                     # 是否启用邮件页面
+  mail_domain = "mail.example.com"  # 登录成功后跳转的邮箱域名
+
+  # --- 第三方登录 ---
+  # 支持的提供商: github / google
+  third_party_login = ["github", "google"]
+
+  # --- 登录/注册 API 接口 ---
+  # SkyMail API 文档: POST /api/login 登录, POST /api/user/add 注册（需注册码）
+  [email.api]
+    enabled = true                  # 是否启用 API 验证（false=仅跳转，不验证）
+    base_url = "https://mail-api.example.com"  # API 基础 URL
+    login_endpoint = "/api/login"   # 登录: POST {email, password} → {data: {token}}
+    register_endpoint = "/api/user/add"  # 注册: POST {email, password}（管理员接口，需注册码）
+    redirect_url = ""               # 登录成功后跳转地址（留空则使用 mail_domain）
+    success_code = 200              # 成功状态码（响应 JSON 中的 code 字段）
+
+
+# --------------------------------------------
+# 13. 工具页面（/tools/）
+# --------------------------------------------
+# 工具页开关，工具数据从 data/tools.yaml 读取。
+
+[tools]
+  enable = true                     # 是否启用工具页面
+
+  # 工具页描述文字（显示在页面标题下方）
+  show_desc = true                  # 是否显示工具页描述
+  desc_zh = "收藏与分享常用工具。"
+  desc_en = "A collection of useful tools."
+
+
+# --------------------------------------------
+# 14. 工坊页面（/work/）
+# --------------------------------------------
+# 工坊项目列表配置。
+
+[work]
+  enable = true                     # 是否启用工坊页面
+
+  # 工坊页描述文字（显示在页面标题下方）
+  show_desc = true                  # 是否显示工坊页描述
+  desc_zh = "我的项目与作品。"
+  desc_en = "My projects and works."
+
+# --- 工坊项目列表 ---
+# 增减方法: 复制一个 [[works]] 块并修改内容
+# url 字段: 填写项目链接（外部 URL 或站内路径），留空则无链接
+
+[[works]]
+  i18nKey = "work-item2"
+  titleZh = "Hugo 主题"
+  descZh = "为 Hugo 静态站点设计的极简主题"
+  statusZh = "草稿"
+  titleEn = "Hugo Theme"
+  descEn = "Minimal theme for Hugo static sites"
+  statusEn = "Draft"
+  url = ""
+
+
+# --------------------------------------------
+# 15. RSS
+# --------------------------------------------
+
+[rss]
+  enable = true                     # 是否启用 RSS 订阅
+
+
+# --------------------------------------------
+# 16. SEO
+# --------------------------------------------
+# 搜索引擎优化配置，控制 meta 标签和结构化数据。
+
+[seo]
+  default_description = "示例站点 - 极简个人站点"  # 默认描述（用于无 description 的页面）
+  default_keywords = ["博客", "设计", "技术", "极简"]  # 默认关键词
+  enable_og = true                  # 是否输出 Open Graph 标签
+  enable_twitter = true             # 是否输出 Twitter Card 标签
+  site_author = "知 止"          # 站点作者（用于 meta author 标签）
+
+
+# --------------------------------------------
+# 17. 自定义扩展
+# --------------------------------------------
+# 注入自定义 HTML/CSS/JS，用于高级定制。
+
+[custom]
+  head_html = ""                    # 注入到 <head> 的 HTML（如自定义 meta、link）
+  footer_html = ""                  # 注入到 </body> 前的 HTML（如自定义 script）
+  extra_css = []                    # 额外 CSS 文件路径列表（如 ["/css/custom.css"]）
+  extra_js = []                     # 额外 JS 文件路径列表（如 ["/js/custom.js"]）
+
+
+# --------------------------------------------
+# 18. 文章作者栏
+# --------------------------------------------
+# 文章详情页作者信息框的配置。
+# 优先级: author_profile > data/authors.yaml > 全局参数
+# 多作者信息请在 data/authors.yaml 中配置（本处为默认/备用值）。
+
+[author_profile]
+  avatar = "img/avatar.svg"         # 默认作者头像路径
+  nickname = "示例昵称"             # 作者昵称
+  nickname_en = "Example"           # 英文作者昵称
+  bio_zh = "独立创作者 · 极简主义践行者 · 数字花园园丁"  # 中文简介
+  bio_en = "Independent Creator · Minimalist · Digital Gardener"  # 英文简介
+  show_cc_license = true           # 是否显示 CC 开源协议
+
+  # 作者赞赏码（也可在 data/authors.yaml 中按作者配置）
+  # 增减方法: 复制一个 [[author_profile.donate]] 块并修改内容
+  [[author_profile.donate]]
+    qr = "img/donate-alipay.svg"    # 二维码图片路径
+    name = "支付宝"                  # 平台名称
+  [[author_profile.donate]]
+    qr = "img/donate-wechat.svg"
+    name = "微信"
+  
+  
+
+  # 作者联系方式（显示在作者信息框中）
+  # 增减方法: 复制一个 [[author_profile.contacts]] 块并修改内容
+  [[author_profile.contacts]]
+    name = "GitHub"
+    icon = "fab fa-github"
+    url = "https://github.com/example"
+  [[author_profile.contacts]]
+    name = "Twitter"
+    icon = "fab fa-twitter"
+    url = "https://x.com/example"
+  [[author_profile.contacts]]
+    name = "Instagram"
+    icon = "fab fa-instagram"
+    url = "https://www.instagram.com/example"
+  [[author_profile.contacts]]
+    name = "B站"
+    icon = "fab fa-bilibili"
+    url = "#"
+  [[author_profile.contacts]]
+    name = "知乎"
+    icon = "fab fa-zhihu"
+    url = "#"
+
+
+# --------------------------------------------
+# 社交链接（全局备用）
+# --------------------------------------------
+# 当 data/authors.yaml 中作者无 social 配置时使用。
+# 增减方法: 复制一个 [[social]] 块并修改内容
+
+[[social]]
+  name = "GitHub"
+  url = "https://github.com/example"
+  icon = "fab fa-github"
+[[social]]
+  name = "Twitter"
+  url = "https://x.com/example"
+  icon = "fab fa-twitter"
+[[social]]
+  name = "Instagram"
+  url = "https://www.instagram.com/example"
+  icon = "fab fa-instagram"
+[[social]]
+  name = "微博"
+  url = "#"
+  icon = "fab fa-weibo"
+[[social]]
+  name = "B站"
+  url = "#"
+  icon = "fab fa-bilibili"
+[[social]]
+  name = "知乎"
+  url = "#"
+  icon = "fab fa-zhihu"

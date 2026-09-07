@@ -1,0 +1,126 @@
+/* ===== 工具页特有样式 ===== */
+.tools-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tool-category {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px 24px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tool-category:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+}
+
+.tool-category .cat-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tool-category .cat-title .emoji {
+  font-size: 1.4rem;
+}
+
+.tool-sub-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tool-sub-item {
+  padding: 4px 16px;
+  background: var(--tag-bg);
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.tool-sub-item:hover {
+  background: var(--text);
+  border-color: var(--text);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.tool-sub-item.active-tool {
+  background: var(--text);
+  color: #fff;
+  border-color: var(--text);
+}
+
+.tool-display {
+  margin-top: 16px;
+  background: var(--tag-bg);
+  padding: 20px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-height: 100px;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tool-display.show {
+  display: flex;
+}
+
+.tool-display .tool-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.tool-display .tool-interface {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.tool-display .tool-interface input,
+.tool-display .tool-interface select {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.tool-display .tool-interface button {
+  padding: 6px 18px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--text);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
+}
+
+.tool-display .tool-interface button:hover {
+  background: #333;
+  transform: scale(1.02);
+}
+
+.tool-display .tool-interface .hint {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}

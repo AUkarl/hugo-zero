@@ -1,0 +1,13 @@
+{{- /*
+  render-image.html — Markdown 图片渲染钩子
+  将图片包裹在 figure 中，alt 文字作为说明文字显示
+*/ -}}
+<figure class="figure">
+  <img src="{{ .Destination | safeURL }}"
+       alt="{{ .Text }}"
+       {{ with .Title }}title="{{ . }}"{{ end }}
+       loading="lazy" />
+  {{- with .Text }}
+  <figcaption class="figure-caption">{{ . }}</figcaption>
+  {{- end }}
+</figure>

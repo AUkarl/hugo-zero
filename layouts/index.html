@@ -1,0 +1,692 @@
+{{- /* ============================================================
+  index.html — 首页落地页
+  完整迁移自原始index.html，包含诗句轮播、主题切换、语言切换等功能
+  ============================================================ */ -}}
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Lang | default "zh-CN" }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>{{ .Site.Title | default "Example" }}</title>
+  <link rel="icon" href="{{ "img/logo.png" | relURL }}">
+  <link rel="apple-touch-icon" href="{{ "img/logo.png" | relURL }}">
+  <link href="https://fonts.googleapis.com/css?family=Cantarell:400,700|Lato:300,400,900" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    /* ===== 主题变量 ===== */
+    body {
+      --bg-color: #fff;
+      --text-color: #777;
+      --heading-color: #000;
+      --link-color: #777;
+      --footer-color: #777;
+      --frame-bg: #fff;
+      background: var(--bg-color);
+      color: var(--text-color);
+      transition: background 0.4s, color 0.4s;
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Cantarell', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    [data-theme="dark"] body,
+    body.dark-theme {
+      --bg-color: #1a1a1a;
+      --text-color: #ccc;
+      --heading-color: #eee;
+      --link-color: #aaa;
+      --footer-color: #aaa;
+      --frame-bg: #1a1a1a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      [data-theme="auto"] body {
+        --bg-color: #1a1a1a;
+        --text-color: #ccc;
+        --heading-color: #eee;
+        --link-color: #aaa;
+        --footer-color: #aaa;
+        --frame-bg: #1a1a1a;
+      }
+    }
+
+    /* ===== 应用变量 ===== */
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--heading-color);
+    }
+    a {
+      color: var(--link-color);
+    }
+    .box-intro h1 {
+      color: var(--heading-color);
+    }
+    .box-intro h3 {
+      color: var(--heading-color);
+    }
+    .footer-home a {
+      color: var(--link-color);
+    }
+    .footer-home {
+      color: var(--footer-color);
+    }
+    .box-intro {
+      background-color: var(--bg-color);
+    }
+
+    /* ===== 边框颜色 ===== */
+    .frame-line {
+      background-color: var(--frame-bg) !important;
+      transition: background 0.4s;
+    }
+
+    /* ===== Logo 智能反色 ===== */
+    .box-logo img {
+      transition: filter 0.4s;
+    }
+    [data-theme="dark"] .box-logo img,
+    body.dark-theme .box-logo img {
+      filter: invert(1);
+    }
+    @media (prefers-color-scheme: dark) {
+      [data-theme="auto"] .box-logo img {
+        filter: invert(1);
+      }
+    }
+
+    /* ===== 工具栏按钮 ===== */
+    .index-toolbar {
+      position: absolute;
+      right: 50px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      display: flex;
+      gap: 10px;
+    }
+    .toolbar-btn {
+      cursor: pointer;
+      font-size: 22px;
+      color: var(--text-color);
+      background: none;
+      border: none;
+      backdrop-filter: none;
+      border-radius: 0;
+      width: auto;
+      height: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      transition: all 0.3s;
+      user-select: none;
+    }
+    .toolbar-btn:hover {
+      transform: scale(1.12);
+      background: none;
+    }
+    [data-theme="dark"] .toolbar-btn,
+    body.dark-theme .toolbar-btn {
+      background: none;
+      border: none;
+    }
+    @media (max-width: 992px) {
+      .index-toolbar {
+        right: 20px;
+      }
+      .toolbar-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+    }
+    @media (max-width: 480px) {
+      .index-toolbar {
+        right: 10px;
+      }
+      .toolbar-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+      }
+    }
+
+    h1[data-i18n] {
+      white-space: nowrap;
+    }
+
+    /* ===== "进入"文字呼吸动画 ===== */
+    .enter-text {
+      display: inline-block;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5em;
+      color: var(--text-color);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.3s;
+      animation: breathe-text 2.4s ease-in-out infinite;
+    }
+    .enter-text:hover {
+      color: #7beec7;
+    }
+    @keyframes breathe-text {
+      0% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.04); }
+      100% { opacity: 0.6; transform: scale(1); }
+    }
+    .btn-wrapper {
+      margin-top: 20px;
+    }
+    .clickable-div .enter-text {
+      position: relative;
+      z-index: 5;
+    }
+
+    /* ===== 深色模式遮罩 ===== */
+    .box-intro {
+      position: relative;
+    }
+    .bg-film:before {
+      z-index: 0;
+    }
+    .box-intro .table-cell {
+      position: relative;
+      z-index: 2;
+    }
+    [data-theme="dark"] .box-intro::after,
+    body.dark-theme .box-intro::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1;
+      pointer-events: none;
+      border-radius: inherit;
+    }
+    @media (prefers-color-scheme: dark) {
+      [data-theme="auto"] .box-intro::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+        pointer-events: none;
+        border-radius: inherit;
+      }
+    }
+
+    /* ===== 圆角效果 ===== */
+    .clickable-div {
+      border-radius: 5px;
+      overflow: hidden;
+      height: 100vh;
+      cursor: pointer;
+    }
+    .box-intro {
+      background-attachment: scroll !important;
+      height: 100vh;
+    }
+    .box-intro .table-cell {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    .footer-home {
+      position: absolute;
+      bottom: 30px;
+      width: 100%;
+      text-align: center;
+      left: 0;
+    }
+
+    /* ===== 边框装饰 ===== */
+    .frame-line {
+      position: absolute;
+      background: #000;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    .top-frame, .bottom-frame {
+      left: 0;
+      right: 0;
+      height: 20px;
+    }
+    .top-frame { top: 0; }
+    .bottom-frame { bottom: 0; }
+    .left-frame, .right-frame {
+      top: 0;
+      bottom: 0;
+      width: 20px;
+    }
+    .left-frame { left: 0; }
+    .right-frame { right: 0; }
+
+    @media (max-width: 992px) {
+      .frame-line { display: none; }
+    }
+
+    /* ===== 头部样式 ===== */
+    .main-header {
+      height: 100vh;
+      position: relative;
+    }
+    .container-fluid {
+      height: 100%;
+    }
+    .box-header {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .box-logo a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-color);
+    }
+    .box-logo img {
+      height: 40px;
+      width: auto;
+    }
+
+    /* ===== 主视觉区域 ===== */
+    .box-intro {
+      {{- $landing := .Site.Params.landing -}}
+      {{- if and ($landing.show_background | default true) ($landing.background_image | default "img/bj.jpg") -}}
+      background: url('{{ $landing.background_image | default "img/bj.jpg" | relURL }}') center/cover no-repeat, linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      {{- else }}
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      {{- end }}
+      display: table;
+      width: 100%;
+      position: relative;
+    }
+    .bg-film {
+      position: relative;
+    }
+
+    /* ===== 诗句轮播 ===== */
+    b {
+      font-weight: 300;
+    }
+    .box-headline {
+      font-size: 130px;
+      line-height: 1.0;
+    }
+    .box-words-wrapper {
+      display: inline-block;
+      position: relative;
+    }
+    .box-words-wrapper b {
+      display: inline-block;
+      position: absolute;
+      white-space: nowrap;
+      left: 0;
+      top: 0;
+    }
+    .box-words-wrapper b.is-visible {
+      position: relative;
+    }
+    .box-headline.rotate-2 .box-words-wrapper {
+      perspective: 300px;
+    }
+    .box-headline.rotate-2 i,
+    .box-headline.rotate-2 em {
+      display: inline-block;
+      backface-visibility: hidden;
+    }
+    .box-headline.rotate-2 b {
+      opacity: 0;
+    }
+    .box-headline.rotate-2 i {
+      transform-style: preserve-3d;
+      transform: translateZ(-20px) rotateX(90deg);
+      opacity: 0;
+    }
+    .is-visible .box-headline.rotate-2 i {
+      opacity: 1;
+    }
+    .box-headline.rotate-2 i.in {
+      animation: box-rotate-2-in 0.4s forwards;
+    }
+    .box-headline.rotate-2 i.out {
+      animation: box-rotate-2-out 0.4s forwards;
+    }
+    .box-headline.rotate-2 em {
+      transform: translateZ(20px);
+    }
+    @keyframes box-rotate-2-in {
+      0% { opacity: 0; transform: translateZ(-20px) rotateX(90deg); }
+      60% { opacity: 1; transform: translateZ(-20px) rotateX(-10deg); }
+      100% { opacity: 1; transform: translateZ(-20px) rotateX(0deg); }
+    }
+    @keyframes box-rotate-2-out {
+      0% { opacity: 1; transform: translateZ(-20px) rotateX(0); }
+      60% { opacity: 0; transform: translateZ(-20px) rotateX(-100deg); }
+      100% { opacity: 0; transform: translateZ(-20px) rotateX(-90deg); }
+    }
+    .box-intro h1 {
+      font-size: clamp(24px, 5vw, 40px);
+      margin-top: 35px;
+      letter-spacing: clamp(2px, 2vw, 40px);
+      font-weight: 700;
+      max-width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+    .box-intro h3 {
+      font-family: "Cantarell", sans-serif;
+      font-size: 14px;
+      letter-spacing: 10px;
+      text-transform: uppercase;
+      line-height: 4;
+      font-weight: 700;
+    }
+
+    @media (max-width: 992px) {
+      .box-intro h1 {
+        font-size: 25px;
+        letter-spacing: 5px;
+      }
+      .box-intro h3 {
+        font-size: 12px;
+        letter-spacing: 8px;
+      }
+      .enter-text {
+        font-size: 16px;
+      }
+      .box-header {
+        top: 15px;
+        left: 15px;
+        right: 15px;
+      }
+      .box-logo img {
+        height: 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 边框装饰 -->
+  <span class="frame-line top-frame visible-lg"></span>
+  <span class="frame-line right-frame visible-lg"></span>
+  <span class="frame-line bottom-frame visible-lg"></span>
+  <span class="frame-line left-frame visible-lg"></span>
+
+  <!-- 头部 -->
+  <header class="main-header">
+    <div class="container-fluid">
+      <div class="box-header">
+        {{- if .Site.Params.show_logo | default true }}
+        <div class="box-logo">
+          <a href="{{ "/" | relLangURL }}">
+            {{- $lang := .Site.Language.Lang | default "zh" -}}
+            {{- $logoPath := .Site.Params.logo | default "/img/logo.png" -}}
+            {{- if eq $lang "en" -}}
+              {{- $logoPath = .Site.Params.logo_en | default $logoPath -}}
+            {{- else -}}
+              {{- $logoPath = .Site.Params.logo_zh | default $logoPath -}}
+            {{- end }}
+            <img src="{{ $logoPath | relURL }}" alt="Logo">
+          </a>
+        </div>
+        {{- end }}
+        <!-- 主题/语言切换按钮 -->
+        {{- $enableThemeSwitch := .Site.Params.enable_theme_switch | default true -}}
+        {{- $enableLangSwitch := .Site.Params.enable_lang_switch | default true -}}
+        {{- if or $enableThemeSwitch $enableLangSwitch }}
+        <div class="index-toolbar">
+          {{- if $enableThemeSwitch }}
+          <div class="toolbar-btn" id="themeToggle" title="切换主题" onclick="event.stopPropagation()">
+            <i id="themeIcon" class="fas fa-adjust"></i>
+          </div>
+          {{- end }}
+          {{- if $enableLangSwitch }}
+          <div class="toolbar-btn" id="langToggle" title="Switch Language" onclick="event.stopPropagation()">
+            <i id="langIcon" class="fas fa-language"></i>
+          </div>
+          {{- end }}
+        </div>
+        {{- end }}
+      </div>
+
+      <!-- 主视觉区域 -->
+      <div class="clickable-div" onclick="navigateToUrl()">
+        <section class="box-intro bg-film">
+          <div class="table-cell">
+            {{- $landing := .Site.Params.landing -}}
+            {{- if $landing.show_quotes | default true }}
+            <h3 class="box-headline letters rotate-2">
+              <span class="box-words-wrapper">
+                {{- $quotes := $landing.quotes_zh | default (slice "海上生明月 & 天涯共此时") -}}
+                {{- range $i, $q := $quotes -}}
+                <b{{ if eq $i 0 }} class="is-visible"{{ end }}>&nbsp;{{ $q }} </b>
+                {{- end }}
+              </span>
+            </h3>
+            {{- end }}
+            {{- if $landing.show_welcome | default true }}
+            <h1 data-i18n="index-greeting">{{ $landing.welcome_zh | default "Hey，好久不见" }}</h1>
+            {{- end }}
+            <div class="btn-wrapper">
+              <a href="{{ "home/" | relLangURL }}" class="enter-text" data-i18n="index-enter" onclick="event.stopPropagation();">{{ i18n "index-enter" | default "进入" }}</a>
+            </div>
+            <p class="footer-home">&copy;2023-<script>document.write(new Date().getFullYear());</script> <a target="_blank" href="{{ .Site.BaseURL }}" title="{{ .Site.Title }}">{{ .Site.Title }}</a></p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </header>
+
+  {{- $landing := .Site.Params.landing -}}
+  {{- $zhGreeting := $landing.welcome_zh | default (i18n "index-greeting-zh" | default "Hey，好久不见") -}}
+  {{- $enGreeting := $landing.welcome_en | default (i18n "index-greeting-en" | default "Hey, long time no see") -}}
+  {{- $zhEnter := i18n "index-enter-zh" | default "进入" -}}
+  {{- $enEnter := i18n "index-enter-en" | default "Enter" -}}
+
+  <script>
+    // ===== i18n =====
+    window.i18nMap = {
+      'zh': {
+        'index-greeting': '{{ $zhGreeting }}',
+        'index-enter': '{{ $zhEnter }}'
+      },
+      'en': {
+        'index-greeting': '{{ $enGreeting }}',
+        'index-enter': '{{ $enEnter }}'
+      }
+    };
+
+    function applyI18n() {
+      var htmlLang = (document.documentElement.lang || '').toLowerCase();
+      var lang = htmlLang.startsWith('en') ? 'en' : 'zh';
+      var map = window.i18nMap[lang];
+      if (!map) return;
+      document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n');
+        if (map[key] !== undefined) el.textContent = map[key];
+      });
+    }
+
+    // ===== 点击跳转 =====
+    function navigateToUrl() {
+      window.location.href = "{{ "home/" | relLangURL }}";
+    }
+
+    // ===== 主题切换 =====
+    (function() {
+      var themes = ['auto', 'light', 'dark'];
+      var iconMap = {
+        'auto': 'fas fa-adjust',
+        'light': 'fas fa-sun',
+        'dark': 'fas fa-moon'
+      };
+      var toggleBtn = document.getElementById('themeToggle');
+      var iconEl = document.getElementById('themeIcon');
+      var enableSwitch = {{ .Site.Params.enable_theme_switch | default true }};
+      var defaultTheme = '{{ .Site.Params.default_theme | default "auto" }}';
+
+      var current = enableSwitch ? (localStorage.getItem('theme') || defaultTheme) : defaultTheme;
+      applyTheme(current);
+
+      if (toggleBtn && enableSwitch) {
+        toggleBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var idx = themes.indexOf(current);
+          idx = (idx + 1) % themes.length;
+          current = themes[idx];
+          applyTheme(current);
+          localStorage.setItem('theme', current);
+        });
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        if (iconEl) iconEl.className = iconMap[theme] || 'fas fa-adjust';
+      }
+    })();
+
+    // ===== 语言切换 =====
+    (function() {
+      var htmlLang = (document.documentElement.lang || '').toLowerCase();
+      var currentLang = htmlLang.startsWith('en') ? 'en' : 'zh';
+      var toggleBtn = document.getElementById('langToggle');
+
+      document.documentElement.lang = currentLang === 'en' ? 'en' : 'zh-CN';
+      applyI18n();
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var newLang = currentLang === 'zh' ? 'en' : 'zh';
+          var path = window.location.pathname;
+          var targetPath;
+          if (newLang === 'en') {
+            targetPath = path.startsWith('/en/') ? path : '/en' + path;
+          } else {
+            targetPath = path.replace(/^\/en/, '') || '/';
+          }
+          window.location.href = targetPath;
+        });
+      }
+    })();
+
+    // ===== 诗句轮播（逐字3D翻转动画） =====
+    (function() {
+      var wordsWrapper = document.querySelector('.box-words-wrapper');
+      if (!wordsWrapper) return;
+      var quotesZh = {{ .Site.Params.landing.quotes_zh | default (slice "海上生明月 & 天涯共此时") | jsonify | safeJS }};
+      var quotesEn = {{ .Site.Params.landing.quotes_en | default (slice "The moon rises over the sea") | jsonify | safeJS }};
+      var currentWord = 0;
+      var lettersDelay = 50;
+      var animationDelay = 5000;
+
+      function singleLetters(words) {
+        words.forEach(function(word) {
+          var text = word.textContent;
+          var selected = word.classList.contains('is-visible');
+          var html = '';
+          for (var j = 0; j < text.length; j++) {
+            var ch = text[j];
+            if (ch === ' ') ch = '\u00a0';
+            html += '<i' + (selected ? ' class="in"' : '') + '><em>' + ch + '</em></i>';
+          }
+          word.innerHTML = html;
+          word.style.opacity = '1';
+        });
+      }
+
+      function setQuotes(quotes) {
+        wordsWrapper.innerHTML = '';
+        quotes.forEach(function(q, i) {
+          var b = document.createElement('b');
+          b.textContent = '\u00a0' + q + ' ';
+          if (i === 0) b.classList.add('is-visible');
+          wordsWrapper.appendChild(b);
+        });
+        currentWord = 0;
+        singleLetters(Array.from(wordsWrapper.querySelectorAll('b')));
+      }
+
+      function takeNext($word) {
+        var siblings = Array.from($word.parentNode.querySelectorAll('b'));
+        var idx = siblings.indexOf($word);
+        return (idx < siblings.length - 1) ? siblings[idx + 1] : siblings[0];
+      }
+
+      function hideLetter($letter, $word, bool) {
+        $letter.classList.remove('in');
+        $letter.classList.add('out');
+        if ($letter.nextElementSibling) {
+          setTimeout(function() { hideLetter($letter.nextElementSibling, $word, bool); }, lettersDelay);
+        } else if (bool) {
+          setTimeout(function() { hideWord(takeNext($word)); }, animationDelay);
+        }
+      }
+
+      function showLetter($letter, $word, bool) {
+        $letter.classList.add('in');
+        $letter.classList.remove('out');
+        if ($letter.nextElementSibling) {
+          setTimeout(function() { showLetter($letter.nextElementSibling, $word, bool); }, lettersDelay);
+        } else {
+          if (!bool) setTimeout(function() { hideWord($word); }, animationDelay);
+        }
+      }
+
+      function hideWord($word) {
+        var nextWord = takeNext($word);
+        var bool = $word.querySelectorAll('i').length >= nextWord.querySelectorAll('i').length;
+        var firstOut = $word.querySelector('i');
+        var firstIn = nextWord.querySelector('i');
+        if (firstOut) hideLetter(firstOut, $word, bool);
+        if (firstIn) showLetter(firstIn, nextWord, bool);
+      }
+
+      var pageLang = (document.documentElement.lang || '').toLowerCase().startsWith('en') ? 'en' : 'zh';
+      setQuotes(pageLang === 'en' ? quotesEn : quotesZh);
+      setTimeout(function() {
+        hideWord(wordsWrapper.querySelector('.is-visible'));
+      }, animationDelay);
+
+      document.addEventListener('langChange', function(e) {
+        setQuotes(e.detail.lang === 'en' ? quotesEn : quotesZh);
+        setTimeout(function() {
+          hideWord(wordsWrapper.querySelector('.is-visible'));
+        }, animationDelay);
+      });
+    })();
+
+    // ===== 首次访问跳转 =====
+    if (localStorage.getItem('visited')) {
+      // 非首次访问可取消注释下面的跳转
+      // window.location.href = "{{ "home/" | relLangURL }}";
+    } else {
+      localStorage.setItem('visited', 'true');
+    }
+
+    // ===== 回车键跳转 =====
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        window.location.href = "{{ "home/" | relLangURL }}";
+      }
+    });
+  </script>
+</body>
+</html>

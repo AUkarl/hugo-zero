@@ -1,0 +1,11 @@
+# Hugo build output
+exampleSite/public/
+exampleSite/resources/
+exampleSite/.hugo_build.lock
+
+# Local theme symlink for exampleSite testing
+exampleSite/themes/
+
+# OS files
+.DS_Store
+Thumbs.db

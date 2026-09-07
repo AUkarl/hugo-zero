@@ -1,0 +1,62 @@
+# ============================================================
+# menus.toml — 导航菜单配置
+# ============================================================
+#
+# 定义网站导航栏的菜单项。
+# name 字段对应 i18n 翻译键（如 nav-home → "主页"/"Home"）。
+# url 字段为菜单链接路径。
+# weight 字段控制显示顺序（数字越小越靠前）。
+#
+# 增减方法: 复制一个 [[main]] 块并修改内容
+#
+# ============================================================
+
+# 主页
+[[main]]
+  name = "home"
+  url = "/home/"
+  weight = 1
+
+# 时刻（说说/动态）
+[[main]]
+  name = "moments"
+  url = "/moments/"
+  weight = 2
+
+# 工具
+[[main]]
+  name = "tools"
+  url = "/tools/"
+  weight = 3
+
+# 博客（外部链接）
+[[main]]
+  name = "blog"
+  url = "https://blog.example.com"
+  weight = 4
+  [main.params]
+    external = true                   # 标记为外部链接（新标签页打开）
+
+# 工坊
+[[main]]
+  name = "work"
+  url = "/work/"
+  weight = 5
+
+# 归档
+[[main]]
+  name = "archive"
+  url = "/archive/"
+  weight = 6
+
+# 邮件
+[[main]]
+  name = "email"
+  url = "/email/"
+  weight = 7
+
+# 关于
+[[main]]
+  name = "about"
+  url = "/about/"
+  weight = 8

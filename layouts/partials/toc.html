@@ -1,0 +1,13 @@
+{{- /* ============================================================
+  toc.html — 文章目录
+  从页面内容自动提取 h2/h3 标题生成目录
+  桌面端固定在右侧，移动端隐藏
+  ============================================================ */ -}}
+{{- if .TableOfContents -}}
+<aside class="article-toc" id="articleToc">
+  <div class="toc-title" data-i18n="article-toc">{{ i18n "article-toc" | default "目录" }}</div>
+  <nav id="tocNav">
+    {{ .TableOfContents }}
+  </nav>
+</aside>
+{{- end -}}

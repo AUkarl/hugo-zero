@@ -1,0 +1,7 @@
+{{- /* audio-kugou.html — 酷狗音乐嵌入 */ -}}
+{{- $id := .Get "id" -}}
+<div class="shortcode-embed kugou-music">
+  <iframe style="max-width:100%;width:330px;height:86px;border:none;"
+    src="https://www.kugou.com/widget/single/{{ $id }}/single.html"
+    allowfullscreen allow="autoplay; encrypted-media"></iframe>
+</div>

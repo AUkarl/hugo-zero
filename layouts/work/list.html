@@ -1,0 +1,83 @@
+{{- /* ============================================================
+  page/work.html — 工坊页
+  展示进行中的创作项目卡片
+  项目数据从 config.toml 的 [params.works] 读取
+  ============================================================ */ -}}
+{{- define "styles" -}}
+{{- $workCSS := resources.Get "css/work.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $workCSS.RelPermalink }}">
+{{- end -}}
+
+{{- define "main" -}}
+{{- if .Site.Params.work.enable | default true }}
+<main class="main">
+  <section class="section">
+    <h1 class="section-title" data-i18n="work-title">{{ i18n "work-title" | default "工坊" }}</h1>
+    {{- if .Site.Params.work.show_desc | default true }}
+    {{- $workDescZh := .Site.Params.work.desc_zh | default "" }}
+    {{- $workDescEn := .Site.Params.work.desc_en | default "" }}
+    {{- $workDesc := cond (eq .Site.Language.Lang "en") $workDescEn $workDescZh }}
+    {{- if $workDesc }}
+    <p class="section-desc" data-i18n="work-desc">{{ $workDesc }}</p>
+    {{- else }}
+    <p class="section-desc" data-i18n="work-desc">{{ i18n "work-desc" | default "正在进行的创作项目，记录从灵感到成品的旅程。" }}</p>
+    {{- end }}
+    {{- end }}
+    <div class="work-grid">
+      {{- $lang := .Site.Language.Lang -}}
+      {{- range .Site.Params.works }}
+      {{- $link := .url | default .link -}}
+      {{- if $link }}
+      <a class="work-card work-card-link" href="{{ $link }}" target="_blank" rel="noopener">
+        <h4 data-i18n="{{ .i18nKey }}-title">{{ if eq $lang "en" }}{{ .titleEn }}{{ else }}{{ .titleZh }}{{ end }}</h4>
+        <p data-i18n="{{ .i18nKey }}-desc">{{ if eq $lang "en" }}{{ .descEn }}{{ else }}{{ .descZh }}{{ end }}</p>
+        <span class="status" data-i18n="{{ .i18nKey }}-status">{{ if eq $lang "en" }}{{ .statusEn }}{{ else }}{{ .statusZh }}{{ end }}</span>
+        <i class="fas fa-external-link-alt work-ext-icon"></i>
+      </a>
+      {{- else }}
+      <div class="work-card">
+        <h4 data-i18n="{{ .i18nKey }}-title">{{ if eq $lang "en" }}{{ .titleEn }}{{ else }}{{ .titleZh }}{{ end }}</h4>
+        <p data-i18n="{{ .i18nKey }}-desc">{{ if eq $lang "en" }}{{ .descEn }}{{ else }}{{ .descZh }}{{ end }}</p>
+        <span class="status" data-i18n="{{ .i18nKey }}-status">{{ if eq $lang "en" }}{{ .statusEn }}{{ else }}{{ .statusZh }}{{ end }}</span>
+      </div>
+      {{- end }}
+      {{- end }}
+    </div>
+  </section>
+</main>
+{{- else }}
+<main class="main">
+  <section class="section" style="text-align:center;padding:60px 20px;">
+    <p style="color:var(--text-secondary);" data-i18n="work-disabled">Studio page is not enabled.</p>
+  </section>
+</main>
+{{- end }}
+{{- end -}}
+
+{{- define "scripts" -}}
+{{- $workDescZh := .Site.Params.work.desc_zh | default "" -}}
+{{- $workDescEn := .Site.Params.work.desc_en | default "" -}}
+<script>
+  /* 工坊页 i18n 数据 */
+  window.i18nMap = {
+    'zh': {
+      'work-title': '{{ i18n "work-title-zh" | default "工坊" }}',
+      'work-desc': '{{ $workDescZh | default (i18n "work-desc-zh" | default "正在进行的创作项目，记录从灵感到成品的旅程。") }}'
+      {{- range .Site.Params.works }},
+      '{{ .i18nKey }}-title': '{{ .titleZh }}',
+      '{{ .i18nKey }}-desc': '{{ .descZh }}',
+      '{{ .i18nKey }}-status': '{{ .statusZh }}'
+      {{- end }}
+    },
+    'en': {
+      'work-title': '{{ i18n "work-title-en" | default "Studio" }}',
+      'work-desc': '{{ $workDescEn | default $workDescZh | default (i18n "work-desc-en" | default "Ongoing creative projects.") }}'
+      {{- range .Site.Params.works }},
+      '{{ .i18nKey }}-title': '{{ .titleEn }}',
+      '{{ .i18nKey }}-desc': '{{ .descEn }}',
+      '{{ .i18nKey }}-status': '{{ .statusEn }}'
+      {{- end }}
+    }
+  };
+</script>
+{{- end -}}

@@ -1,0 +1,67 @@
+/* ============================================================
+   work.css — 工坊页
+   项目卡片网格布局
+   ============================================================ */
+
+/* ===== 项目网格 ===== */
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+/* ===== 项目卡片 ===== */
+.work-card {
+  background: var(--card-bg);
+  padding: 20px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.work-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+}
+
+.work-card h4 {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.work-card p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+/* --- 状态标签 --- */
+.work-card .status {
+  display: inline-block;
+  font-size: 0.72rem;
+  margin-top: 10px;
+  color: var(--text-secondary);
+  background: var(--tag-bg);
+  padding: 2px 14px;
+  border-radius: var(--radius);
+}
+
+/* --- 可点击卡片 --- */
+a.work-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  cursor: pointer;
+  position: relative;
+}
+
+.work-ext-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  opacity: 0.5;
+}

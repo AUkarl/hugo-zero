@@ -1,0 +1,7 @@
+{{- /* video-youku.html — 优酷视频嵌入 */ -}}
+{{- $id := .Get "id" -}}
+<div class="shortcode-embed youku-video">
+  <iframe style="width:100%;aspect-ratio:16/9;border:none;"
+    src="https://player.youku.com/embed/{{ $id }}"
+    allowfullscreen allow="autoplay; encrypted-media"></iframe>
+</div>

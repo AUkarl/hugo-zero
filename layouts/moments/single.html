@@ -1,0 +1,47 @@
+{{- /* ============================================================
+  shuo/single.html — 时刻详情页
+  简化版模板，用于单独访问时刻内容
+  ============================================================ */ -}}
+{{- define "styles" -}}
+{{- $momentsCSS := resources.Get "css/shuo.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $momentsCSS.RelPermalink }}">
+{{- end -}}
+
+{{- define "main" -}}
+<main class="main">
+  <section class="section">
+    <div class="moment-single">
+      <div class="moment-content">
+        <div class="moment-time">
+          <i class="far fa-clock"></i> {{ .Date.Format "2006-01-02 15:04" }}
+        </div>
+        <div class="moment-text">
+          {{ .Content }}
+        </div>
+        {{- with .Params.images }}
+        <div class="moment-images">
+          {{- range . }}
+          <img src="{{ . }}" alt="Moment image" loading="lazy">
+          {{- end }}
+        </div>
+        {{- end }}
+        {{- with .Params.music }}
+        <div class="moment-music">
+          <i class="fas fa-music"></i> <a href="{{ . }}" target="_blank">{{ . }}</a>
+        </div>
+        {{- end }}
+        {{- with .Params.video }}
+        <div class="moment-video">
+          <video controls src="{{ . }}"></video>
+        </div>
+        {{- end }}
+      </div>
+      <div class="moment-back">
+        <a href="{{ "/moments/" | relLangURL }}" class="back-link">
+          <i class="fas fa-arrow-left"></i> {{ i18n "moments-back" | default "返回时刻" }}
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+{{- end -}}

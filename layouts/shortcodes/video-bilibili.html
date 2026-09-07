@@ -1,0 +1,9 @@
+{{- /* video-bilibili.html — B站视频嵌入 */ -}}
+{{- $bvid := .Get "bvid" -}}
+{{- $page := .Get "page" | default "1" -}}
+<div class="shortcode-embed bilibili-video">
+  <iframe style="width:100%;aspect-ratio:16/9;border:none;"
+    src="//player.bilibili.com/player.html?bvid={{ $bvid }}&page={{ $page }}&high_quality=1&danmaku=0"
+    allowfullscreen allow="autoplay; encrypted-media"
+    scrolling="no" frameborder="0"></iframe>
+</div>

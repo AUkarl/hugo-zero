@@ -1,0 +1,7 @@
+{{- /* video-tencent.html — 腾讯视频嵌入 */ -}}
+{{- $id := .Get "id" -}}
+<div class="shortcode-embed tencent-video">
+  <iframe style="width:100%;aspect-ratio:16/9;border:none;"
+    src="https://v.qq.com/txp/iframe/player.html?vid={{ $id }}"
+    allowfullscreen allow="autoplay; encrypted-media"></iframe>
+</div>

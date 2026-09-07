@@ -1,0 +1,210 @@
+{{- /* ============================================================
+  moments/list.html — 时刻页模板
+  两种模式：
+    online_publish = true  → 整页评论区（waline/twikoo/artalk）
+    online_publish = false → 说说卡片展示（无发布框、无点赞）
+  ============================================================ */ -}}
+{{- define "styles" -}}
+{{- $momentsCSS := resources.Get "css/shuo.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $momentsCSS.RelPermalink }}">
+{{- end -}}
+
+{{- define "main" -}}
+{{- $mCfg := .Site.Params.moment -}}
+{{- $online := $mCfg.online_publish | default false -}}
+
+<main class="main">
+  {{- /* ====== 顶部横幅 ====== */ -}}
+  {{- if $online -}}
+    {{- $b := $mCfg.online.banner -}}
+    {{- if $b.show_background -}}
+    <div class="moments-header-banner" style="background-image: url('{{ $b.background_image | default "img/bj.jpg" | relURL }}');">
+    {{- else -}}
+    <div class="moments-header-banner moments-header-no-bg">
+    {{- end -}}
+      <div class="moments-header-overlay"></div>
+      <div class="moments-header-content">
+        {{- if $b.show_avatar -}}
+        <div class="moments-header-avatar">
+          <img src="{{ .Site.Params.aboutAvatar | default "img/avatar.png" | relURL }}" alt="avatar">
+        </div>
+        {{- end -}}
+        <div class="moments-header-info">
+          {{- if $b.show_nickname -}}
+          <div class="moments-header-nickname">{{ $b.nickname | default .Site.Params.aboutName | default "知 止" }}</div>
+          {{- end -}}
+          {{- if $b.show_signature -}}
+          <div class="moments-header-signature">{{ $b.signature | default (i18n "moments-signature" | default "记录生活，分享感悟") }}</div>
+          {{- end -}}
+        </div>
+      </div>
+    </div>
+  {{- else -}}
+    {{- $b := $mCfg.offline.banner -}}
+    {{- $p := $mCfg.offline.profile -}}
+    {{- if $b.show_background -}}
+    <div class="moments-header-banner" style="background-image: url('{{ $b.background_image | default "img/bj.jpg" | relURL }}');">
+    {{- else -}}
+    <div class="moments-header-banner moments-header-no-bg">
+    {{- end -}}
+      <div class="moments-header-overlay"></div>
+      <div class="moments-header-content">
+        {{- if $p.show_avatar | default true }}
+        <div class="moments-header-avatar">
+          <img src="{{ $p.default_avatar | default "img/avatar.png" | relURL }}" alt="avatar">
+        </div>
+        {{- end }}
+        <div class="moments-header-info">
+          {{- if $p.show_nickname | default true }}
+          <div class="moments-header-nickname">{{ $p.default_nickname | default "知 止" }}</div>
+          {{- end }}
+          {{- if $p.show_signature | default false }}
+          <div class="moments-header-signature">{{ $p.signature | default "记录生活，分享感悟" }}</div>
+          {{- end }}
+        </div>
+      </div>
+    </div>
+  {{- end -}}
+
+  {{- /* ====== 内容区域 ====== */ -}}
+  {{- if $online -}}
+    {{- /* 在线发布模式：整页评论区 */ -}}
+    <section class="section">
+      <div class="moment-comment-wrapper">
+        <div id="moment-comment"></div>
+      </div>
+    </section>
+  {{- else -}}
+    {{- /* 离线展示模式：说说卡片列表 */ -}}
+    <section class="section">
+      <div class="shuo-wrapper" id="shuoWrapper">
+        <div id="shuoList"></div>
+      </div>
+    </section>
+  {{- end -}}
+</main>
+
+{{- /* ====== 离线模式：注入说说数据 JSON ====== */ -}}
+{{- if not $online -}}
+{{- $moments := where .Site.RegularPages "Section" "moments" -}}
+{{- $moments = $moments.ByDate.Reverse -}}
+{{- $.Scratch.Set "shuoItems" (slice) -}}
+{{- range $p := $moments -}}
+  {{- $.Scratch.Add "shuoItems" (dict
+    "id" ($p.File.UniqueID | default "0")
+    "text" ($p.Content | plainify)
+    "images" ($p.Params.images | default (slice))
+    "music" ($p.Params.music | default "")
+    "video" ($p.Params.video | default "")
+    "time" ($p.Date | time.Format "2006-01-02 15:04")
+    "nickname" ($p.Site.Params.aboutName | default "知 止")
+    "avatarUrl" (($p.Site.Params.aboutAvatar | default "img/avatar.png") | relURL)
+  ) -}}
+{{- end -}}
+<script type="application/json" id="shuoData">
+{{- $.Scratch.Get "shuoItems" | jsonify | safeJS -}}
+</script>
+{{- end -}}
+
+{{- /* ====== 配置注入 ====== */ -}}
+{{- if $online -}}
+  {{- $oCfg := $mCfg.online -}}
+<script>
+  window.momentOnlineConfig = {
+    commentProvider: "{{ $oCfg.comment_provider | default "waline" }}",
+    walineServerUrl: "{{ $oCfg.waline_server_url | default "" }}",
+    walineEmoji: {{ ($oCfg.waline_emoji | default (slice "https://cdn.jsdelivr.net/npm/@waline/emojis/weibo")) | jsonify | safeJS }},
+    twikooEnvId: "{{ $oCfg.twikoo_env_id | default "" }}",
+    twikooRegion: "{{ $oCfg.twikoo_region | default "" }}",
+    artalkServer: "{{ $oCfg.artalk_server | default "" }}",
+    artalkSite: "{{ $oCfg.artalk_site | default "default" }}",
+    pageKey: "/moments/",
+    pageTitle: "{{ i18n "moments-title" | default "时刻" }}"
+  };
+</script>
+{{- else -}}
+  {{- $offCfg := $mCfg.offline -}}
+<script>
+  window.momentConfig = {
+    paginate: {{ $offCfg.paginate | default 10 }},
+    commentEnabled: {{ if and .Site.Params.comment.enable (ne ($offCfg.comment_provider | default "") "") }}true{{ else }}false{{ end }},
+    commentProvider: "{{ $offCfg.comment_provider | default "" }}",
+    walineServerUrl: "{{ $offCfg.waline_server_url | default "" }}",
+    walineEmoji: {{ ($offCfg.waline_emoji | default (slice "https://cdn.jsdelivr.net/npm/@waline/emojis/weibo")) | jsonify | safeJS }},
+    twikooEnvId: "{{ $offCfg.twikoo_env_id | default "" }}",
+    twikooRegion: "{{ $offCfg.twikoo_region | default "" }}",
+    artalkServer: "{{ $offCfg.artalk_server | default "" }}",
+    artalkSite: "{{ $offCfg.artalk_site | default "default" }}"
+  };
+</script>
+{{- end -}}
+{{- end -}}
+
+{{- define "scripts" -}}
+{{- $mCfg := .Site.Params.moment -}}
+{{- $online := $mCfg.online_publish | default false -}}
+
+{{- if $online -}}
+  {{- /* 在线模式：加载评论系统 CDN 并初始化 */ -}}
+  {{- $provider := $mCfg.online.comment_provider | default "waline" -}}
+  {{- if eq $provider "waline" }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@latest/dist/waline.css">
+<script type="module">
+  import { init } from 'https://cdn.jsdelivr.net/npm/@waline/client@latest/dist/waline.mjs';
+  var cfg = window.momentOnlineConfig || {};
+  init({
+    el: '#moment-comment',
+    serverURL: cfg.walineServerUrl,
+    emoji: cfg.walineEmoji || [],
+    path: cfg.pageKey || '/moments/',
+    lang: document.documentElement.lang || 'zh'
+  });
+</script>
+  {{- else if eq $provider "twikoo" }}
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.0/dist/twikoo.all.min.js"></script>
+<script>
+  (function() {
+    var cfg = window.momentOnlineConfig || {};
+    twikoo.init({
+      envId: cfg.twikooEnvId,
+      el: '#moment-comment',
+      path: cfg.pageKey || '/moments/',
+      lang: document.documentElement.lang || 'zh'
+    });
+  })();
+</script>
+  {{- else if eq $provider "artalk" }}
+<link href="https://cdn.jsdelivr.net/npm/artalk@2/dist/Artalk.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/artalk@2/dist/Artalk.js"></script>
+<script>
+  (function() {
+    var cfg = window.momentOnlineConfig || {};
+    Artalk.init({
+      el: '#moment-comment',
+      pageKey: cfg.pageKey || '/moments/',
+      pageTitle: cfg.pageTitle || 'Moments',
+      server: cfg.artalkServer,
+      site: cfg.artalkSite || 'default',
+      locale: document.documentElement.lang || 'zh'
+    });
+  })();
+</script>
+  {{- end -}}
+{{- else -}}
+  {{- /* 离线模式：加载 shuo.js + 可选评论 CDN */ -}}
+  {{- $offCfg := $mCfg.offline -}}
+  {{- $cp := $offCfg.comment_provider | default "" -}}
+  {{- if and .Site.Params.comment.enable (ne $cp "") -}}
+    {{- if eq $cp "twikoo" }}
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.0/dist/twikoo.all.min.js"></script>
+    {{- else if eq $cp "waline" }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@latest/dist/waline.css">
+    {{- else if eq $cp "artalk" }}
+<link href="https://cdn.jsdelivr.net/npm/artalk@2/dist/Artalk.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/artalk@2/dist/Artalk.js"></script>
+    {{- end -}}
+  {{- end -}}
+  {{- $shuoJS := resources.Get "js/shuo.js" | minify | fingerprint -}}
+<script src="{{ $shuoJS.RelPermalink }}"></script>
+{{- end -}}
+{{- end -}}

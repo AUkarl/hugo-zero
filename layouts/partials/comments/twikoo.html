@@ -1,0 +1,13 @@
+{{- /* comments/twikoo.html — Twikoo 评论系统 */ -}}
+<div id="tcomment"></div>
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.0/dist/twikoo.all.min.js"></script>
+<script>
+  twikoo.init({
+    envId: '{{ .cfg.twikoo_env_id }}',
+    {{- if .cfg.twikoo_region }}
+    region: '{{ .cfg.twikoo_region }}',
+    {{- end }}
+    el: '#tcomment',
+    lang: document.documentElement.lang || 'zh'
+  });
+</script>

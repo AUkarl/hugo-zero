@@ -1,0 +1,221 @@
+/* ============================================================
+   about.css — 关于页
+   头像+昵称头部、分隔线区块、找到我、友情链接、站点声明、投稿
+   ============================================================ */
+
+/* ===== 容器 ===== */
+.about-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* ===== 关于我头部（头像+昵称） ===== */
+.about-me-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.about-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--tag-bg);
+}
+
+.about-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.about-tagline {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.about-me-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ===== 分隔线 ===== */
+.about-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 28px 0;
+}
+
+/* ===== 区块标题 ===== */
+.about-block-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== 通用段落 ===== */
+.about-section p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin: 0;
+}
+
+.about-section p + p {
+  margin-top: 10px;
+}
+
+/* ===== 找到我 ===== */
+.find-me-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.find-me-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.find-me-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.find-me-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.find-me-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: var(--tag-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.find-me-link:hover {
+  border-color: var(--text);
+  color: var(--text);
+  background: var(--tag-active-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.find-me-link .ext-arrow {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  margin-left: 2px;
+}
+
+/* ===== 友情链接 ===== */
+.friend-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.friend-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: var(--tag-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.friend-links a:hover {
+  border-color: var(--text);
+  color: var(--text);
+  background: var(--tag-active-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== 站点联盟 ===== */
+.alliance-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.alliance-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: var(--tag-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.alliance-links a:hover {
+  border-color: var(--text);
+  color: var(--text);
+  background: var(--tag-active-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== 站点声明 ===== */
+.site-declaration p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+/* ===== 投稿 ===== */
+.submit-info p {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.submit-info a {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 600px) {
+  .about-me-header {
+    gap: 16px;
+  }
+  .about-avatar {
+    width: 60px;
+    height: 60px;
+  }
+  .about-name {
+    font-size: 1.2rem;
+  }
+}

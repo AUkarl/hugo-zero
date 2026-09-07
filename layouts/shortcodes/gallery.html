@@ -1,0 +1,14 @@
+{{- /*
+  gallery.html — 多图画廊布局短代码
+  用法: {{< gallery columns="3" >}}
+        ![图片1](img1.jpg)
+        ![图片2](img2.jpg)
+        ![图片3](img3.jpg)
+        {{< /gallery >}}
+  支持: 自定义列数、图片间距
+*/ -}}
+{{- $columns := .Get "columns" | default "3" -}}
+{{- $gap := .Get "gap" | default "8px" -}}
+<div class="gallery" style="--gallery-columns:{{ $columns }};--gallery-gap:{{ $gap }};">
+  {{ .Inner | markdownify }}
+</div>

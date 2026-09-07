@@ -1,0 +1,146 @@
+{{- /* ============================================================
+  _default/single.html — 文章详情页
+  展示 Markdown 文章正文、目录、字数统计、作者信息
+  支持评论和赞赏弹窗
+  ============================================================ */ -}}
+{{- define "styles" -}}
+{{- $articleCSS := resources.Get "css/article.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $articleCSS.RelPermalink }}">
+{{- $shortcodesCSS := resources.Get "css/shortcodes.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $shortcodesCSS.RelPermalink }}">
+{{- end -}}
+
+{{- define "main" -}}
+<main class="main">
+  <article class="article-wrapper">
+    {{- /* 左侧正文 */ -}}
+    <div class="article-content">
+      {{- /* 文章头部 */ -}}
+      <header class="article-header">
+        {{- with .Params.categories }}
+        <span class="article-category">{{ index . 0 }}</span>
+        {{- end }}
+        <h1 class="article-title">{{ .Title }}</h1>
+        {{- if .Params.subtitle }}
+        <p class="article-subtitle">{{ .Params.subtitle }}</p>
+        {{- end }}
+        <div class="article-meta">
+          <span><i class="far fa-calendar-alt"></i> {{ .Date.Format "2006-01-02" }}</span>
+          {{- with .Params.categories }}
+          <span><i class="far fa-folder"></i> {{ i18n "article-category-label" | default "分类：" }}{{ index . 0 }}</span>
+          {{- end }}
+          {{- if .Site.Params.article.show_word_count | default true }}
+          <span><i class="far fa-file-alt"></i> {{ i18n "article-wordcount-label" | default "字数：" }}{{ .WordCount }}</span>
+          {{- end }}
+          <span><i class="far fa-clock"></i> {{ i18n "article-reading-about" | default "阅读时间：约 " }}{{ .ReadingTime }}{{ i18n "article-minutes" | default " 分钟" }}</span>
+        </div>
+        {{- if .Params.tags }}
+        <div class="article-tags">
+          {{- range .Params.tags }}
+          <a href="{{ "tags/" | relLangURL }}{{ . | urlize }}/" class="article-tag">#{{ . }}</a>
+          {{- end }}
+        </div>
+        {{- end }}
+      </header>
+
+      {{- /* 正文内容 */ -}}
+      <div class="article-body" id="articleBody">
+        {{ .Content }}
+      </div>
+
+      {{- /* 文章底部 */ -}}
+      <footer class="article-footer">
+        {{- /* 上一篇/下一篇导航 */ -}}
+        <div class="article-nav">
+          {{- if .PrevInSection }}
+          <a href="{{ .PrevInSection.RelPermalink }}" class="nav-link-item prev">
+            <span class="direction"><i class="fas fa-arrow-left"></i> <span data-i18n="article-prev">{{ i18n "article-prev" | default "上一篇" }}</span></span>
+            <span class="title">{{ .PrevInSection.Title }}</span>
+          </a>
+          {{- else }}
+          <a href="#" class="nav-link-item prev" style="visibility:hidden;">
+            <span class="direction"><i class="fas fa-arrow-left"></i> <span data-i18n="article-prev">{{ i18n "article-prev" | default "上一篇" }}</span></span>
+            <span class="title"></span>
+          </a>
+          {{- end }}
+          {{- if .NextInSection }}
+          <a href="{{ .NextInSection.RelPermalink }}" class="nav-link-item next">
+            <span class="direction"><span data-i18n="article-next">{{ i18n "article-next" | default "下一篇" }}</span> <i class="fas fa-arrow-right"></i></span>
+            <span class="title">{{ .NextInSection.Title }}</span>
+          </a>
+          {{- else }}
+          <a href="#" class="nav-link-item next" style="visibility:hidden;">
+            <span class="direction"><span data-i18n="article-next">{{ i18n "article-next" | default "下一篇" }}</span> <i class="fas fa-arrow-right"></i></span>
+            <span class="title"></span>
+          </a>
+          {{- end }}
+        </div>
+
+        {{- /* 作者信息 */ -}}
+        {{- if .Site.Params.article.show_author_box | default true -}}
+          {{- partial "author-box.html" . -}}
+        {{- end -}}
+
+        {{- /* 评论区 */ -}}
+        {{- if ne .Params.comments false -}}
+          {{- partial "comments/loader.html" . -}}
+        {{- end -}}
+      </div>
+    </div>
+
+    {{- /* 右侧目录 */ -}}
+    {{- if .Site.Params.article.show_toc | default true -}}
+      {{- partial "toc.html" . -}}
+    {{- end -}}
+  </article>
+</main>
+
+{{- /* 赞赏弹窗 */ -}}
+{{- if or .Site.Params.donate .Site.Params.author_profile.donate .Site.Data.authors -}}
+  {{- partial "donate-modal.html" . -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "scripts" -}}
+{{- $profileCfg := .Site.Params.author_profile -}}
+{{- range .Translations -}}
+<script>window.translatedPageUrl = "{{ .RelPermalink }}";</script>
+{{- end -}}
+<script>
+  /* 文章页 i18n 数据 */
+  window.i18nMap = {
+    'zh': {
+      'article-category-label': '{{ i18n "article-category-label-zh" | default "分类：" }}',
+      'article-wordcount-label': '{{ i18n "article-wordcount-label-zh" | default "字数：" }}',
+      'article-reading-about': '{{ i18n "article-reading-about-zh" | default "阅读时间：约 " }}',
+      'article-minutes': '{{ i18n "article-minutes-zh" | default " 分钟" }}',
+      'article-prev': '{{ i18n "article-prev-zh" | default "上一篇" }}',
+      'article-next': '{{ i18n "article-next-zh" | default "下一篇" }}',
+      'article-author-bio': '{{ $profileCfg.bio_zh | default (i18n "article-author-bio-zh" | default "独立开发者 · 极简主义践行者 · 热爱写作与技术分享。") }}',
+      'article-author-name': '{{ $profileCfg.nickname | default .Site.Params.author | default "Example" }}',
+      'article-donate': '{{ i18n "article-donate-zh" | default "赞赏" }}',
+      'article-comments': '{{ i18n "article-comments-zh" | default "评论" }}',
+      'article-toc': '{{ i18n "article-toc-zh" | default "目录" }}',
+      'donate-title': '{{ i18n "donate-title-zh" | default "支持作者" }}',
+      'donate-desc': '{{ i18n "donate-desc-zh" | default "如果您觉得这篇文章对您有帮助，欢迎扫码赞赏，您的支持是我持续创作的动力 ❤️" }}'
+    },
+    'en': {
+      'article-category-label': '{{ i18n "article-category-label-en" | default "Category: " }}',
+      'article-wordcount-label': '{{ i18n "article-wordcount-label-en" | default "Words: " }}',
+      'article-reading-about': '{{ i18n "article-reading-about-en" | default "Reading time: ~" }}',
+      'article-minutes': '{{ i18n "article-minutes-en" | default " min" }}',
+      'article-prev': '{{ i18n "article-prev-en" | default "Previous" }}',
+      'article-next': '{{ i18n "article-next-en" | default "Next" }}',
+      'article-author-bio': '{{ $profileCfg.bio_en | default $profileCfg.bio_zh | default (i18n "article-author-bio-en" | default "Indie developer · Minimalist · Loves writing & tech.") }}',
+      'article-author-name': '{{ $profileCfg.nickname_en | default $profileCfg.nickname | default .Site.Params.author | default "Example" }}',
+      'article-donate': '{{ i18n "article-donate-en" | default "Donate" }}',
+      'article-comments': '{{ i18n "article-comments-en" | default "Comments" }}',
+      'article-toc': '{{ i18n "article-toc-en" | default "Contents" }}',
+      'donate-title': '{{ i18n "donate-title-en" | default "Support the Author" }}',
+      'donate-desc': '{{ i18n "donate-desc-en" | default "If this article helped you, consider donating. Your support keeps me writing!" }}'
+    }
+  };
+</script>
+{{- $articleJS := resources.Get "js/article.js" | minify | fingerprint -}}
+<script src="{{ $articleJS.RelPermalink }}"></script>
+{{- end -}}

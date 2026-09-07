@@ -1,0 +1,403 @@
+{{- /*
+  404.html — 404 错误页面
+  左侧现代诗 + 右侧宝贝回家公益插件
+*/ -}}
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Lang | default "zh-CN" }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>404 · {{ .Site.Title }}</title>
+  <link href="https://fonts.googleapis.com/css?family=Cantarell:400,700|Lato:300,400,900" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  {{- $commonCSS := resources.Get "css/common.css" | minify | fingerprint }}
+  <link rel="stylesheet" href="{{ $commonCSS.RelPermalink }}">
+  <style>
+    .error-page {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+      min-height: calc(100vh - var(--nav-height) - 80px);
+      padding: 0;
+    }
+
+    .error-poem,
+    .error-plugin {
+      width: 50%;
+      padding: 60px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* ===== 左侧诗歌 ===== */
+    .error-poem {
+      align-items: flex-end;
+      text-align: right;
+      border-right: 1px solid var(--border);
+    }
+
+    .poem-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+
+    .poem-body {
+      font-size: 0.95rem;
+      line-height: 2;
+      color: var(--text-secondary);
+      font-family: "Georgia", "Noto Serif SC", serif;
+    }
+
+    .poem-body p {
+      margin: 0;
+    }
+
+    .poem-author {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 20px;
+      opacity: 0.7;
+    }
+
+    .poem-home-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 32px;
+      padding: 8px 24px;
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 0.88rem;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .poem-home-link:hover {
+      background: var(--tag-active-bg);
+      border-color: var(--text);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    /* ===== 右侧宝贝回家 ===== */
+    .error-plugin {
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+    }
+
+    .bbhj-card {
+      max-width: 360px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .bbhj-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .bbhj-header-icon {
+      font-size: 1.3rem;
+    }
+
+    .bbhj-header-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .bbhj-body {
+      display: flex;
+      gap: 14px;
+      padding: 14px 16px;
+    }
+
+    .bbhj-photo {
+      flex-shrink: 0;
+      width: 100px;
+      height: 130px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #f0f0f0;
+    }
+
+    .bbhj-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .bbhj-info {
+      flex: 1;
+      min-width: 0;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--text);
+    }
+
+    .bbhj-info .bbhj-name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .bbhj-info .bbhj-detail {
+      color: var(--text-secondary);
+    }
+
+    .bbhj-info .bbhj-detail strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .bbhj-feature {
+      padding: 0 16px 12px;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .bbhj-feature strong {
+      color: var(--text);
+    }
+
+    .bbhj-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .bbhj-footer a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 18px;
+      background: #e74c3c;
+      color: #fff;
+      border-radius: var(--radius);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .bbhj-footer a:hover {
+      background: #c0392b;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
+    }
+
+    .bbhj-loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+    }
+
+    /* ===== 移动端：上下堆叠 ===== */
+    @media (max-width: 768px) {
+      .error-page {
+        flex-direction: column;
+        min-height: auto;
+      }
+
+      .error-poem,
+      .error-plugin {
+        width: 100%;
+        padding: 40px 20px;
+        border-right: none;
+      }
+
+      .error-poem {
+        border-bottom: 1px solid var(--border);
+        align-items: center;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== 导航 ===== -->
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <img src="{{ .Site.Params.logo | default "img/logo.png" | relURL }}" alt="Logo">
+        <span>{{ .Site.Title }}</span>
+      </div>
+      <div class="nav-controls" style="margin-left:auto;">
+        <button class="ctrl-btn" id="themeToggle" title="{{ T "theme-toggle" }}"><i class="fas fa-sun"></i></button>
+        <button class="ctrl-btn" id="langToggle" title="{{ T "lang-toggle" }}"><i class="fas fa-globe"></i></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== 主内容 ===== -->
+  <main class="main">
+    <div class="error-page">
+
+      <!-- 左侧：现代诗 -->
+      <div class="error-poem">
+        <div class="poem-title" data-i18n="error-poem-title">{{ T "error-poem-title" }}</div>
+        <div class="poem-body">
+          <p data-i18n="error-poem-line1">{{ T "error-poem-line1" }}</p>
+          <p data-i18n="error-poem-line2">{{ T "error-poem-line2" }}</p>
+          <p data-i18n="error-poem-line3">{{ T "error-poem-line3" }}</p>
+          <p data-i18n="error-poem-line4">{{ T "error-poem-line4" }}</p>
+          <p>&nbsp;</p>
+          <p data-i18n="error-poem-line6">{{ T "error-poem-line6" }}</p>
+          <p data-i18n="error-poem-line7">{{ T "error-poem-line7" }}</p>
+          <p data-i18n="error-poem-line8">{{ T "error-poem-line8" }}</p>
+          <p data-i18n="error-poem-line9">{{ T "error-poem-line9" }}</p>
+          <p data-i18n="error-poem-line10">{{ T "error-poem-line10" }}</p>
+        </div>
+        <div class="poem-author" data-i18n="error-poem-author">{{ T "error-poem-author" }}</div>
+        <a href="{{ "/" | relURL }}" class="poem-home-link">
+          <i class="fas fa-home"></i>
+          <span data-i18n="error-back-home">{{ T "error-back-home" }}</span>
+        </a>
+      </div>
+
+      <!-- 右侧：宝贝回家 -->
+      <div class="error-plugin">
+        <div class="bbhj-card" id="bbhjCard">
+          <div class="bbhj-header">
+            <span class="bbhj-header-title" data-i18n="error-bbhj-title">{{ T "error-bbhj-title" }}</span>
+          </div>
+          <div class="bbhj-body" id="bbhjBody">
+            <div class="bbhj-loading" data-i18n="error-bbhj-loading">{{ T "error-bbhj-loading" }}</div>
+          </div>
+          <div class="bbhj-feature" id="bbhjFeature"></div>
+          <div class="bbhj-footer">
+            <a id="bbhjLink" href="https://bbs.baobeihuijia.com/" target="_blank" rel="noopener">
+              <i class="fas fa-heart"></i> <span data-i18n="error-bbhj-btn">{{ T "error-bbhj-btn" }}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ===== 底部 ===== -->
+  {{- partial "footer.html" . }}
+
+  <!-- ===== 滚动按钮 ===== -->
+  {{- partial "scroll-buttons.html" . }}
+
+  <!-- ===== 脚本 ===== -->
+  <script>
+    window.i18nMap = window.i18nMap || {};
+    window.i18nMap.zh = {
+      'error-poem-title': '{{ T "error-poem-title-zh" }}',
+      'error-poem-line1': '{{ T "error-poem-line1-zh" }}',
+      'error-poem-line2': '{{ T "error-poem-line2-zh" }}',
+      'error-poem-line3': '{{ T "error-poem-line3-zh" }}',
+      'error-poem-line4': '{{ T "error-poem-line4-zh" }}',
+      'error-poem-line6': '{{ T "error-poem-line6-zh" }}',
+      'error-poem-line7': '{{ T "error-poem-line7-zh" }}',
+      'error-poem-line8': '{{ T "error-poem-line8-zh" }}',
+      'error-poem-line9': '{{ T "error-poem-line9-zh" }}',
+      'error-poem-line10': '{{ T "error-poem-line10-zh" }}',
+      'error-poem-author': '{{ T "error-poem-author-zh" }}',
+      'error-bbhj-title': '{{ T "error-bbhj-title-zh" }}',
+      'error-bbhj-loading': '{{ T "error-bbhj-loading-zh" }}',
+      'error-bbhj-sex': '{{ T "error-bbhj-sex-zh" }}',
+      'error-bbhj-birth': '{{ T "error-bbhj-birth-zh" }}',
+      'error-bbhj-lost': '{{ T "error-bbhj-lost-zh" }}',
+      'error-bbhj-place': '{{ T "error-bbhj-place-zh" }}',
+      'error-bbhj-feature': '{{ T "error-bbhj-feature-zh" }}',
+      'error-bbhj-btn': '{{ T "error-bbhj-btn-zh" }}',
+      'error-bbhj-fail': '{{ T "error-bbhj-fail-zh" }}',
+      'error-bbhj-official': '{{ T "error-bbhj-official-zh" }}',
+      'error-back-home': '{{ T "error-back-home-zh" }}'
+    };
+    window.i18nMap.en = {
+      'error-poem-title': '{{ T "error-poem-title-en" }}',
+      'error-poem-line1': '{{ T "error-poem-line1-en" }}',
+      'error-poem-line2': '{{ T "error-poem-line2-en" }}',
+      'error-poem-line3': '{{ T "error-poem-line3-en" }}',
+      'error-poem-line4': '{{ T "error-poem-line4-en" }}',
+      'error-poem-line6': '{{ T "error-poem-line6-en" }}',
+      'error-poem-line7': '{{ T "error-poem-line7-en" }}',
+      'error-poem-line8': '{{ T "error-poem-line8-en" }}',
+      'error-poem-line9': '{{ T "error-poem-line9-en" }}',
+      'error-poem-line10': '{{ T "error-poem-line10-en" }}',
+      'error-poem-author': '{{ T "error-poem-author-en" }}',
+      'error-bbhj-title': '{{ T "error-bbhj-title-en" }}',
+      'error-bbhj-loading': '{{ T "error-bbhj-loading-en" }}',
+      'error-bbhj-sex': '{{ T "error-bbhj-sex-en" }}',
+      'error-bbhj-birth': '{{ T "error-bbhj-birth-en" }}',
+      'error-bbhj-lost': '{{ T "error-bbhj-lost-en" }}',
+      'error-bbhj-place': '{{ T "error-bbhj-place-en" }}',
+      'error-bbhj-feature': '{{ T "error-bbhj-feature-en" }}',
+      'error-bbhj-btn': '{{ T "error-bbhj-btn-en" }}',
+      'error-bbhj-fail': '{{ T "error-bbhj-fail-en" }}',
+      'error-bbhj-official': '{{ T "error-bbhj-official-en" }}',
+      'error-back-home': '{{ T "error-back-home-en" }}'
+    };
+  </script>
+  {{- $commonJS := resources.Get "js/common.js" | minify | fingerprint }}
+  <script src="{{ $commonJS.RelPermalink }}"></script>
+  <script>
+    (function() {
+      var PIC_BASE = 'https://qzonestyle.gtimg.cn/qzone_v6/lostchild/images/';
+      function t(key) {
+        var lang = (document.documentElement.lang || '').toLowerCase().startsWith('en') ? 'en' : 'zh';
+        return (window.i18nMap && window.i18nMap[lang] && window.i18nMap[lang][key]) || '';
+      }
+      var script = document.createElement('script');
+      script.src = 'https://qzonestyle.gtimg.cn/qzone_v6/lostchild/data.js';
+      script.onload = function() {
+        if (typeof jsondata === 'undefined' || !jsondata.data || !jsondata.data.length) return;
+        var list = jsondata.data;
+        var child = list[Math.floor(Math.random() * list.length)];
+        var body = document.getElementById('bbhjBody');
+        var feature = document.getElementById('bbhjFeature');
+        var link = document.getElementById('bbhjLink');
+        if (!body) return;
+        body.innerHTML =
+          '<div class="bbhj-photo">' +
+            '<img src="' + PIC_BASE + child.child_pic + '" alt="' + child.name + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+          '</div>' +
+          '<div class="bbhj-info">' +
+            '<div class="bbhj-name">' + child.name + '</div>' +
+            '<div class="bbhj-detail">' + t('error-bbhj-sex') + '<strong>' + child.sex + '</strong></div>' +
+            '<div class="bbhj-detail">' + t('error-bbhj-birth') + '<strong>' + child.birth_time + '</strong></div>' +
+            '<div class="bbhj-detail">' + t('error-bbhj-lost') + '<strong>' + child.lost_time + '</strong></div>' +
+            '<div class="bbhj-detail">' + t('error-bbhj-place') + '<strong>' + child.lost_place + '</strong></div>' +
+          '</div>';
+        if (feature && child.child_feature) {
+          feature.innerHTML = '<strong>' + t('error-bbhj-feature') + '</strong>' + child.child_feature;
+        }
+        if (link && child.url) {
+          link.href = child.url;
+        }
+      };
+      script.onerror = function() {
+        var body = document.getElementById('bbhjBody');
+        if (body) body.innerHTML = '<div class="bbhj-loading">' + t('error-bbhj-fail') + '<a href="https://bbs.baobeihuijia.com/" target="_blank" rel="noopener" style="color:#e74c3c;">' + t('error-bbhj-official') + '</a></div>';
+      };
+      document.head.appendChild(script);
+    })();
+  </script>
+
+</body>
+</html>
