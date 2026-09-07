@@ -1,9 +1,0 @@
-{{- /* katex.html — KaTeX 数学公式 */ -}}
-{{- if not (.Page.Scratch.Get "katex_loaded") -}}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
-  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}]});"></script>
-{{- .Page.Scratch.Set "katex_loaded" true -}}
-{{- end -}}
-<span class="katex-block">{{ .Inner | safeHTML }}</span>

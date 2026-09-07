@@ -1,9 +1,0 @@
-{{- /* code.html — 增强代码块 */ -}}
-{{- $lang := .Get "lang" | default "text" -}}
-{{- $title := .Get "title" -}}
-<div class="shortcode-code">
-{{- if $title }}
-<div class="code-title">{{ $title }}</div>
-{{- end }}
-{{- highlight .Inner $lang "" -}}
-</div>
