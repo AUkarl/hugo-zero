@@ -1,6 +1,7 @@
 # Zero
 
 一个极简风格的 Hugo 个人站点主题。
+Demo：[molyun.com](https://molyun.com)
 
 ## 特性
 
@@ -19,6 +20,30 @@
 - 自定义页脚链接与社交图标
 
 ## 安装
+
+### 准备工作，你的电脑需要提前下载Git和Hugo（Hugo extended版本）
+
+### 创建你的站点
+在命令提示符中，导航到你想要存放网站项目的文件夹（例如桌面）：
+
+```bash
+cd Desktop
+创建一个新的 Hugo 站点，myblog 是站点文件夹的名字，你可以改成你喜欢的：
+```
+
+```bash
+hugo new site myblog
+进入站点目录：
+```
+
+```bash
+cd myblog
+```
+
+```bash
+初始化仓库
+git init
+```
 
 ### 作为 Git 子模块
 
