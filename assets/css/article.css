@@ -646,3 +646,12 @@
     flex: 0 0 100%;
   }
 }
+
+/* ===== Waline 评论头像固定大小 ===== */
+.wl-user .wl-avatar,
+.wl-user .wl-avatar img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}

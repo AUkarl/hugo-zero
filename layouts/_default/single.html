@@ -30,9 +30,9 @@
           <span><i class="far fa-folder"></i> {{ i18n "article-category-label" | default "分类：" }}{{ index . 0 }}</span>
           {{- end }}
           {{- if .Site.Params.article.show_word_count | default true }}
-          <span><i class="far fa-file-alt"></i> {{ i18n "article-wordcount-label" | default "字数：" }}{{ .WordCount }}</span>
+          <span><i class="far fa-file-alt"></i> {{ i18n "article-wordcount-label" | default "字数：" }}<span id="wordCount">{{ .WordCount }}</span></span>
           {{- end }}
-          <span><i class="far fa-clock"></i> {{ i18n "article-reading-about" | default "阅读时间：约 " }}{{ .ReadingTime }}{{ i18n "article-minutes" | default " 分钟" }}</span>
+          <span><i class="far fa-clock"></i> {{ i18n "article-reading-about" | default "阅读时间：约 " }}<span id="readTime">{{ .ReadingTime }}</span>{{ i18n "article-minutes" | default " 分钟" }}</span>
         </div>
         {{- if .Params.tags }}
         <div class="article-tags">

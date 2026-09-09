@@ -37,7 +37,7 @@
       <div class="pagination" id="pagination"></div>
     </div>
     <script type="application/json" id="gardenData">
-    {{- $pages := where .Site.RegularPages "Section" "posts" -}}
+    {{- $pages := where (index .Sites 0).RegularPages "Section" "posts" -}}
     {{- $data := slice -}}
     {{- range $page := $pages -}}
       {{- $cat := "" -}}

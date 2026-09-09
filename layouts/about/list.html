@@ -22,7 +22,7 @@
     <h1 class="section-title" data-i18n="about-title">{{ i18n "about-title" | default "关于" }}</h1>
     {{- if $aboutCfg.show_desc | default true }}
     {{- if $aboutDesc }}
-    <p class="section-desc" data-i18n="about-desc">{{ $aboutDesc }}</p>
+    <p class="section-desc" data-i18n="about-desc">{{ $aboutDesc | markdownify }}</p>
     {{- else }}
     <p class="section-desc" data-i18n="about-desc">{{ i18n "about-desc" | default "一个在数字世界里种花的人。" }}</p>
     {{- end }}
@@ -51,7 +51,7 @@
         {{- if $aboutCfg.show_bio | default true }}
         {{- if $aboutCfg.bio }}
           {{- range $i, $p := $aboutCfg.bio }}
-        <p data-i18n="about-bio-{{ $i }}">{{ if eq $lang "en" }}{{ default .text_en .text_zh }}{{ else }}{{ .text_zh }}{{ end }}</p>
+        <p data-i18n="about-bio-{{ $i }}">{{ if eq $lang "en" }}{{ default .text_en .text_zh | markdownify }}{{ else }}{{ .text_zh | markdownify }}{{ end }}</p>
           {{- end }}
         {{- else }}
         <p data-i18n="about-bio-0">{{ i18n "about-me-p1" | default "相信好的设计是隐形的，好的文字是真诚的。" }}</p>
@@ -67,7 +67,7 @@
         <div class="about-block-title"><i class="fas fa-globe"></i> <span data-i18n="about-site-title">{{ i18n "about-site-title" | default "关于本站" }}</span></div>
         {{- if $aboutCfg.site }}
           {{- range $i, $p := $aboutCfg.site }}
-        <p data-i18n="about-site-{{ $i }}">{{ if eq $lang "en" }}{{ default .text_en .text_zh }}{{ else }}{{ .text_zh }}{{ end }}</p>
+        <p data-i18n="about-site-{{ $i }}">{{ if eq $lang "en" }}{{ default .text_en .text_zh | markdownify }}{{ else }}{{ .text_zh | markdownify }}{{ end }}</p>
           {{- end }}
         {{- else }}
         <p data-i18n="about-site-0">{{ i18n "about-site-p1" | default "这是一个用 Hugo 搭建的个人站点，保留了手工搭建的质感。" }}</p>
