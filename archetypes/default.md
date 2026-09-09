@@ -1,12 +1,17 @@
 ---
 title: "{{ replace .Name "-" " " | title }}"
 date: {{ .Date }}
+<<<<<<< HEAD
 draft: true
+=======
+draft: false
+>>>>>>> 3ac21e66445f9cf1608c7d9417d8b4fb1a78f61f
 description: "摘要"
 categories:
   - "分类"
 tags:
-  - "标签"
+
+>>>>>>> 3ac21e66445f9cf1608c7d9417d8b4fb1a78f61f
 image: ""
 author: "你的名字"
 toc: true
@@ -215,4 +220,10 @@ $$
 
 这是另一个短段落，用来展示段落间距。
 
+<<<<<<< HEAD
 ---
+=======
+---
+
+
+>>>>>>> 3ac21e66445f9cf1608c7d9417d8b4fb1a78f61f
