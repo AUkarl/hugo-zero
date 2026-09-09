@@ -649,9 +649,69 @@
 
 /* ===== Waline 评论头像固定大小 ===== */
 .wl-user .wl-avatar,
-.wl-user .wl-avatar img {
-  width: 48px;
-  height: 48px;
+.wl-user .wl-avatar img,
+.wl-user-avatar,
+.wl-user-avatar img,
+.wl-header-avatar,
+.wl-header-avatar img,
+.wl-user img,
+.wl-comment .wl-avatar,
+.wl-comment .wl-avatar img {
+  width: 48px !important;
+  height: 48px !important;
   border-radius: 50%;
   object-fit: cover;
+}
+
+/* ===== Waline 深色模式适配 ===== */
+[data-theme="dark"] .wl-panel,
+[data-theme="dark"] .wl-editor,
+[data-theme="dark"] .wl-input {
+  background: var(--card-bg, #2a2a2a) !important;
+  border-color: var(--border, #444) !important;
+  color: var(--text, #eee) !important;
+}
+
+[data-theme="dark"] .wl-content,
+[data-theme="dark"] .wl-content p,
+[data-theme="dark"] .wl-nick,
+[data-theme="dark"] .wl-time,
+[data-theme="dark"] .wl-addr,
+[data-theme="dark"] .wl-browser,
+[data-theme="dark"] .wl-os {
+  color: var(--text, #eee) !important;
+}
+
+[data-theme="dark"] .wl-meta,
+[data-theme="dark"] .wl-meta *,
+[data-theme="dark"] .wl-info,
+[data-theme="dark"] .wl-info * {
+  color: var(--text-secondary, #aaa) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] .wl-panel,
+  [data-theme="auto"] .wl-editor,
+  [data-theme="auto"] .wl-input {
+    background: var(--card-bg, #2a2a2a) !important;
+    border-color: var(--border, #444) !important;
+    color: var(--text, #eee) !important;
+  }
+
+  [data-theme="auto"] .wl-content,
+  [data-theme="auto"] .wl-content p,
+  [data-theme="auto"] .wl-nick,
+  [data-theme="auto"] .wl-time,
+  [data-theme="auto"] .wl-addr,
+  [data-theme="auto"] .wl-browser,
+  [data-theme="auto"] .wl-os {
+    color: var(--text, #eee) !important;
+  }
+
+  [data-theme="auto"] .wl-meta,
+  [data-theme="auto"] .wl-meta *,
+  [data-theme="auto"] .wl-info,
+  [data-theme="auto"] .wl-info * {
+    color: var(--text-secondary, #aaa) !important;
+  }
 }
