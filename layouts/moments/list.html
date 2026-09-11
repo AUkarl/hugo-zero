@@ -161,7 +161,7 @@
   });
 </script>
   {{- else if eq $provider "twikoo" }}
-<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.0/dist/twikoo.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.7.22/dist/twikoo.all.min.js"></script>
 <script>
   (function() {
     var cfg = window.momentOnlineConfig || {};
@@ -196,7 +196,7 @@
   {{- $cp := $offCfg.comment_provider | default "" -}}
   {{- if and .Site.Params.comment.enable (ne $cp "") -}}
     {{- if eq $cp "twikoo" }}
-<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.0/dist/twikoo.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.7.22/dist/twikoo.all.min.js"></script>
     {{- else if eq $cp "waline" }}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@latest/dist/waline.css">
     {{- else if eq $cp "artalk" }}
