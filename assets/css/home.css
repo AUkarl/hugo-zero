@@ -3,13 +3,17 @@
    瀑布流卡片布局、分页控件
    ============================================================ */
 
-/* ===== 瀑布流容器 ===== */
+/* ===== 卡片容器 ===== */
 .garden-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
+/* 兜底布局（JS 未执行时）：CSS 多栏瀑布流。
+   注意：多栏是「先竖着填满第一列，再填第二列」，
+   卡片顺序看起来会和时间顺序对不上，所以 JS 可用时会加上
+   .is-masonry（见下方）改用「分列瀑布流」。 */
 .garden-grid {
   column-count: var(--home-columns, 4);
   column-gap: 20px;
@@ -17,10 +21,33 @@
   flex: 1;
 }
 
+/* ===== 分列瀑布流（JS 版，保留错落感且顺序正确）=====
+   home.js 把卡片按数据顺序轮流塞进 .garden-col：
+   第 1 张在第 1 列顶部，第 2 张在其右侧，……，第 n+1 张回到第 1 列继续往下。
+   于是阅读顺序是「从左到右、从上到下」，而每列高度各自独立，
+   仍然是瀑布流的错落效果。 */
+.garden-grid.is-masonry {
+  display: flex;
+  align-items: flex-start;   /* 每列各自堆叠，不互相拉伸 */
+  gap: 20px;
+}
+
+.garden-grid.is-masonry .garden-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;                 /* 同一列内卡片间距 */
+}
+
+.garden-grid.is-masonry .garden-card {
+  margin-bottom: 0;          /* 间距交给 gap，避免叠加 */
+}
+
 /* ===== 文章卡片 ===== */
 .garden-card {
-  break-inside: avoid;
-  margin-bottom: 20px;
+  break-inside: avoid;       /* 多栏兜底布局下避免卡片被拆到两列 */
+  margin-bottom: 20px;       /* 多栏兜底布局的行间距（分列布局下由 gap 接管） */
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);

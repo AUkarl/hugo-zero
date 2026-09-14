@@ -40,6 +40,57 @@ function locPermalink(item) {
   return item.permalink || '#';
 }
 
+// ==================== 瀑布流分列 ====================
+// CSS 的 column-count 是「先竖着填满第一列，再填第二列」，
+// 卡片顺序看起来会和时间顺序对不上。
+// 这里改成：按数据顺序把卡片轮流分配到各列
+// （第 1 张进第 1 列、第 2 张进第 2 列……第 n+1 张回到第 1 列继续往下），
+// 阅读顺序即「从左到右、从上到下」，而每列高度独立，仍是瀑布流的错落感。
+const Masonry = {
+  // 列数取 CSS 变量 --home-columns（响应式断点写在 home.css 里）
+  getColumnCount(grid) {
+    const raw = getComputedStyle(grid).getPropertyValue('--home-columns');
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n > 0 ? n : 4;
+  },
+  // 分列；首次调用会缓存卡片节点，之后 resize 重排也能保持顺序、不丢节点
+  layout(grid) {
+    if (!grid) return;
+    if (!grid.__gardenCards) {
+      grid.__gardenCards = Array.from(grid.children).filter(el => !el.classList.contains('garden-col'));
+    }
+    const cards = grid.__gardenCards;
+    if (cards.length === 0) return;
+
+    const count = Math.max(1, Math.min(Masonry.getColumnCount(grid), cards.length));
+    const cols = [];
+    grid.textContent = '';                 // 清空旧列，卡片节点仍被 cards 引用着
+    for (let i = 0; i < count; i++) {
+      const col = document.createElement('div');
+      col.className = 'garden-col';
+      grid.appendChild(col);
+      cols.push(col);
+    }
+    cards.forEach((card, i) => cols[i % count].appendChild(card));
+    grid.classList.add('is-masonry');
+    grid.__gardenCols = count;
+  },
+  // 内容重新渲染后调用：先丢弃旧缓存再分列
+  refresh(grid) {
+    if (!grid) return;
+    grid.__gardenCards = null;
+    Masonry.layout(grid);
+  },
+  // 响应式：列数变化时重新分列
+  watch() {
+    window.addEventListener('resize', function () {
+      const grid = document.getElementById('gardenGrid');
+      if (!grid || !grid.__gardenCards || grid.__gardenCards.length === 0) return;
+      if (Masonry.getColumnCount(grid) !== grid.__gardenCols) Masonry.layout(grid);
+    });
+  }
+};
+
 // ==================== 初始化 ====================
 document.addEventListener('DOMContentLoaded', function() {
   initGarden();
@@ -63,10 +114,14 @@ function initGarden() {
     } catch (e) {
       filteredArticles = [];
     }
+    renderGarden();
+  } else {
+    // 静态列表页（/posts/ 等）：卡片已由 Hugo 渲染好，直接分列
+    Masonry.layout(gridEl);
   }
 
-  renderGarden();
   bindEvents();
+  Masonry.watch();
 }
 
 // ==================== 渲染文章卡片 ====================
@@ -74,6 +129,9 @@ function renderGarden() {
   const gridEl = document.getElementById('gardenGrid');
   const paginationEl = document.getElementById('pagination');
   if (!gridEl) return;
+  // 静态列表页（如 /posts/）的卡片由 Hugo 渲染，没有 #gardenData，
+  // 这里直接跳过，避免语言切换等事件把已有卡片清空
+  if (!document.getElementById('gardenData')) return;
 
   const start = (currentPage - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
@@ -112,6 +170,8 @@ function renderGarden() {
     `;
   });
   gridEl.innerHTML = html;
+  // 重新按顺序分列（保证「从左到右、从上到下」）
+  Masonry.refresh(gridEl);
 
   // 渲染分页
   const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE);

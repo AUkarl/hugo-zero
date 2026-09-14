@@ -36,3 +36,9 @@
   </section>
 </main>
 {{- end -}}
+
+{{- /* 加载列表脚本：卡片按顺序分列，保证「从左到右、从上到下」 */ -}}
+{{- define "scripts" -}}
+{{- $homeJS := resources.Get "js/home.js" | minify | fingerprint -}}
+<script src="{{ $homeJS.RelPermalink }}"></script>
+{{- end -}}
