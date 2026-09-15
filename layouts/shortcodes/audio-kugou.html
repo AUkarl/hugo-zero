@@ -1,7 +1,26 @@
-{{- /* audio-kugou.html — 酷狗音乐嵌入 */ -}}
+{{- /* ============================================================
+  audio-kugou.html — 酷狗音乐（跳转卡片）
+  ------------------------------------------------------------
+  为什么不是播放器：酷狗已经关闭了可嵌入的网页播放器 ——
+    旧外链播放器 https://www.kugou.com/widget/single/<hash>/single.html 已 404，
+    且全站返回 X-Frame-Options: SAMEORIGIN + frame-ancestors 'self'，
+    任何 iframe 嵌入都会被浏览器拒绝（表现为空白）。
+  这里改为输出一张卡片，点击跳转到酷狗对应歌曲，永远不会失效。
+
+  用法: {{< audio-kugou id="歌曲hash" title="歌名" artist="歌手" >}}
+  说明: id 为酷狗歌曲的 hash（在酷狗里点分享/复制链接可见）
+  ============================================================ */ -}}
 {{- $id := .Get "id" -}}
-<div class="shortcode-embed kugou-music">
-  <iframe style="max-width:100%;width:330px;height:86px;border:none;"
-    src="https://www.kugou.com/widget/single/{{ $id }}/single.html"
-    allowfullscreen allow="autoplay; encrypted-media"></iframe>
+{{- $title := .Get "title" | default "在酷狗音乐中播放" -}}
+{{- $artist := .Get "artist" -}}
+<div class="shortcode-embed kugou-music"
+     style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--border,#e5e5e5);border-radius:10px;background:var(--card-bg,transparent);">
+  <span style="font-size:22px;line-height:1;">🎵</span>
+  <span style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+    <a href="https://www.kugou.com/song/#hash={{ $id }}" target="_blank" rel="noopener"
+       style="font-weight:600;text-decoration:none;color:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $title }}</a>
+    {{- with $artist }}
+    <span style="font-size:0.85em;opacity:0.7;">{{ . }}</span>
+    {{- end }}
+  </span>
 </div>
