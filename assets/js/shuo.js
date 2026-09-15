@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!serverUrl) return;
     var el = document.getElementById('comment-' + id);
     if (!el) return;
-    import('https://cdn.jsdelivr.net/npm/@waline/client@latest/dist/waline.mjs').then(function(Waline) {
+    import('https://cdn.jsdelivr.net/npm/@waline/client@latest/dist/waline.js').then(function(Waline) {
       try {
         Waline.init({
           el: '#comment-' + id,
