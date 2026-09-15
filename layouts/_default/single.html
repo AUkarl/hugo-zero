@@ -33,6 +33,9 @@
           <span><i class="far fa-file-alt"></i> {{ i18n "article-wordcount-label" | default "字数：" }}<span id="wordCount">{{ .WordCount }}</span></span>
           {{- end }}
           <span><i class="far fa-clock"></i> {{ i18n "article-reading-about" | default "阅读时间：约 " }}<span id="readTime">{{ .ReadingTime }}</span>{{ i18n "article-minutes" | default " 分钟" }}</span>
+          {{- if and .Site.Params.comment.enable (eq (.Site.Params.comment.article.provider | default "") "waline") (.Site.Params.comment.article.waline_pageview | default true) }}
+          <span><i class="far fa-eye"></i> <span data-i18n="article-views-label">{{ i18n "article-views-label" | default "Views: " }}</span><span class="waline-pageview-count">-</span></span>
+          {{- end }}
         </div>
         {{- if .Params.tags }}
         <div class="article-tags">
@@ -112,6 +115,7 @@
     'zh': {
       'article-category-label': '{{ i18n "article-category-label-zh" | default "分类：" }}',
       'article-wordcount-label': '{{ i18n "article-wordcount-label-zh" | default "字数：" }}',
+      'article-views-label': '{{ i18n "article-views-label-zh" | default "浏览：" }}',
       'article-reading-about': '{{ i18n "article-reading-about-zh" | default "阅读时间：约 " }}',
       'article-minutes': '{{ i18n "article-minutes-zh" | default " 分钟" }}',
       'article-prev': '{{ i18n "article-prev-zh" | default "上一篇" }}',
@@ -127,6 +131,7 @@
     'en': {
       'article-category-label': '{{ i18n "article-category-label-en" | default "Category: " }}',
       'article-wordcount-label': '{{ i18n "article-wordcount-label-en" | default "Words: " }}',
+      'article-views-label': '{{ i18n "article-views-label-en" | default "Views: " }}',
       'article-reading-about': '{{ i18n "article-reading-about-en" | default "Reading time: ~" }}',
       'article-minutes': '{{ i18n "article-minutes-en" | default " min" }}',
       'article-prev': '{{ i18n "article-prev-en" | default "Previous" }}',

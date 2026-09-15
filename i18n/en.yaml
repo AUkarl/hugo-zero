@@ -53,6 +53,7 @@ page-suffix-en: ""
 # ===== Article page =====
 article-category-label: "Category: "
 article-wordcount-label: "Words: "
+article-views-label: "Views: "
 article-reading-about: "Reading time: ~"
 article-minutes: " min"
 article-prev: "Previous"
@@ -68,6 +69,7 @@ author: "Author"
 # Article - Chinese client keys
 article-category-label-zh: "分类："
 article-wordcount-label-zh: "字数："
+article-views-label-zh: "浏览："
 article-reading-about-zh: "阅读时间：约 "
 article-minutes-zh: " 分钟"
 article-prev-zh: "上一篇"
@@ -82,6 +84,7 @@ donate-desc-zh: "如果您觉得这篇文章对您有帮助，欢迎扫码赞赏
 # Article - English client keys
 article-category-label-en: "Category: "
 article-wordcount-label-en: "Words: "
+article-views-label-en: "Views: "
 article-reading-about-en: "Reading time: ~"
 article-minutes-en: " min"
 article-prev-en: "Previous"

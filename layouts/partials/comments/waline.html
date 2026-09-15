@@ -7,9 +7,11 @@
     el: '#waline',
     serverURL: '{{ .cfg.waline_server_url }}',
     emoji: {{ .cfg.waline_emoji | default (slice "https://cdn.jsdelivr.net/npm/@waline/emojis/weibo") | jsonify | safeJS }},
-    visitor: {{ .cfg.waline_visitor | default true }},
     commentSorting: '{{ .cfg.waline_comment_sorting | default "latest" }}',
-    pageview: {{ .cfg.waline_pageview | default true }},
+    {{- /* Waline v3 移除了 visitor/pageview 布尔选项，浏览量改为传入 CSS 选择器 */}}
+    {{- if .cfg.waline_pageview | default true }}
+    pageview: '.waline-pageview-count',
+    {{- end }}
     lang: document.documentElement.lang || 'zh'
   });
 </script>
