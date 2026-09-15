@@ -3,7 +3,7 @@
   优先级: author_profile.donate > data/authors.yaml > site.donate
   ============================================================ */ -}}
 {{- $authorID := .Params.author | default .Site.Params.default_author -}}
-{{- $author := index .Site.Data.authors $authorID -}}
+{{- $author := index hugo.Data.authors $authorID -}}
 
 <div class="donate-modal" id="donateModal">
   <div class="donate-modal-content">

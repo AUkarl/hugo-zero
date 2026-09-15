@@ -99,7 +99,7 @@
 </main>
 
 {{- /* 赞赏弹窗 */ -}}
-{{- if or .Site.Params.donate .Site.Params.author_profile.donate .Site.Data.authors -}}
+{{- if or .Site.Params.donate .Site.Params.author_profile.donate hugo.Data.authors -}}
   {{- partial "donate-modal.html" . -}}
 {{- end -}}
 {{- end -}}

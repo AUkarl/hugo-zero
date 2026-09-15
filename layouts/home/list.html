@@ -37,7 +37,7 @@
       <div class="pagination" id="pagination"></div>
     </div>
     <script type="application/json" id="gardenData">
-    {{- $pages := where (index .Sites 0).RegularPages "Section" "posts" -}}
+    {{- $pages := where (index hugo.Sites 0).RegularPages "Section" "posts" -}}
     {{- /* 显式按日期倒序（最新 → 最旧），不依赖 Hugo 默认排序；
            前端按此顺序从左到右、从上到下依次渲染卡片 */ -}}
     {{- $pages = $pages.ByDate.Reverse -}}

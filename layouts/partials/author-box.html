@@ -3,7 +3,7 @@
   数据来源优先级: data/authors.yaml > author_profile 配置 > 全局参数
   ============================================================ */ -}}
 {{- $authorID := .Params.author | default .Site.Params.default_author -}}
-{{- $authorData := .Site.Data.authors -}}
+{{- $authorData := hugo.Data.authors -}}
 {{- $author := index $authorData $authorID -}}
 {{- $profileCfg := .Site.Params.author_profile -}}
 {{- $lang := .Site.Language.Lang -}}

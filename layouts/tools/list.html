@@ -43,7 +43,7 @@
 {{- $toolsDescZh := .Site.Params.tools.desc_zh | default "" -}}
 {{- $toolsDescEn := .Site.Params.tools.desc_en | default "" -}}
 <script>
-  window.toolsData = {{ site.Data.tools | jsonify | safeJS }};
+  window.toolsData = {{ hugo.Data.tools | jsonify | safeJS }};
   window.i18nMap = {
     'zh': {
       'tools-title': '{{ i18n "tools-title-zh" | default "工具" }}',
