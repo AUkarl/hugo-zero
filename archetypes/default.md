@@ -1,17 +1,16 @@
 ---
-title: "{{ replace .Name "-" " " | title }}"
+# ============================================================
+# archetypes/default.md — 默认文章模板
+# 使用 hugo new content/posts/my-post.md 创建新文章时自动填充
+# ============================================================
+title: "{{ replace .File.ContentBaseName "-" " " | title }}"
 date: {{ .Date }}
-<<<<<<< HEAD
-draft: true
-=======
 draft: false
->>>>>>> 3ac21e66445f9cf1608c7d9417d8b4fb1a78f61f
 description: "摘要"
 categories:
-  - "分类"
+  - "未分类"
 tags:
-
->>>>>>> 3ac21e66445f9cf1608c7d9417d8b4fb1a78f61f
+  - "未标签"
 image: ""
 author: "你的名字"
 toc: true
@@ -220,10 +219,6 @@ $$
 
 这是另一个短段落，用来展示段落间距。
 
-<<<<<<< HEAD
----
-=======
 ---
 
 
->>>>>>> 3ac21e66445f9cf1608c7d9417d8b4fb1a78f61f
