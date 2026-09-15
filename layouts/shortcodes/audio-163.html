@@ -1,7 +1,10 @@
-{{- /* audio-163.html — 网易云音乐嵌入 */ -}}
+{{- /* audio-163.html — 网易云音乐嵌入（单曲，自动播放）
+   与 music163 一致：输出占位，由 partials/music163-script.html 在浏览器端
+   按设备选择正确的播放器地址（避免网易把 iframe 换成 http 地址导致 Mixed Content）。 */ -}}
 {{- $id := .Get "id" -}}
-<div class="shortcode-embed netease-music">
-  <iframe style="max-width:100%;width:330px;height:100px;border:none;"
-    src="https://music.163.com/outchain/player?type=2&id={{ $id }}&auto=1&height=100"
-    allowfullscreen allow="autoplay; encrypted-media"></iframe>
+<div class="shortcode-embed netease-music" data-music163
+     data-type="2" data-id="{{ $id }}" data-auto="1" data-height="100"
+     style="min-height:100px;">
+  <a class="music163-fallback" href="https://music.163.com/song?id={{ $id }}" target="_blank" rel="noopener">♪ 在网易云音乐中播放</a>
 </div>
+{{- partial "music163-script.html" . -}}

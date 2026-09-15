@@ -1,0 +1,43 @@
+{{- /* ============================================================
+  music163-script.html — 网易云播放器：按设备选择正确的播放器地址
+  ------------------------------------------------------------
+  网易云有两个播放器地址，必须和设备匹配，否则它会把 iframe 内容换成
+  http:// 的另一种地址，浏览器以 Mixed Content 拦掉：
+    桌面 UA + /outchain/player    -> 正常
+    移动 UA + /m/outchain/player  -> 正常
+    两者交叉                    -> 被拦（移动端播放器空白 + F12 报 Mixed Content）
+
+  静态站在构建时不知道访客设备，所以由这段脚本在浏览器端按 UA 决定。
+  各音乐短代码输出 <div data-music163 data-id=... > 占位，脚本把它替换成 iframe；
+  没开启 JS 时占位里的链接依然可用。
+  同名函数只定义一次，同页面多个播放器共用。
+   ============================================================ */ -}}
+<script>
+(function () {
+  if (!window.__zeroMusic163) {
+    window.__zeroMusic163 = function () {
+      var mobile = /Mobi|Android|iPhone|iPod|Windows Phone|BlackBerry|Opera Mini/i.test(navigator.userAgent);
+      var boxes = document.querySelectorAll('[data-music163]:not([data-ready])');
+      for (var i = 0; i < boxes.length; i++) {
+        var box = boxes[i];
+        box.setAttribute('data-ready', '1');
+        var h = parseInt(box.getAttribute('data-height') || '100', 10);
+        var src = 'https://music.163.com' + (mobile ? '/m' : '') + '/outchain/player' +
+          '?type=' + (box.getAttribute('data-type') || '2') +
+          '&id=' + box.getAttribute('data-id') +
+          '&auto=' + (box.getAttribute('data-auto') || '0') +
+          '&height=' + h;
+        var f = document.createElement('iframe');
+        f.setAttribute('frameborder', 'no');
+        f.setAttribute('loading', 'lazy');
+        f.setAttribute('allow', 'autoplay; encrypted-media');
+        f.src = src;
+        f.style.cssText = 'width:100%;height:' + h + 'px;border:0;display:block;';
+        box.innerHTML = '';
+        box.appendChild(f);
+      }
+    };
+  }
+  window.__zeroMusic163();
+})();
+</script>

@@ -3,28 +3,28 @@
   用法: {{< music163 "1234567890" >}}
   或:   {{< music163 id="1234567890" type="song" >}}
   支持: 歌曲 ID、歌单 ID、类型选择（song/playlist/album）
+
+  这里不直接输出 iframe，而是输出占位 + 交给 partials/music163-script.html
+  在浏览器端按设备选择正确的播放器地址（原因见该文件注释）。
 */ -}}
 {{- $id := .Get "id" | default (.Get 0) -}}
 {{- $type := .Get "type" | default "song" -}}
 {{- $auto := .Get "auto" | default "0" -}}
-<div class="video-embed music163-embed">
-  {{- if eq $type "playlist" }}
-  <iframe frameborder="no" border="0" marginwidth="0" marginheight="0"
-    src="//music.163.com/outchain/player?type=0&id={{ $id }}&auto={{ $auto }}&height=430"
-    loading="lazy"
-    style="width:100%;height:430px;">
-  </iframe>
-  {{- else if eq $type "album" }}
-  <iframe frameborder="no" border="0" marginwidth="0" marginheight="0"
-    src="//music.163.com/outchain/player?type=1&id={{ $id }}&auto={{ $auto }}&height=430"
-    loading="lazy"
-    style="width:100%;height:430px;">
-  </iframe>
-  {{- else }}
-  <iframe frameborder="no" border="0" marginwidth="0" marginheight="0"
-    src="//music.163.com/outchain/player?type=2&id={{ $id }}&auto={{ $auto }}&height=100"
-    loading="lazy"
-    style="width:100%;height:100px;">
-  </iframe>
-  {{- end }}
+{{- $playerType := "2" -}}
+{{- $height := 100 -}}
+{{- $link := printf "https://music.163.com/song?id=%s" $id -}}
+{{- if eq $type "playlist" -}}
+  {{- $playerType = "0" -}}
+  {{- $height = 430 -}}
+  {{- $link = printf "https://music.163.com/#/playlist?id=%s" $id -}}
+{{- else if eq $type "album" -}}
+  {{- $playerType = "1" -}}
+  {{- $height = 430 -}}
+  {{- $link = printf "https://music.163.com/#/album?id=%s" $id -}}
+{{- end -}}
+<div class="video-embed music163-embed" data-music163
+     data-type="{{ $playerType }}" data-id="{{ $id }}" data-auto="{{ $auto }}" data-height="{{ $height }}"
+     style="min-height:{{ $height }}px;">
+  <a class="music163-fallback" href="{{ $link }}" target="_blank" rel="noopener">♪ 在网易云音乐中播放</a>
 </div>
+{{- partial "music163-script.html" . -}}
