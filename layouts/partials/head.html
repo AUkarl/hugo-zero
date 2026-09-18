@@ -1,9 +1,14 @@
 {{- /* ============================================================
   head.html — <head> 部分
   包含 meta 标签、标题、SEO、CSS 引入
+
+  性能约定（不要改成同步加载）：
+  - Google Fonts / Font Awesome / animate.css 一律用
+    media="print" + onload 的经典非阻塞写法，避免阻塞首屏渲染。
+  - 本站自己的 common.css 属于关键样式，保持同步加载。
   ============================================================ */ -}}
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 {{- /* 主题标识：方便确认站点实际使用的是哪套主题 */ -}}
 <meta name="theme" content="zero · https://github.com/AUkarl/hugo-zero">
 
@@ -16,24 +21,36 @@
 </script>
 
 {{- /* 页面标题 */ -}}
+{{- $sep := .Site.Params.seo.title_separator | default "·" -}}
 <title>
   {{- if .IsHome -}}
     {{ .Site.Title | default "Example" }}
   {{- else if .Params.seoTitle -}}
-    {{ .Params.seoTitle }} · {{ .Site.Title | default "Example" }}
+    {{ .Params.seoTitle }} {{ $sep }} {{ .Site.Title | default "Example" }}
   {{- else -}}
-    {{ .Title }} · {{ .Site.Title | default "Example" }}
+    {{ .Title }} {{ $sep }} {{ .Site.Title | default "Example" }}
   {{- end -}}
 </title>
 
-{{- /* SEO 元数据 */ -}}
+{{- /* SEO 元数据（description / canonical / robots / OG / Twitter / JSON-LD） */ -}}
 {{- partial "seo.html" . -}}
 
-{{- /* 多语言 alternate links */ -}}
+{{- /* 多语言 alternate links（含 x-default） */ -}}
 {{- if .IsTranslated -}}
-  {{- range .Translations -}}
+  {{- range .AllTranslations -}}
 <link rel="alternate" hreflang="{{ .Language.Lang }}" href="{{ .Permalink }}">
   {{- end -}}
+  {{- $defaultLang := .Site.Home.Language.Lang | default "zh" -}}
+  {{- $xdefault := .Permalink -}}
+  {{- range .AllTranslations -}}
+    {{- if eq .Language.Lang $defaultLang -}}{{- $xdefault = .Permalink -}}{{- end -}}
+  {{- end -}}
+<link rel="alternate" hreflang="x-default" href="{{ $xdefault }}">
+{{- end -}}
+
+{{- /* RSS / 其它输出格式自动发现 */ -}}
+{{- range .AlternativeOutputFormats -}}
+{{ printf "<link rel=%q type=%q href=%q title=%q>" .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
 {{- end -}}
 
 {{- /* Favicon */ -}}
@@ -43,13 +60,23 @@
 <link rel="icon" href="{{ "img/logo.png" | relURL }}">
 {{- end -}}
 
-{{- /* Google Fonts */ -}}
-<link href="https://fonts.googleapis.com/css?family=Cantarell:400,700|Lato:300,400,900" rel="stylesheet">
+{{- /* ===== 外部资源：预连接，提前建连 ===== */ -}}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
-{{- /* Font Awesome 图标库 */ -}}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+{{- /* Google Fonts（非阻塞） */ -}}
+{{- $fontURL := "https://fonts.googleapis.com/css?family=Cantarell:400,700|Lato:300,400,900&display=swap" -}}
+<link rel="stylesheet" href="{{ $fontURL }}" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="{{ $fontURL }}"></noscript>
 
-{{- /* 公共样式 */ -}}
+{{- /* Font Awesome 图标库（非阻塞） */ -}}
+{{- $faURL := "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" -}}
+<link rel="stylesheet" href="{{ $faURL }}" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="{{ $faURL }}"></noscript>
+
+{{- /* 公共样式（关键样式，保持同步加载） */ -}}
 {{- $commonCSS := resources.Get "css/common.css" | minify | fingerprint -}}
 <link rel="stylesheet" href="{{ $commonCSS.RelPermalink }}">
 

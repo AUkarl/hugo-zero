@@ -49,17 +49,32 @@ document.addEventListener('DOMContentLoaded', function() {
   const navClose = document.querySelector('.nav-close');
 
   if (navToggle && navLinksContainer && navOverlay) {
+    // 同步 aria-expanded，让读屏用户知道抽屉是否展开
+    function setDrawerAria(open) {
+      navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
     function openDrawer() {
       navLinksContainer.classList.add('open');
       navOverlay.classList.add('show');
       document.body.style.overflow = 'hidden';
+      setDrawerAria(true);
     }
 
     function closeDrawer() {
       navLinksContainer.classList.remove('open');
       navOverlay.classList.remove('show');
       document.body.style.overflow = '';
+      setDrawerAria(false);
     }
+
+    // Esc 关闭抽屉（键盘用户）
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && navLinksContainer.classList.contains('open')) {
+        closeDrawer();
+        navToggle.focus();
+      }
+    });
 
     navToggle.addEventListener('click', function(e) {
       e.stopPropagation();

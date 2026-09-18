@@ -1,84 +1,168 @@
 {{- /* ============================================================
-  seo.html — SEO 元数据（OG / Twitter Card / meta）
-  由 head.html 调用，读取 params.seo 配置
-  ============================================================ */ -}}
-{{- $seo := .Site.Params.seo -}}
-{{- $desc := .Description | default .Summary | plainify | truncate 160 | default $seo.default_description -}}
-{{- $keywords := .Params.keywords | default $seo.default_keywords -}}
-{{- $image := .Params.image | default .Params.img | default "/img/og-image.jpg" -}}
-{{- $author := .Site.Params.author | default $seo.site_author -}}
+  seo.html — SEO 元数据
+  由 head.html 调用，读取 params.toml 的 [seo] 配置
 
+  输出：description / canonical / robots / Open Graph / Twitter Card
+        / JSON-LD（Article、BreadcrumbList、WebSite）
+
+  新增标签全部可用 [seo] 下的开关关闭，默认行为与旧版兼容。
+  ============================================================ */ -}}
+{{- $seo := .Site.Params.seo | default dict -}}
+{{- $is404 := eq .Kind "404" -}}
+
+{{- /* ---------- description：页面 description → .Description → 摘要 → 站点描述 → 默认描述 ---------- */ -}}
+{{- $descMax := $seo.description_length | default 160 -}}
+{{- $desc := "" -}}
+{{- with .Params.description }}{{ $desc = . }}{{ end -}}
+{{- if not $desc }}{{ with .Description }}{{ $desc = . }}{{ end }}{{ end -}}
+{{- if not $desc }}{{ with .Summary }}{{ $desc = . | plainify }}{{ end }}{{ end -}}
+{{- if not $desc }}{{ with .Site.Params.description }}{{ $desc = . }}{{ end }}{{ end -}}
+{{- if not $desc }}{{ $desc = $seo.default_description | default .Site.Title }}{{ end -}}
+{{- $desc = $desc | plainify | htmlUnescape | replaceRE `\s+` " " | strings.TrimSpace | truncate $descMax -}}
+
+{{- /* ---------- 分享图：页面 image/img → 配置默认 → 站点 logo ---------- */ -}}
+{{- $image := .Params.image | default .Params.img -}}
+{{- if not $image }}{{ $image = $seo.og_image_default }}{{ end -}}
+{{- if not $image }}{{ $image = .Site.Params.favicon | default "img/logo.png" }}{{ end -}}
+{{- if not (or (hasPrefix $image "http://") (hasPrefix $image "https://")) -}}
+  {{- $image = $image | absURL -}}
+{{- end -}}
+{{- $keywords := .Params.keywords | default $seo.default_keywords -}}
+{{- $author := .Params.author | default .Site.Params.author | default $seo.site_author -}}
+
+{{- /* ---------- 标题 / 站点名 ---------- */ -}}
+{{- $pageTitle := .Title | default .Site.Title -}}
+{{- $siteName := .Site.Params.navName | default .Site.Title -}}
+
+{{- /* ---------- canonical（规范链接，避免重复内容） ---------- */ -}}
+{{- if $seo.enable_canonical | default true }}
+<link rel="canonical" href="{{ .Permalink }}">
+{{- end }}
+
+{{- /* ---------- robots（默认 index,follow；404 页 noindex；可用页面 front matter 的 robots 覆盖） ---------- */ -}}
+{{- if $seo.enable_robots | default true -}}
+  {{- $robots := $seo.robots_default | default "index, follow" -}}
+  {{- if $is404 }}{{ $robots = "noindex, follow" }}{{ end -}}
+  {{- with .Params.robots }}{{ $robots = . }}{{ end -}}
+  {{- with $robots }}
+<meta name="robots" content="{{ . }}">
+  {{- end }}
+{{- end }}
+
+{{- /* ---------- 基础 meta ---------- */ -}}
+<meta name="description" content="{{ $desc }}">
+{{- if $seo.enable_keywords | default true }}
+  {{- with $keywords }}
+<meta name="keywords" content="{{ delimit . ", " }}">
+  {{- end }}
+{{- end }}
+{{- with $author }}
+<meta name="author" content="{{ . }}">
+{{- end }}
+
+{{- /* ---------- Open Graph ---------- */ -}}
 {{- if $seo.enable_og | default true }}
-<meta property="og:title" content="{{ .Title | default .Site.Title }}">
+<meta property="og:title" content="{{ $pageTitle }}">
 <meta property="og:description" content="{{ $desc }}">
 <meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
 <meta property="og:url" content="{{ .Permalink }}">
-<meta property="og:image" content="{{ $image | absURL }}">
-<meta property="og:site_name" content="{{ .Site.Title }}">
+<meta property="og:site_name" content="{{ $siteName }}">
+<meta property="og:locale" content="{{ replace (.Language.Lang | default "zh") "-" "_" }}">
+{{- range .Translations }}
+<meta property="og:locale:alternate" content="{{ replace (.Language.Lang | default "zh") "-" "_" }}">
+{{- end }}
+{{- with $image }}
+<meta property="og:image" content="{{ . }}">
+<meta property="og:image:alt" content="{{ $pageTitle }}">
+{{- end }}
 {{- if .IsPage }}
 <meta property="article:published_time" content="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
 <meta property="article:modified_time" content="{{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" }}">
-<meta property="article:author" content="{{ $author }}">
-{{- with .Params.categories }}<meta property="article:section" content="{{ index . 0 }}">{{ end }}
-{{- with .Params.tags }}{{ range . }}<meta property="article:tag" content="{{ . }}">{{ end }}{{ end }}
+{{- with $author }}<meta property="article:author" content="{{ . }}">{{ end }}
+{{- with .Params.categories }}<meta property="article:section" content="{{ if reflect.IsSlice . }}{{ index . 0 }}{{ else }}{{ . }}{{ end }}">{{ end }}
+{{- with .Params.tags }}{{ if reflect.IsSlice . }}{{ range . }}<meta property="article:tag" content="{{ . }}">{{ end }}{{ else }}<meta property="article:tag" content="{{ . }}">{{ end }}{{ end }}
 {{- end }}
 {{- end }}
 
+{{- /* ---------- Twitter Card ---------- */ -}}
 {{- if $seo.enable_twitter | default true }}
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ .Title | default .Site.Title }}">
+<meta name="twitter:card" content="{{ if $image }}summary_large_image{{ else }}summary{{ end }}">
+<meta name="twitter:title" content="{{ $pageTitle }}">
 <meta name="twitter:description" content="{{ $desc }}">
-<meta name="twitter:image" content="{{ $image | absURL }}">
+{{- with $image }}
+<meta name="twitter:image" content="{{ . }}">
+<meta name="twitter:image:alt" content="{{ $pageTitle }}">
+{{- end }}
+{{- with $seo.twitter_site }}
+<meta name="twitter:site" content="{{ . }}">
+{{- end }}
+{{- with $seo.twitter_creator }}
+<meta name="twitter:creator" content="{{ . }}">
+{{- end }}
 {{- end }}
 
-<meta name="description" content="{{ $desc }}">
-{{- with $keywords }}
-<meta name="keywords" content="{{ delimit . ", " }}">
-{{- end }}
-<meta name="author" content="{{ $author }}">
+{{- /* ---------- 结构化数据 ---------- */ -}}
+{{- if $seo.enable_jsonld | default true -}}
+  {{- $publisherLogo := $seo.publisher_logo | default .Site.Params.logo | default "img/logo.png" -}}
+  {{- if not (or (hasPrefix $publisherLogo "http://") (hasPrefix $publisherLogo "https://")) -}}
+    {{- $publisherLogo = $publisherLogo | absURL -}}
+  {{- end -}}
 
-{{- /* JSON-LD 结构化数据 */ -}}
-{{- if .IsPage }}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": {{ .Title | jsonify }},
-  "description": {{ $desc | jsonify }},
-  "image": {{ $image | absURL | jsonify }},
-  "author": {
-    "@type": "Person",
-    "name": {{ $author | jsonify }}
-  },
-  "datePublished": {{ .Date.Format "2006-01-02T15:04:05Z07:00" | jsonify }},
-  "dateModified": {{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" | jsonify }},
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": {{ .Permalink | jsonify }}
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": {{ .Site.Title | jsonify }},
-    "logo": {
-      "@type": "ImageObject",
-      "url": {{ (default "/img/logo.png" .Site.Params.logo) | absURL | jsonify }}
-    }
-  }
-}
-</script>
-{{- else }}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": {{ .Site.Title | jsonify }},
-  "url": {{ .Site.BaseURL | jsonify }},
-  "description": {{ ($seo.default_description | default "") | jsonify }},
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "{{ .Site.BaseURL }}archive/?q={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
-}
-</script>
-{{- end }}
+  {{- if .IsPage -}}
+    {{- $article := dict
+      "@context" "https://schema.org"
+      "@type" "Article"
+      "headline" $pageTitle
+      "description" $desc
+      "inLanguage" (.Language.Lang | default "zh")
+      "author" (dict "@type" "Person" "name" ($author | default $siteName))
+      "publisher" (dict "@type" "Organization" "name" $siteName "logo" (dict "@type" "ImageObject" "url" $publisherLogo))
+      "datePublished" (.Date.Format "2006-01-02T15:04:05Z07:00")
+      "dateModified" (.Lastmod.Format "2006-01-02T15:04:05Z07:00")
+      "mainEntityOfPage" (dict "@type" "WebPage" "@id" .Permalink)
+      "wordCount" .WordCount
+    -}}
+    {{- with $image }}{{ $article = merge $article (dict "image" (slice .)) }}{{ end -}}
+    {{- /* categories / tags 兼容「列表」与「单个字符串」两种写法 */ -}}
+    {{- with .Params.categories -}}
+      {{- $cat := . -}}
+      {{- if reflect.IsSlice . }}{{ $cat = index . 0 }}{{ end -}}
+      {{- $article = merge $article (dict "articleSection" $cat) -}}
+    {{- end -}}
+    {{- with .Params.tags -}}
+      {{- $kw := . -}}
+      {{- if reflect.IsSlice . }}{{ $kw = delimit . ", " }}{{ end -}}
+      {{- $article = merge $article (dict "keywords" $kw) -}}
+    {{- end -}}
+<script type="application/ld+json">{{ $article | jsonify | safeJS }}</script>
+
+    {{- /* 面包屑：站点 → 栏目 → 文章 */ -}}
+    {{- if $seo.enable_breadcrumb | default true -}}
+      {{- $pos := 1 -}}
+      {{- $items := slice (dict "@type" "ListItem" "position" $pos "name" $siteName "item" .Site.Home.Permalink) -}}
+      {{- if and .CurrentSection (not .CurrentSection.IsHome) -}}
+        {{- $pos = add $pos 1 -}}
+        {{- $items = $items | append (dict "@type" "ListItem" "position" $pos "name" .CurrentSection.Title "item" .CurrentSection.Permalink) -}}
+      {{- end -}}
+      {{- $pos = add $pos 1 -}}
+      {{- $items = $items | append (dict "@type" "ListItem" "position" $pos "name" .Title "item" .Permalink) -}}
+<script type="application/ld+json">{{ dict "@context" "https://schema.org" "@type" "BreadcrumbList" "itemListElement" $items | jsonify | safeJS }}</script>
+    {{- end -}}
+  {{- else -}}
+    {{- $site := dict
+      "@context" "https://schema.org"
+      "@type" "WebSite"
+      "name" $siteName
+      "url" .Site.BaseURL
+      "description" ($seo.default_description | default .Site.Params.description | default "")
+      "inLanguage" (.Language.Lang | default "zh")
+    -}}
+    {{- if $seo.enable_search_action | default false -}}
+      {{- $site = merge $site (dict "potentialAction" (dict
+        "@type" "SearchAction"
+        "target" (printf "%sarchive/?q={search_term_string}" .Site.BaseURL)
+        "query-input" "required name=search_term_string")) -}}
+    {{- end -}}
+<script type="application/ld+json">{{ $site | jsonify | safeJS }}</script>
+  {{- end -}}
+{{- end -}}

@@ -6,10 +6,22 @@
 <html lang="{{ .Site.Language.Lang | default "zh-CN" }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>404 · {{ .Site.Title }}</title>
-  <link href="https://fonts.googleapis.com/css?family=Cantarell:400,700|Lato:300,400,900" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  {{- /* SEO：404 页面自动输出 noindex + description/canonical */ -}}
+  {{- partial "seo.html" . }}
+  {{- /* 预连接 + 非阻塞加载外部样式 */ -}}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  {{- $fontURL := "https://fonts.googleapis.com/css?family=Cantarell:400,700|Lato:300,400,900&display=swap" -}}
+  {{- $faURL := "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" -}}
+  <link rel="stylesheet" href="{{ $fontURL }}" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="{{ $faURL }}" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="{{ $fontURL }}">
+    <link rel="stylesheet" href="{{ $faURL }}">
+  </noscript>
   {{- $commonCSS := resources.Get "css/common.css" | minify | fingerprint }}
   <link rel="stylesheet" href="{{ $commonCSS.RelPermalink }}">
   <style>
@@ -235,22 +247,25 @@
 </head>
 <body>
 
+  {{- /* 无障碍：跳过导航直达主内容 */ -}}
+  <a class="skip-link" href="#main">{{ i18n "skip-to-content" | default "跳到主要内容" }}</a>
+
   <!-- ===== 导航 ===== -->
-  <nav class="site-nav">
+  <nav class="site-nav" aria-label="{{ i18n "nav-main-label" | default "主导航" }}">
     <div class="nav-inner">
       <div class="nav-logo">
         <img src="{{ .Site.Params.logo | default "img/logo.png" | relURL }}" alt="Logo">
         <span>{{ .Site.Title }}</span>
       </div>
       <div class="nav-controls" style="margin-left:auto;">
-        <button class="ctrl-btn" id="themeToggle" title="{{ T "theme-toggle" }}"><i class="fas fa-sun"></i></button>
-        <button class="ctrl-btn" id="langToggle" title="{{ T "lang-toggle" }}"><i class="fas fa-globe"></i></button>
+        <button type="button" class="ctrl-btn" id="themeToggle" title="{{ T "theme-toggle" }}" aria-label="{{ T "theme-toggle" }}"><i class="fas fa-sun" aria-hidden="true"></i></button>
+        <button type="button" class="ctrl-btn" id="langToggle" title="{{ T "lang-toggle" }}" aria-label="{{ T "lang-toggle" }}"><i class="fas fa-globe" aria-hidden="true"></i></button>
       </div>
     </div>
   </nav>
 
   <!-- ===== 主内容 ===== -->
-  <main class="main">
+  <main class="main" id="main">
     <div class="error-page">
 
       <!-- 左侧：现代诗 -->

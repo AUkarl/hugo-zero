@@ -10,7 +10,7 @@
 
 {{- define "main" -}}
 {{- if .Site.Params.work.enable | default true }}
-<main class="main">
+<main class="main" id="main">
   <section class="section">
     <h1 class="section-title" data-i18n="work-title">{{ i18n "work-title" | default "工坊" }}</h1>
     {{- if .Site.Params.work.show_desc | default true }}
@@ -46,7 +46,7 @@
   </section>
 </main>
 {{- else }}
-<main class="main">
+<main class="main" id="main">
   <section class="section" style="text-align:center;padding:60px 20px;">
     <p style="color:var(--text-secondary);" data-i18n="work-disabled">Studio page is not enabled.</p>
   </section>

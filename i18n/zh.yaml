@@ -15,6 +15,10 @@ nav-email: "邮件"
 nav-about: "关于"
 nav-menu: "菜单"
 nav-close: "关闭菜单"
+nav-main-label: "主导航"
+site-footer-label: "站点页脚"
+footer-services-label: "支持服务"
+skip-to-content: "跳到主要内容"
 
 # ===== 通用 UI =====
 theme-toggle: "切换主题"

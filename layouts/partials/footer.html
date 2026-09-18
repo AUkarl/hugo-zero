@@ -1,8 +1,11 @@
 {{- /* ============================================================
   footer.html — 页脚（三栏布局）
   左：版权 + 设计者 | 中：服务图标+文字 + ICP | 右：两排社交图标
+
+  无障碍：<footer role="contentinfo"> 是内容信息地标；
+  纯图标链接用 aria-label 提供可读名称，装饰图标 aria-hidden。
   ============================================================ */ -}}
-<footer class="footer">
+<footer class="footer" role="contentinfo" aria-label="{{ i18n "site-footer-label" | default "站点页脚" }}">
   {{- /* 左栏：版权 */ -}}
   <div class="footer-left">
     <span class="copyright">&copy;{{ replace ( .Site.Params.footer.copyright_text | default "2023-{year} Example" ) "{year}" (string now.Year) }}</span>
@@ -15,11 +18,11 @@
   {{- /* 中栏：支持服务 + ICP */ -}}
   <div class="footer-center">
     {{- with .Site.Params.footer.services }}
-    <div class="footer-services">
+    <nav class="footer-services" aria-label="{{ i18n "footer-services-label" | default "支持服务" }}">
       {{- range . }}
-      <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}"><i class="{{ .icon }}"></i> {{ .name }}</a>
+      <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}" aria-label="{{ .name }}"><i class="{{ .icon }}" aria-hidden="true"></i> {{ .name }}</a>
       {{- end }}
-    </div>
+    </nav>
     {{- end }}
     {{- with .Site.Params.footer.icp }}
     <span class="footer-icp"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">{{ . }}</a></span>
@@ -31,14 +34,14 @@
     {{- with .Site.Params.footer.social_row1 }}
     <div class="social-row">
       {{- range . }}
-      <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}"><i class="{{ .icon }}"></i></a>
+      <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}" aria-label="{{ .name }}"><i class="{{ .icon }}" aria-hidden="true"></i></a>
       {{- end }}
     </div>
     {{- end }}
     {{- with .Site.Params.footer.social_row2 }}
     <div class="social-row">
       {{- range . }}
-      <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}"><i class="{{ .icon }}"></i></a>
+      <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}" aria-label="{{ .name }}"><i class="{{ .icon }}" aria-hidden="true"></i></a>
       {{- end }}
     </div>
     {{- end }}

@@ -10,7 +10,7 @@
 
 {{- define "main" -}}
 {{- if .Site.Params.tools.enable | default true }}
-<main class="main">
+<main class="main" id="main">
   <section class="section">
     <h1 class="section-title" data-i18n="tools-title">{{ i18n "tools-title" | default "工具" }}</h1>
     {{- if .Site.Params.tools.show_desc | default true }}
@@ -31,7 +31,7 @@
   </section>
 </main>
 {{- else }}
-<main class="main">
+<main class="main" id="main">
   <section class="section" style="text-align:center;padding:60px 20px;">
     <p style="color:var(--text-secondary);" data-i18n="tools-disabled">Tools page is not enabled.</p>
   </section>

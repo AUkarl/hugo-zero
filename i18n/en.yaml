@@ -15,6 +15,10 @@ nav-email: "Mail"
 nav-about: "About"
 nav-menu: "Menu"
 nav-close: "Close menu"
+nav-main-label: "Main navigation"
+site-footer-label: "Site footer"
+footer-services-label: "Support services"
+skip-to-content: "Skip to main content"
 
 # ===== Common UI =====
 theme-toggle: "Toggle theme"

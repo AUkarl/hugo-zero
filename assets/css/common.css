@@ -102,6 +102,32 @@ a {
   text-decoration: none;
 }
 
+/* ===== 无障碍：跳过链接（键盘聚焦时才出现） ===== */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 200;
+  padding: 10px 16px;
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0 0 var(--radius) 0;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.skip-link:focus {
+  left: 0;
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* 跳过链接的落点（<main id="main">）不需要焦点框 */
+#main:focus {
+  outline: none;
+}
+
 /* ===== 导航 ===== */
 .site-nav {
   position: fixed;

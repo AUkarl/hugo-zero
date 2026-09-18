@@ -2,37 +2,47 @@
   header.html — 导航栏
   包含 Logo、导航链接、主题/语言切换按钮
   支持 show_logo / show_site_name 开关
+
+  无障碍约定：
+  - 外层 <header role="banner"> 由 baseof.html 提供
+  - <nav aria-label="…"> 是导航地标
+  - 当前页链接带 aria-current="page"
+  - 抽屉按钮带 aria-expanded / aria-controls（common.js 负责同步状态）
+  - 纯装饰图标一律 aria-hidden="true"
   ============================================================ */ -}}
-<nav class="site-nav">
+<nav class="site-nav" aria-label="{{ i18n "nav-main-label" | default "主导航" }}">
   <div class="nav-inner">
     <div class="nav-logo">
       {{- if .Site.Params.show_logo | default true -}}
         {{- if .Site.Params.logo -}}
-      <a href="{{ "home/" | relLangURL }}"><img src="{{ .Site.Params.logo | relURL }}" alt="Logo"></a>
+      <a href="{{ "home/" | relLangURL }}"><img src="{{ .Site.Params.logo | relURL }}" alt="{{ .Site.Params.navName | default .Site.Title }}"></a>
         {{- else -}}
-      <a href="{{ "home/" | relLangURL }}"><img src="{{ "img/logo.png" | relURL }}" alt="Logo"></a>
+      <a href="{{ "home/" | relLangURL }}"><img src="{{ "img/logo.png" | relURL }}" alt="{{ .Site.Params.navName | default .Site.Title }}"></a>
         {{- end -}}
       {{- end -}}
       {{- if .Site.Params.show_site_name | default true -}}
       <span data-i18n="nav-site-name">{{ .Site.Params.navName | default .Site.Title }}</span>
       {{- end -}}
     </div>
-    <button class="nav-toggle" aria-label="{{ i18n "nav-menu" | default "菜单" }}"><i class="fas fa-bars"></i></button>
+    <button type="button" class="nav-toggle" aria-label="{{ i18n "nav-menu" | default "菜单" }}" aria-expanded="false" aria-controls="navLinks"><i class="fas fa-bars" aria-hidden="true"></i></button>
     <div class="nav-links" id="navLinks">
-      <button class="nav-close" aria-label="{{ i18n "nav-close" | default "关闭菜单" }}">&times;</button>
+      <button type="button" class="nav-close" aria-label="{{ i18n "nav-close" | default "关闭菜单" }}">&times;</button>
       {{- range .Site.Menus.main -}}
+        {{- $href := .URL -}}
+        {{- if not .Params.external -}}{{- $href = .URL | relLangURL -}}{{- end -}}
+        {{- $isCurrent := or (eq (strings.TrimSuffix "/" $href) (strings.TrimSuffix "/" $.RelPermalink)) ($.HasMenuCurrent "main" .) -}}
         {{- if .Params.external -}}
       <a class="nav-link blog-link" href="{{ .URL }}" target="_blank" rel="noopener" data-i18n="nav-{{ .Name }}">{{ .Name }}</a>
         {{- else -}}
-      <a class="nav-link{{ if $.IsMenuCurrent "main" . }} active{{ end }}" data-section="{{ .Name }}" data-i18n="nav-{{ .Name }}" href="{{ .URL | relLangURL }}">{{ .Name }}</a>
+      <a class="nav-link{{ if $isCurrent }} active{{ end }}" data-section="{{ .Name }}" data-i18n="nav-{{ .Name }}" href="{{ $href }}"{{ if $isCurrent }} aria-current="page"{{ end }}>{{ .Name }}</a>
         {{- end -}}
       {{- end -}}
       <div class="nav-controls">
         {{- if .Site.Params.enable_theme_switch | default true }}
-        <button class="ctrl-btn" id="themeToggle" title="{{ i18n "theme-toggle" | default "切换主题" }}"><i class="fas fa-sun"></i></button>
+        <button type="button" class="ctrl-btn" id="themeToggle" title="{{ i18n "theme-toggle" | default "切换主题" }}" aria-label="{{ i18n "theme-toggle" | default "切换主题" }}"><i class="fas fa-sun" aria-hidden="true"></i></button>
         {{- end }}
         {{- if .Site.Params.enable_lang_switch | default true }}
-        <button class="ctrl-btn" id="langToggle" title="{{ i18n "lang-toggle" | default "切换语言" }}"><i class="fas fa-globe"></i></button>
+        <button type="button" class="ctrl-btn" id="langToggle" title="{{ i18n "lang-toggle" | default "切换语言" }}" aria-label="{{ i18n "lang-toggle" | default "切换语言" }}"><i class="fas fa-globe" aria-hidden="true"></i></button>
         {{- end }}
       </div>
     </div>

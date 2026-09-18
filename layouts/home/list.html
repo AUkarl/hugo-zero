@@ -26,7 +26,7 @@
 {{- $showDesc := $home.show_desc | default true -}}
 {{- $widthRatio := $home.width_ratio | default 100 -}}
 {{- $columns := $home.columns | default 4 -}}
-<main class="main">
+<main class="main" id="main">
   <section class="section">
     <h1 class="section-title" data-i18n="home-title">{{ i18n "home-title" | default "主页" }}</h1>
     {{- if $showDesc }}

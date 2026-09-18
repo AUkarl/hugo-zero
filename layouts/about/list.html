@@ -17,7 +17,7 @@
 {{- $taglineZh := $aboutCfg.tagline_zh | default "" -}}
 {{- $taglineEn := $aboutCfg.tagline_en | default "" -}}
 {{- $tagline := cond (eq $lang "en") (default $taglineEn $taglineZh) $taglineZh -}}
-<main class="main">
+<main class="main" id="main">
   <section class="section">
     <h1 class="section-title" data-i18n="about-title">{{ i18n "about-title" | default "关于" }}</h1>
     {{- if $aboutCfg.show_desc | default true }}

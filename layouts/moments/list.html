@@ -13,7 +13,7 @@
 {{- $mCfg := .Site.Params.moment -}}
 {{- $online := $mCfg.online_publish | default false -}}
 
-<main class="main">
+<main class="main" id="main">
   {{- /* ====== 顶部横幅 ====== */ -}}
   {{- if $online -}}
     {{- $b := $mCfg.online.banner -}}

@@ -2,6 +2,12 @@
   baseof.html — Hugo 主题基础模板
   所有页面的 HTML 骨架，定义 head / body 结构
   子模板通过 block 机制注入具体内容
+
+  Landmark（无障碍地标）约定：
+  - <header role="banner">  站点头部（导航）
+  - <nav aria-label>        导航（见 partials/header.html）
+  - <main id="main">        主内容（各页面模板自己输出，跳过链接指向它）
+  - <footer role="contentinfo"> 页脚（见 partials/footer.html）
   ============================================================ */ -}}
 <!DOCTYPE html>
 <html lang="{{ .Site.Language.Lang | default "zh-CN" }}">
@@ -19,12 +25,16 @@
   {{- with .Site.Params.custom.head_html }}{{ . | safeHTML }}{{ end -}}
 </head>
 <body>
+  {{- /* 跳过导航，直接到主内容（键盘/读屏用户） */ -}}
+  <a class="skip-link" href="#main">{{ i18n "skip-to-content" | default "跳到主要内容" }}</a>
   {{- /* 根据页面类型选择不同布局 */ -}}
   {{- if .IsHome -}}
     {{- /* 首页（落地页）无导航栏 */ -}}
     {{- block "main" . }}{{ end -}}
   {{- else -}}
-    {{- partial "header.html" . -}}
+    <header class="site-header" role="banner">
+      {{- partial "header.html" . -}}
+    </header>
     {{- block "main" . }}{{ end -}}
     {{- partial "footer.html" . -}}
     {{- partial "scroll-buttons.html" . -}}

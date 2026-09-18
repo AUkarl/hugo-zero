@@ -1,10 +1,25 @@
-{{- if .Site.Params.rss.enable | default true -}}
+{{- /* ============================================================
+  rss.xml — RSS 订阅模板
+  ------------------------------------------------------------
+  输出策略（可在 config/_default/params.toml 的 [rss] 下调整）：
+  - full_content = true  正文字段输出「完整正文」而不是截断摘要
+  - 图片、代码块、列表、表格、公式（$...$ 原文）等全部保留
+  - 视频/音乐类短代码（iframe、audio 播放器、网易云占位脚本）会被剔除，
+    因为这些内容在阅读器里无法播放，且内嵌 <script> 会破坏 feed 结构
+  - 正文同时写入 <description> 与 <content:encoded>（兼容各类阅读器）
+  - limit 控制条目数量，默认 50
+  ============================================================ */ -}}
+{{- $rss := .Site.Params.rss | default dict -}}
+{{- if $rss.enable | default true -}}
+{{- $full := $rss.full_content | default true -}}
+{{- $limit := $rss.limit | default 50 -}}
+{{- $embedRe := `(?s)<div[^>]*class="[^"]*(?:video-embed|shortcode-embed|music163-embed|bilibili-embed|netease-music|kugou-music|qq-music|bilibili-video|tencent-video)[^"]*"[^>]*>.*?</div>` -}}
 {{- printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
     <title>{{ if eq .Title .Site.Title }}{{ .Site.Title }}{{ else }}{{ with .Title }}{{.}} on {{ end }}{{ .Site.Title }}{{ end }}</title>
     <link>{{ .Permalink }}</link>
-    <description>Recent content {{ if ne .Title .Site.Title }}{{ with .Title }}in {{.}} {{ end }}{{ end }}on {{ .Site.Title }}</description>
+    <description>{{ .Site.Params.description | default (printf "Recent content on %s" .Site.Title) }}</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>{{ site.Language.Locale }}</language>{{ with .Site.Copyright }}
     <copyright>{{.}}</copyright>{{end}}{{ if not .Date.IsZero }}
@@ -12,13 +27,45 @@
     {{- with .OutputFormats.Get "RSS" -}}
     {{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType | safeHTML }}
     {{- end -}}
-    {{- range (where site.RegularPages "Type" "in" (slice "post" "posts" "article" "blog" "shuo")) | first 50 }}
+    {{- range (where site.RegularPages "Type" "in" (slice "post" "posts" "article" "blog" "shuo")) | first $limit }}
+    {{- $html := .Summary -}}
+    {{- if $full }}{{ $html = .Content }}{{ end -}}
+    {{- /* 正文里没有图片时，把文章封面图补到最前面，保证订阅里能看到配图 */ -}}
+    {{- $cover := .Params.image | default .Params.img -}}
+    {{- if and $full $cover (not (in $html "<img")) -}}
+      {{- if not (or (hasPrefix $cover "http://") (hasPrefix $cover "https://")) -}}
+        {{- $cover = $cover | absURL -}}
+      {{- end -}}
+      {{- $html = printf "<p><img src=%q alt=%q loading=\"lazy\"></p>%s" $cover (.Title | plainify) $html -}}
+    {{- end -}}
+    {{- /* 剔除脚本、嵌入播放器与残留标签（保留 <img> 等正文元素） */ -}}
+    {{- $html = replaceRE `(?s)<script\b[^>]*>.*?</script>` "" $html -}}
+    {{- $html = replaceRE $embedRe "" $html -}}
+    {{- $html = replaceRE `(?s)<iframe\b.*?</iframe>` "" $html -}}
+    {{- $html = replaceRE `(?s)<audio\b.*?</audio>` "" $html -}}
+    {{- $html = replaceRE `(?s)<video\b.*?</video>` "" $html -}}
+    {{- $html = replaceRE `(?s)<!--.*?-->` "" $html -}}
+    {{- /* XMLEscape 后由阅读器还原成 HTML：这是 RSS 的规范做法，避免 feed 结构非法 */ -}}
+    {{- $html = $html | transform.XMLEscape -}}
     <item>
       <title>{{ .Title }}</title>
       <link>{{ .Permalink }}</link>
       <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
       <guid>{{ .Permalink }}</guid>
-      <description>{{ .Summary | html }}</description>
+      {{- with .Params.author }}
+      <dc:creator>{{ . }}</dc:creator>
+      {{- end }}
+      {{- /* categories / tags 兼容两种写法：列表 或 单个字符串 */ -}}
+      {{- with .Params.categories -}}
+        {{- if reflect.IsSlice . -}}{{- range . }}<category>{{ . }}</category>{{ end -}}
+        {{- else }}<category>{{ . }}</category>{{ end -}}
+      {{- end -}}
+      {{- with .Params.tags -}}
+        {{- if reflect.IsSlice . -}}{{- range . }}<category>{{ . }}</category>{{ end -}}
+        {{- else }}<category>{{ . }}</category>{{ end -}}
+      {{- end }}
+      <description>{{ $html | safeHTML }}</description>
+      <content:encoded>{{ $html | safeHTML }}</content:encoded>
     </item>
     {{- end }}
   </channel>
