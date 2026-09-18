@@ -516,8 +516,25 @@ a {
 }
 
 .footer .footer-center .footer-icp {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0 8px;
   font-size: 0.75rem;
   opacity: 0.7;
+  text-align: center;
+}
+
+/* 多条备案号之间的竖线分隔（CSS 生成，读屏软件不会念出来） */
+.footer .footer-center .footer-icp > *:not(:last-child)::after {
+  content: '|';
+  margin-left: 8px;
+  opacity: 0.5;
+}
+
+.footer .footer-center .footer-icp span {
+  color: var(--text-secondary);
 }
 
 .footer .footer-center .footer-icp a {

@@ -1,44 +1,86 @@
 {{- /* ============================================================
   footer.html — 页脚（三栏布局）
-  左：版权 + 设计者 | 中：服务图标+文字 + ICP | 右：两排社交图标
+  左：版权 + 设计者 + powered by | 中：服务图标 + ICP 备案 | 右：两排社交图标
+
+  ICP 备案（config/_default/params.toml 的 [footer]）：
+  - 旧写法仍支持：icp = "xxx"（超链用 icp_default_link，默认工信部网站）
+  - 新写法：[[footer.icp_items]] 可写多条，每条可单独指定 link；
+    text 留空则该条不显示，link 留空则该条是纯文本。多条会自动居中成一行，
+    中间由 CSS 生成竖线分隔（读屏软件不会念出分隔符）。
+  powered by：powered_by_text 留空则不显示；powered_by_link 填了就是超链。
 
   无障碍：<footer role="contentinfo"> 是内容信息地标；
   纯图标链接用 aria-label 提供可读名称，装饰图标 aria-hidden。
   ============================================================ */ -}}
+{{- $footer := .Site.Params.footer | default dict -}}
 <footer class="footer" role="contentinfo" aria-label="{{ i18n "site-footer-label" | default "站点页脚" }}">
   {{- /* 左栏：版权 */ -}}
   <div class="footer-left">
-    <span class="copyright">&copy;{{ replace ( .Site.Params.footer.copyright_text | default "2023-{year} Example" ) "{year}" (string now.Year) }}</span>
+    <span class="copyright">&copy;{{ replace ( $footer.copyright_text | default "2023-{year} Example" ) "{year}" (string now.Year) }}</span>
     <span class="designer">designed by 知止</span>
-    {{- if .Site.Params.footer.show_powered_by | default true }}
-    <span class="powered-by">{{ .Site.Params.footer.powered_by_text | default "powered by HuGo" }}</span>
+    {{- if $footer.show_powered_by | default true -}}
+      {{- /* powered_by_text 未配置时用默认文案；显式留空则不显示这一行 */ -}}
+      {{- $pbText := "powered by HuGo" -}}
+      {{- if isset $footer "powered_by_text" }}{{ $pbText = $footer.powered_by_text }}{{ end -}}
+      {{- with $pbText -}}
+    <span class="powered-by">
+        {{- with $footer.powered_by_link -}}
+      <a href="{{ . }}" target="_blank" rel="noopener">{{ $pbText }}</a>
+        {{- else -}}
+      {{ $pbText }}
+        {{- end -}}
+    </span>
+      {{- end -}}
     {{- end }}
   </div>
 
-  {{- /* 中栏：支持服务 + ICP */ -}}
+  {{- /* 中栏：支持服务 + ICP 备案 */ -}}
   <div class="footer-center">
-    {{- with .Site.Params.footer.services }}
+    {{- with $footer.services }}
     <nav class="footer-services" aria-label="{{ i18n "footer-services-label" | default "支持服务" }}">
       {{- range . }}
       <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}" aria-label="{{ .name }}"><i class="{{ .icon }}" aria-hidden="true"></i> {{ .name }}</a>
       {{- end }}
     </nav>
     {{- end }}
-    {{- with .Site.Params.footer.icp }}
-    <span class="footer-icp"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">{{ . }}</a></span>
+
+    {{- /* 汇总备案条目：icp_items 优先，其次兼容旧的单条 icp */ -}}
+    {{- $icpItems := slice -}}
+    {{- with $footer.icp_items -}}
+      {{- range . -}}
+        {{- $text := .text | default "" -}}
+        {{- if $text -}}
+          {{- $icpItems = $icpItems | append (dict "text" $text "link" (.link | default "")) -}}
+        {{- end -}}
+      {{- end -}}
+    {{- else -}}
+      {{- with $footer.icp -}}
+        {{- $icpItems = $icpItems | append (dict "text" . "link" ($footer.icp_default_link | default "https://beian.miit.gov.cn/")) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- with $icpItems }}
+    <div class="footer-icp">
+      {{- range . }}
+        {{- if .link }}
+      <a href="{{ .link }}" target="_blank" rel="noopener">{{ .text }}</a>
+        {{- else }}
+      <span>{{ .text }}</span>
+        {{- end }}
+      {{- end }}
+    </div>
     {{- end }}
   </div>
 
   {{- /* 右栏：两排社交图标 */ -}}
   <div class="footer-right">
-    {{- with .Site.Params.footer.social_row1 }}
+    {{- with $footer.social_row1 }}
     <div class="social-row">
       {{- range . }}
       <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}" aria-label="{{ .name }}"><i class="{{ .icon }}" aria-hidden="true"></i></a>
       {{- end }}
     </div>
     {{- end }}
-    {{- with .Site.Params.footer.social_row2 }}
+    {{- with $footer.social_row2 }}
     <div class="social-row">
       {{- range . }}
       <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}" aria-label="{{ .name }}"><i class="{{ .icon }}" aria-hidden="true"></i></a>
