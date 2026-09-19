@@ -599,11 +599,29 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* 手机上点完不要留下"按下/聚焦"的高亮底色 */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.scroll-buttons .scroll-btn:hover {
-  background: var(--tag-active-bg);
-  color: var(--text);
+/* 悬停效果只在真正支持悬停的设备上生效：
+   触屏点一下会残留 :hover，导致按钮一直保持深色 */
+@media (hover: hover) and (pointer: fine) {
+  .scroll-buttons .scroll-btn:hover {
+    background: var(--tag-active-bg);
+    color: var(--text);
+  }
+}
+
+/* 用键盘操作时给出焦点提示，鼠标/触摸点击后不残留焦点样式 */
+.scroll-buttons .scroll-btn:focus {
+  outline: none;
+}
+
+.scroll-buttons .scroll-btn:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 
 .scroll-buttons .scroll-btn.hidden {

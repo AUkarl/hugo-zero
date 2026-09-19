@@ -44,13 +44,14 @@
 {{- $variants := slice "hero" "wide" "dark" "top" "tall" "top" "indigo" "top" "amber" "top" "outline" -}}
 {{- $mode := $bento.featured_mode | default "auto" -}}
 
+<main class="main" id="main">
 <section id="home-bento">
   {{- /* ===== 顶部简介 ===== */ -}}
   {{- if or $introEyebrow $introTitle $introDesc }}
   <div class="hb-intro">
     {{- with $introEyebrow }}<p class="hb-eyebrow">{{ . }}</p>{{ end }}
-    {{- with $introTitle }}<h1 class="hb-title">{{ . }}</h1>{{ end }}
-    {{- with $introDesc }}<p class="hb-desc">{{ . }}</p>{{ end }}
+    {{- with $introTitle }}<h1 class="hb-title section-title">{{ . }}</h1>{{ end }}
+    {{- with $introDesc }}<p class="hb-desc section-desc">{{ . }}</p>{{ end }}
   </div>
   {{- end }}
 
@@ -165,3 +166,4 @@
     </div>
   </section>
 </section>
+</main>

@@ -25,11 +25,18 @@ html { scroll-behavior: smooth; }
 #home-bento {
   max-width: var(--hb-max);
   margin: 0 auto;
-  padding: 0 24px 96px;
+  /* 顶部/左右避让由主题的 .main 负责（padding-top 已含导航高度），这里只留底部间距 */
+  padding: 0 0 96px;
+}
+
+/* 锚点跳转时不要被固定导航挡住标题（#featured / #articles） */
+#home-bento #featured,
+#home-bento #articles {
+  scroll-margin-top: calc(var(--nav-height) + 24px);
 }
 
 /* ===== 顶部简介 ===== */
-#home-bento .hb-intro { padding: 56px 0 40px; }
+#home-bento .hb-intro { padding: 8px 0 40px; }
 
 #home-bento .hb-eyebrow {
   font-size: 13px;
@@ -40,20 +47,17 @@ html { scroll-behavior: smooth; }
   margin: 0 0 12px;
 }
 
+/* 主标题：尺寸/字重沿用主题的 .section-title（模板里同时挂了该类），
+   这里只补齐行高与间距，保证和其它页面一致 */
 #home-bento .hb-title {
-  font-size: clamp(1.6rem, 3.2vw, 2.5rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  color: var(--text);
+  line-height: 1.25;
   margin: 0;
 }
 
+/* 简介：竖线 + 字号沿用主题的 .section-desc（模板里同时挂了该类） */
 #home-bento .hb-desc {
-  margin: 16px 0 0;
-  max-width: 36rem;
-  line-height: 1.8;
-  color: var(--text-secondary);
+  margin: 12px 0 0;
+  max-width: 46rem;
 }
 
 /* ===== 区块标题 ===== */
