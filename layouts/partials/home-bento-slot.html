@@ -24,12 +24,15 @@
 {{- $loadAttr := "lazy" -}}
 {{- $prioAttr := "" -}}
 {{- if .eager -}}{{- $loadAttr = "eager" -}}{{- $prioAttr = ` fetchpriority="high"` -}}{{- end -}}
+{{- $imgCls := "hb-top-img" -}}
+{{- if or (eq $v "hero") (eq $v "tall") (eq $v "overlay") -}}{{- $imgCls = "hb-hero-img" -}}{{- end -}}
 {{- $imgTag := "" -}}
 {{- if $image -}}
-  {{- $imgTag = printf `<img class="hb-img %s" src="%s" alt="%s" loading="%s"%s decoding="async">` (cond (eq $v "hero") "hb-hero-img" (cond (eq $v "tall") "hb-hero-img" "hb-top-img")) $image ($title | plainify) $loadAttr $prioAttr -}}
+  {{- $imgTag = printf `<img class="hb-img %s" src="%s" alt="%s" loading="%s"%s decoding="async">` $imgCls $image ($title | plainify) $loadAttr $prioAttr -}}
 {{- end -}}
-{{- if eq $v "hero" -}}
-<a class="hb-card hb-hero" href="{{ $url }}" data-hb-slot>
+{{- if or (eq $v "hero") (eq $v "overlay") -}}
+{{- $cls := cond (eq $v "hero") "hb-hero" "hb-overlay" -}}
+<a class="hb-card {{ $cls }}" href="{{ $url }}" data-hb-slot>
   {{ $imgTag | safeHTML }}
   <div class="hb-hero-body">
     {{- with $badge }}<span class="hb-badge">{{ . }}</span>{{ end }}

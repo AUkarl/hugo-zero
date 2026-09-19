@@ -41,7 +41,9 @@
 {{- $defaultImage := $bento.default_image | default "" -}}
 {{- $initialRows := $bento.initial_rows | default 3 -}}
 {{- $initialVisible := mul $initialRows 3 -}}
-{{- $variants := slice "hero" "wide" "dark" "top" "tall" "top" "indigo" "top" "amber" "top" "outline" -}}
+{{- /* 默认排布（第 3 个用 overlay：图上叠字，不用纯色卡片）
+   可用变体：hero / wide / overlay / tall / top / dark / indigo / amber / outline */ -}}
+{{- $variants := slice "hero" "wide" "overlay" "top" "tall" "top" "indigo" "top" "amber" "top" "outline" -}}
 {{- $mode := $bento.featured_mode | default "auto" -}}
 
 <main class="main" id="main">

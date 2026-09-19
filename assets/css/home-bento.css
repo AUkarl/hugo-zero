@@ -303,13 +303,15 @@ html { scroll-behavior: smooth; }
 }
 
 /* --- 变体 E：高卡（图 + 渐变 + 文字叠加，仅 lg 跨两行） --- */
-#home-bento .hb-tall {
+#home-bento .hb-tall,
+#home-bento .hb-overlay {
   position: relative;
   display: block;
   background: var(--hb-placeholder);
 }
 
-#home-bento .hb-tall .hb-hero-img {
+#home-bento .hb-tall .hb-hero-img,
+#home-bento .hb-overlay .hb-hero-img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -317,14 +319,16 @@ html { scroll-behavior: smooth; }
   object-fit: cover;
 }
 
-#home-bento .hb-tall::after {
+#home-bento .hb-tall::after,
+#home-bento .hb-overlay::after {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.2) 50%, transparent);
 }
 
-#home-bento .hb-tall .hb-hero-body {
+#home-bento .hb-tall .hb-hero-body,
+#home-bento .hb-overlay .hb-hero-body {
   position: relative;
   z-index: 1;
   height: 100%;
@@ -335,21 +339,24 @@ html { scroll-behavior: smooth; }
   color: #fff;
 }
 
-#home-bento .hb-tall .hb-hero-title {
+#home-bento .hb-tall .hb-hero-title,
+#home-bento .hb-overlay .hb-hero-title {
   font-size: 17px;
   font-weight: 700;
   line-height: 1.4;
   margin: 0 0 8px;
 }
 
-#home-bento .hb-tall .hb-hero-desc {
+#home-bento .hb-tall .hb-hero-desc,
+#home-bento .hb-overlay .hb-hero-desc {
   font-size: 12px;
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.68);
   margin: 0 0 12px;
 }
 
-#home-bento .hb-tall .hb-meta { color: rgba(255, 255, 255, 0.55); }
+#home-bento .hb-tall .hb-meta,
+#home-bento .hb-overlay .hb-meta { color: rgba(255, 255, 255, 0.55); }
 
 /* --- 变体 C / G / I / K：无图纯文字小卡（莫兰迪暖色，明暗模式一致） --- */
 #home-bento .hb-text {
