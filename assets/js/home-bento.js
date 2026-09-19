@@ -256,6 +256,23 @@
     });
   }
 
+  // ==================== 图片兜底 ====================
+  // 封面加载失败（图源在部分网络不可达等）时：
+  //   1) 若配置了 default_image，自动换成兜底图重试一次
+  //   2) 否则给 img 加 hb-img-failed（由 CSS 隐藏，露出莫兰迪渐变底）
+  root.addEventListener('error', function (e) {
+    var img = e.target;
+    if (!img || img.tagName !== 'IMG') return;
+    var fallback = cfg.fallbackImage;
+    if (fallback && img.getAttribute('src') !== fallback && img.getAttribute('data-hb-retried') !== '1') {
+      img.setAttribute('data-hb-retried', '1');
+      img.classList.remove('hb-img-failed');
+      img.setAttribute('src', fallback);
+      return;
+    }
+    img.classList.add('hb-img-failed');
+  }, true);
+
   // ==================== 启动 ====================
   applyVisibility();
 

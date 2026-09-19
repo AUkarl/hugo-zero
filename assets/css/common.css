@@ -188,7 +188,10 @@ a {
 }
 
 .nav-logo img {
-  height: 30px;
+  /* 放大到合适尺寸：40px 高，同时用 max-height 兜住，
+     保证不会超过导航栏高度（也不会撑破导航栏宽度） */
+  height: 40px;
+  max-height: calc(var(--nav-height) - 20px);
   width: auto;
   display: block;
   filter: var(--logo-filter);
@@ -649,7 +652,9 @@ a {
   }
 
   .nav-logo img {
-    height: 24px;
+    /* 手机上导航更矮（56px），同步放大但不超出导航栏 */
+    height: 34px;
+    max-height: calc(56px - 16px);
   }
 
   .main {

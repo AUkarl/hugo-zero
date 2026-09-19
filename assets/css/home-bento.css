@@ -24,7 +24,8 @@
   --hb-morandi-3: #c9d8b4;   /* 橄榄绿 */
   --hb-morandi-4: #c3d3dc;   /* 雾蓝 */
   --hb-morandi-ink: #463c34; /* 暖褐灰文字 */
-  --hb-placeholder: #e9e1d7; /* 无封面图时的底色（中性暖灰，与上面四色区分开） */
+  /* 无封面图 / 图片加载中或失败时的底：暖色莫兰迪渐变（不是一个纯色块） */
+  --hb-placeholder: linear-gradient(135deg, #f0e8dd 0%, #e3d7c8 50%, #d8ccbe 100%);
 }
 
 /* 平滑滚动（仅新版主页需要，#featured / #articles 锚点跳转） */
@@ -475,8 +476,7 @@ html { scroll-behavior: smooth; }
 
 #home-bento .hb-acard .hb-a-body {
   flex: 1;
-  min-width: 0;
-  padding: 20px;
+  min-width: 0;  padding: 20px;
   display: flex;
   flex-direction: column;
 }
@@ -653,4 +653,14 @@ html { scroll-behavior: smooth; }
 #home-bento .hb-top-body,
 #home-bento .hb-a-body {
   min-width: 0;
+}
+
+/* ============================================================
+   图片加载失败时的处理：
+   失败的 <img> 隐藏，容器露出上面的莫兰迪渐变底，
+   所以封面挂了也不会变成"一块纯色"；若配置了 default_image，
+   JS 会先自动换成那张兜底图再重试。
+   ============================================================ */
+#home-bento img.hb-img-failed {
+  opacity: 0;
 }

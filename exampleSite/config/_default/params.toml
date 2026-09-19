@@ -771,7 +771,7 @@ aboutName = "知 止"
   initial_rows = 3                  # 初始显示行数
   load_rows = 5                     # 每次「加载更多」加载行数
   show_views = false                # 卡片上是否显示浏览量
-  default_image = ""                # 无封面时的兜底图
+  default_image = ""                # 封面缺失/加载失败时的兜底图（留空则显示莫兰迪渐变底）
   enable_hot = true                 # 是否启用「热门」排序（需评论系统提供统计）
   stats_provider = "auto"           # auto / waline / twikoo / artalk / none
   stats_server_url = ""             # 留空 = 自动取评论配置里的地址
