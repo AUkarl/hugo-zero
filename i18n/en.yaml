@@ -20,6 +20,20 @@ site-footer-label: "Site footer"
 footer-services-label: "Support services"
 skip-to-content: "Skip to main content"
 
+# ===== Home page (bento layout) =====
+hb-featured: "Featured"
+hb-featured-sub: "A few worth reading first"
+hb-all: "All posts"
+hb-all-link: "All →"
+hb-tab-latest: "Latest"
+hb-tab-hot: "Popular"
+hb-more: "Load more"
+hb-no-more: "No more posts"
+hb-empty: "No posts yet"
+hb-sub-latest: "%d posts · by date"
+hb-sub-hot: "%d posts · by popularity"
+hb-views: "%d views"
+
 # ===== Common UI =====
 theme-toggle: "Toggle theme"
 lang-toggle: "Toggle language"

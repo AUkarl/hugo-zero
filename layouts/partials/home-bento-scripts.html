@@ -1,0 +1,52 @@
+{{- /* ============================================================
+  home-bento-scripts.html — 新版主页的脚本与前端配置
+  ------------------------------------------------------------
+  统计来源（浏览量/评论数）优先取 [home.bento] 的配置：
+    stats_provider  = "auto" | "waline" | "twikoo" | "none"
+    stats_server_url = 留空则自动从评论配置里取
+  auto 时：读文章页用的评论系统（[comment.article].comment_provider → [comment].provider）
+  ============================================================ */ -}}
+{{- $bento := .Site.Params.home.bento | default dict -}}
+{{- $comment := .Site.Params.comment | default dict -}}
+{{- $cArticle := $comment.article | default dict -}}
+
+{{- /* 评论系统：文章页优先（两种键名都兼容：provider / comment_provider） */ -}}
+{{- $provider := $cArticle.provider | default ($cArticle.comment_provider | default ($comment.provider | default ($comment.comment_provider | default ""))) -}}
+{{- /* 自动识别 / 手动指定 */ -}}
+{{- $statsProvider := $bento.stats_provider | default "auto" -}}
+{{- if eq $statsProvider "auto" }}{{ $statsProvider = $provider }}{{ end -}}
+{{- if not $statsProvider }}{{ $statsProvider = "none" }}{{ end -}}
+{{- if not ($bento.enable_hot | default true) }}{{ $statsProvider = "none" }}{{ end -}}
+
+{{- /* 统计服务地址 */ -}}
+{{- $serverUrl := $bento.stats_server_url | default "" -}}
+{{- if not $serverUrl -}}
+  {{- if eq $statsProvider "waline" -}}
+    {{- $serverUrl = $cArticle.waline_server_url | default ($comment.waline_server_url | default "") -}}
+  {{- else if eq $statsProvider "twikoo" -}}
+    {{- $serverUrl = $cArticle.twikoo_env_id | default ($comment.twikoo_env_id | default "") -}}
+  {{- else if eq $statsProvider "artalk" -}}
+    {{- $serverUrl = $cArticle.artalk_server | default ($comment.artalk_server | default "") -}}
+  {{- end -}}
+{{- end -}}
+
+<script>
+  window.hbConfig = {
+    featuredMode: {{ $bento.featured_mode | default "auto" }},
+    initialRows: {{ $bento.initial_rows | default 3 }},
+    loadRows: {{ $bento.load_rows | default 5 }},
+    showViews: {{ $bento.show_views | default false }},
+    provider: {{ $statsProvider }},
+    serverUrl: {{ $serverUrl }},
+    viewsWeight: {{ $bento.stats_views_weight | default 1 }},
+    commentsWeight: {{ $bento.stats_comments_weight | default 10 }},
+    commentProbe: {{ $bento.stats_comment_probe | default 12 }},
+    labelMore: {{ i18n "hb-more" | default "加载更多" | jsonify | safeJS }},
+    labelSubLatest: {{ i18n "hb-sub-latest" | default "共 %d 篇 · 按时间排序" | jsonify | safeJS }},
+    labelSubHot: {{ i18n "hb-sub-hot" | default "共 %d 篇 · 按热度排序" | jsonify | safeJS }},
+    labelViews: {{ i18n "hb-views" | default "%d 次浏览" | jsonify | safeJS }},
+    labelNoMore: {{ i18n "hb-no-more" | default "没有更多了" | jsonify | safeJS }}
+  };
+</script>
+{{- $js := resources.Get "js/home-bento.js" | minify | fingerprint -}}
+<script src="{{ $js.RelPermalink }}" defer></script>

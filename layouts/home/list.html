@@ -1,11 +1,17 @@
 {{- /* ============================================================
-  home/list.html — 主页模板（文章卡片规整网格）
-  展示所有文章的卡片列表，支持分页、分类筛选、搜索
-  布局：等宽等高卡片网格，第 2、4 列整体下移 stagger_offset（默认 60px）
-  数据由 Hugo 从 content/posts/ 目录自动生成
+  home/list.html — 主页模板（两种布局，由配置切换）
+  ------------------------------------------------------------
+  [home] layout = "bento"（默认）
+      → 新版：精选 Bento Grid + 全部文章等高网格（partials/home-bento*.html）
+  [home] layout = "grid"
+      → 旧版：文章卡片规整网格（本文件下方的原有实现，逻辑一行未改）
+  两个布局各自的样式与脚本也按该开关分别加载。
   ============================================================ */ -}}
 
 {{- define "styles" -}}
+{{- if eq (site.Params.home.layout | default "bento") "bento" -}}
+{{- partial "home-bento-styles.html" . -}}
+{{- else -}}
 {{- $home := .Site.Params.home -}}
 {{- $widthRatio := $home.width_ratio | default 100 -}}
 {{- $homeCSS := resources.Get "css/home.css" | minify | fingerprint -}}
@@ -16,8 +22,12 @@
   .main { max-width: {{ $widthRatio }}%; margin-left: auto; margin-right: auto; }
 </style>
 {{- end -}}
+{{- end -}}
 
 {{- define "main" -}}
+{{- if eq (site.Params.home.layout | default "bento") "bento" -}}
+{{- partial "home-bento.html" . -}}
+{{- else -}}
 {{- $home := .Site.Params.home -}}
 {{- $paginate := $home.paginate | default 20 -}}
 {{- /* 摘要截断字数：中英文分别配置，未配置时回退到旧参数 summary_length */ -}}
@@ -92,8 +102,12 @@
   </section>
 </main>
 {{- end -}}
+{{- end -}}
 
 {{- define "scripts" -}}
+{{- if eq (site.Params.home.layout | default "bento") "bento" -}}
+{{- partial "home-bento-scripts.html" . -}}
+{{- else -}}
 {{- $home := .Site.Params.home -}}
 <script>
   /* 主页 i18n 数据 */
@@ -114,4 +128,5 @@
 </script>
 {{- $homeJS := resources.Get "js/home.js" | minify | fingerprint -}}
 <script src="{{ $homeJS.RelPermalink }}"></script>
+{{- end -}}
 {{- end -}}

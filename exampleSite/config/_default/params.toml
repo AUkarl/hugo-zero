@@ -111,6 +111,7 @@ navName_en = "MOL Cloud."
 # 文章卡片列表页的显示配置。
 
 [home]
+  layout = "bento"                # 主页布局：bento = 新版；grid = 旧版卡片网格
   paginate = 20                     # 每页最多显示文章数量
   columns = 4                       # 卡片列数（1-4）
   stagger_offset = 22               # 第 2、4 列整体下移 = 卡片宽度的百分比（随屏幕等比缩放；0 = 不错落）
@@ -130,6 +131,7 @@ navName_en = "MOL Cloud."
   show_desc = true                  # 是否显示主页描述
   desc_zh = "这里永远有一摩尔的不确定性"
   desc_en = "There is always a mole of uncertainty here."
+
 
 
 # --------------------------------------------
@@ -166,6 +168,7 @@ math = true                         # 是否全局启用数学公式（KaTeX）
   show_desc = true                  # 是否显示归档页描述
   desc_zh = "一摩尔的思想微粒在此归档"
   desc_en = "One Mole's thought particles are archived here."
+
 
 
 # --------------------------------------------
@@ -389,6 +392,7 @@ math = true                         # 是否全局启用数学公式（KaTeX）
   desc_zh = "云朵会散，但摩尔永恒"
   desc_en = "Clouds may disperse, but Moore is eternal."
 
+
   # 个性签名（显示在名称下方）
   tagline_zh = "日上三竿我独眠，谁是神仙，我是神仙"
   tagline_en = "sun climbs high, I lie in bed.Who’s the god? This sleepyhead!"
@@ -584,6 +588,7 @@ aboutName = "知 止"
   desc_en = "Measure my digital universe."
 
 
+
 # --------------------------------------------
 # 14. 工坊页面（/work/）
 # --------------------------------------------
@@ -596,6 +601,7 @@ aboutName = "知 止"
   show_desc = true                  # 是否显示工坊页描述
   desc_zh = "每一朵云都由思想摩尔组成"
   desc_en = "Every cloud is composed of thought Moors."
+
 
 # --- 工坊项目列表 ---
 # 增减方法: 复制一个 [[works]] 块并修改内容
@@ -744,3 +750,37 @@ aboutName = "知 止"
   url = "https://space.bilibili.com/224662929"
   icon = "fab fa-bilibili"
 
+# --------------------------------------------
+# 新版主页（[home] layout = "bento" 时生效）
+# --------------------------------------------
+# 布局切换：layout = "bento"（精选 Bento + 全部文章等高网格）
+#           layout = "grid" （旧的卡片网格布局）
+# 详见站点仓库 README「主页卡片布局」一节。
+[home.bento]
+  max_width = 1280                  # 内容区最大宽度（px）
+  intro_eyebrow = ""                # 顶部小字标签（留空不显示）
+  intro_title = ""                  # 主标题（留空不显示）
+  intro_desc = ""                   # 简介（留空不显示）
+  featured_title = ""               # 精选区标题，留空用 i18n 默认
+  featured_sub = ""                 # 精选区 slogan
+  featured_mode = "auto"            # auto = 按浏览量/评论数自动选；manual = 用 featured 槽位
+  featured_auto_count = 11          # auto 模式取前几篇
+  featured_auto_badge = ""          # auto 模式第一张卡的角标
+  articles_title = ""               # 全部文章区标题，留空用 i18n 默认
+  articles_link_text = ""           # 「全部 →」文案
+  initial_rows = 3                  # 初始显示行数
+  load_rows = 5                     # 每次「加载更多」加载行数
+  show_views = false                # 卡片上是否显示浏览量
+  default_image = ""                # 无封面时的兜底图
+  enable_hot = true                 # 是否启用「热门」排序（需评论系统提供统计）
+  stats_provider = "auto"           # auto / waline / twikoo / artalk / none
+  stats_server_url = ""             # 留空 = 自动取评论配置里的地址
+  stats_views_weight = 1
+  stats_comments_weight = 10
+  stats_comment_probe = 12
+
+  # 手动模式：逐槽位配置（variant 不写则按 hero→wide→dark→top→tall→… 依次套用）
+  # [[home.bento.featured]]
+  #   url = "/posts/example/"
+  #   variant = "hero"
+  #   badge = "置顶"

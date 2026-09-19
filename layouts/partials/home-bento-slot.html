@@ -1,0 +1,82 @@
+{{- /* ============================================================
+  home-bento-slot.html — 精选区的一个卡片槽位
+  ------------------------------------------------------------
+  入参（dict）：
+    variant  hero | wide | dark | top | tall | indigo | amber | outline
+    url      文章链接（必填）
+    title    标题（留空则由调用方补）
+    desc     摘要
+    image    封面图
+    date     日期字符串
+    tag      分类/标签文字（药丸或 #标签）
+    badge    角标文字（如「置顶」），留空不显示
+    eager    true → 该图优先加载（首屏大图用，提升 LCP）
+  每个变体都带 data-hb-* 标记，方便「自动精选」在前端换内容。
+  ============================================================ */ -}}
+{{- $v := .variant | default "top" -}}
+{{- $url := .url | default "#" -}}
+{{- $title := .title | default "" -}}
+{{- $desc := .desc | default "" -}}
+{{- $image := .image | default "" -}}
+{{- $date := .date | default "" -}}
+{{- $tag := .tag | default "" -}}
+{{- $badge := .badge | default "" -}}
+{{- $loadAttr := "lazy" -}}
+{{- $prioAttr := "" -}}
+{{- if .eager -}}{{- $loadAttr = "eager" -}}{{- $prioAttr = ` fetchpriority="high"` -}}{{- end -}}
+{{- $imgTag := "" -}}
+{{- if $image -}}
+  {{- $imgTag = printf `<img class="hb-img %s" src="%s" alt="%s" loading="%s"%s decoding="async">` (cond (eq $v "hero") "hb-hero-img" (cond (eq $v "tall") "hb-hero-img" "hb-top-img")) $image ($title | plainify) $loadAttr $prioAttr -}}
+{{- end -}}
+{{- if eq $v "hero" -}}
+<a class="hb-card hb-hero" href="{{ $url }}" data-hb-slot>
+  {{ $imgTag | safeHTML }}
+  <div class="hb-hero-body">
+    {{- with $badge }}<span class="hb-badge">{{ . }}</span>{{ end }}
+    <h3 class="hb-hero-title hb-clamp-2" data-hb-title>{{ $title }}</h3>
+    <p class="hb-hero-desc hb-clamp-2" data-hb-desc>{{ $desc }}</p>
+    <div class="hb-meta"><span data-hb-date>{{ $date }}</span><span class="hb-dot"></span><span data-hb-tag>{{ $tag }}</span></div>
+  </div>
+</a>
+{{- else if eq $v "tall" -}}
+<a class="hb-card hb-tall" href="{{ $url }}" data-hb-slot>
+  {{ $imgTag | safeHTML }}
+  <div class="hb-hero-body">
+    {{- with $badge }}<span class="hb-badge">{{ . }}</span>{{ end }}
+    <h3 class="hb-hero-title hb-clamp-2" data-hb-title>{{ $title }}</h3>
+    <p class="hb-hero-desc hb-clamp-2" data-hb-desc>{{ $desc }}</p>
+    <div class="hb-meta"><span data-hb-date>{{ $date }}</span><span class="hb-dot"></span><span data-hb-tag>{{ $tag }}</span></div>
+  </div>
+</a>
+{{- else if eq $v "wide" -}}
+<a class="hb-card hb-wide" href="{{ $url }}" data-hb-slot>
+  <div class="hb-wide-img">
+    {{- if $image }}<img class="hb-img" src="{{ $image }}" alt="{{ $title | plainify }}" loading="{{ $loadAttr }}"{{ $prioAttr | safeHTMLAttr }} decoding="async">{{ end }}
+  </div>
+  <div class="hb-wide-body">
+    {{- with $tag }}<span class="hb-pill" data-hb-pill>{{ . }}</span>{{ end }}
+    <h3 class="hb-card-title hb-clamp-1" data-hb-title>{{ $title }}</h3>
+    <p class="hb-card-desc hb-clamp-2" data-hb-desc>{{ $desc }}</p>
+    <div class="hb-meta"><span data-hb-date>{{ $date }}</span><span class="hb-dot"></span><span data-hb-tag>{{ $tag }}</span></div>
+  </div>
+</a>
+{{- else if or (eq $v "top") (eq $v "plain") -}}
+<a class="hb-card hb-top" href="{{ $url }}" data-hb-slot>
+  <div class="hb-top-img">
+    {{- if $image }}<img class="hb-img hb-top-img-el" src="{{ $image }}" alt="{{ $title | plainify }}" loading="{{ $loadAttr }}"{{ $prioAttr | safeHTMLAttr }} decoding="async">{{ end }}
+  </div>
+  <div class="hb-top-body">
+    <h3 class="hb-card-title hb-clamp-1" data-hb-title>{{ $title }}</h3>
+    <p class="hb-card-desc hb-clamp-2" data-hb-desc>{{ $desc }}</p>
+    <div class="hb-meta"><span data-hb-date>{{ $date }}</span><span class="hb-dot"></span><span data-hb-tag>{{ $tag }}</span></div>
+  </div>
+</a>
+{{- else -}}
+{{- /* 纯文字卡：dark（深色）/ indigo（浅靛蓝）/ amber（浅琥珀）/ outline（白底描边） */ -}}
+<a class="hb-card hb-text hb-{{ $v }}" href="{{ $url }}" data-hb-slot>
+  {{- with $tag }}<span class="hb-pill" data-hb-pill>{{ . }}</span>{{ end }}
+  <h3 class="hb-card-title hb-clamp-2" data-hb-title>{{ $title }}</h3>
+  <p class="hb-card-desc hb-clamp-2" data-hb-desc>{{ $desc }}</p>
+  <div class="hb-text-date" data-hb-date>{{ $date }}</div>
+</a>
+{{- end -}}

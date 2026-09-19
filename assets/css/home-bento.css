@@ -1,0 +1,582 @@
+/* ============================================================
+   home-bento.css — 新版主页（精选 Bento Grid + 全部文章等高网格）
+   ------------------------------------------------------------
+   只在 [home] layout = "bento" 时加载，所有规则都限制在 #home-bento
+   容器内，不会影响旧布局（.garden-*）和其它页面。
+   布局/尺寸对齐参考稿：
+     精选：1 列 → sm 2 列 → lg 4 列；bento 行高 210px（<1024px 时 200px）
+     全部：1 列 → sm 2 列 → lg 3 列；卡片固定高 360px，图片占 52%
+   颜色/圆角沿用主题变量（--card-bg/--border/--text/…），因此暗色模式同样可用。
+   ============================================================ */
+
+#home-bento {
+  --hb-radius: 16px;
+  --hb-gap: 20px;
+  --hb-max: 1280px;
+  --hb-shadow: var(--shadow);
+  --hb-shadow-hover: 0 18px 36px -14px rgba(0, 0, 0, 0.22);
+  --hb-card-h: 360px;
+  --hb-acard-img: 52%;
+}
+
+/* 平滑滚动（仅新版主页需要，#featured / #articles 锚点跳转） */
+html { scroll-behavior: smooth; }
+
+#home-bento {
+  max-width: var(--hb-max);
+  margin: 0 auto;
+  padding: 0 24px 96px;
+}
+
+/* ===== 顶部简介 ===== */
+#home-bento .hb-intro { padding: 56px 0 40px; }
+
+#home-bento .hb-eyebrow {
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  opacity: 0.75;
+  margin: 0 0 12px;
+}
+
+#home-bento .hb-title {
+  font-size: clamp(1.6rem, 3.2vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text);
+  margin: 0;
+}
+
+#home-bento .hb-desc {
+  margin: 16px 0 0;
+  max-width: 36rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+/* ===== 区块标题 ===== */
+#home-bento .hb-sec-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+#home-bento .hb-sec-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 0;
+}
+
+#home-bento .hb-sec-sub {
+  margin: 2px 0 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+#home-bento .hb-sec-link {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+#home-bento .hb-sec-link:hover { color: var(--text); }
+
+#home-bento #articles { margin-top: 80px; }
+
+/* ===== 通用卡片行为（参考稿的交互动效） ===== */
+#home-bento .hb-card {
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  color: inherit;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--hb-radius);
+  box-shadow: var(--hb-shadow);
+  overflow: hidden;
+}
+
+#home-bento .hb-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--hb-shadow-hover);
+}
+
+#home-bento .hb-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#home-bento .hb-card:hover .hb-img { transform: scale(1.06); }
+
+/* 文本截断工具 */
+#home-bento .hb-clamp-1,
+#home-bento .hb-clamp-2,
+#home-bento .hb-clamp-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+#home-bento .hb-clamp-1 { -webkit-line-clamp: 1; }
+#home-bento .hb-clamp-2 { -webkit-line-clamp: 2; }
+#home-bento .hb-clamp-3 { -webkit-line-clamp: 3; }
+
+/* 分类小药丸 */
+#home-bento .hb-pill {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 11px;
+  line-height: 1.6;
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: var(--tag-bg);
+  color: var(--text-secondary);
+}
+
+/* 卡片底部「日期 · #标签」 */
+#home-bento .hb-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.85;
+}
+
+#home-bento .hb-meta .hb-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+/* ===== 精选：Bento Grid ===== */
+#home-bento .bento-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--hb-gap);
+  grid-auto-rows: 200px;
+  margin-top: 20px;
+}
+
+@media (min-width: 640px) {
+  #home-bento .bento-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  #home-bento .bento-grid { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 210px; }
+}
+
+/* 各变体的跨格规则 */
+#home-bento .hb-hero { grid-column: span 1; grid-row: span 2; }
+#home-bento .hb-wide { grid-column: span 1; grid-row: span 1; }
+#home-bento .hb-tall { grid-column: span 1; grid-row: span 1; }
+
+@media (min-width: 640px) {
+  #home-bento .hb-hero { grid-column: span 2; }
+  #home-bento .hb-wide { grid-column: span 2; }
+}
+
+@media (min-width: 1024px) {
+  #home-bento .hb-hero { grid-column: span 2; grid-row: span 2; }
+  #home-bento .hb-tall { grid-row: span 2; }
+}
+
+/* --- 变体 A：大卡（图 + 渐变 + 文字叠加） --- */
+#home-bento .hb-hero {
+  position: relative;
+  display: block;
+  background: var(--tag-bg);
+}
+
+#home-bento .hb-hero .hb-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#home-bento .hb-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.25) 55%, transparent);
+}
+
+#home-bento .hb-hero .hb-hero-body {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px 26px;
+  color: #fff;
+}
+
+#home-bento .hb-hero .hb-badge {
+  align-self: flex-start;
+  font-size: 11px;
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  margin-bottom: 12px;
+}
+
+#home-bento .hb-hero .hb-hero-title {
+  font-size: clamp(1.15rem, 2vw, 1.6rem);
+  font-weight: 800;
+  line-height: 1.3;
+  margin: 0 0 8px;
+}
+
+#home-bento .hb-hero .hb-hero-desc {
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0 0 14px;
+}
+
+#home-bento .hb-hero .hb-meta { color: rgba(255, 255, 255, 0.62); }
+
+/* --- 变体 B：宽卡（左图 + 右文） --- */
+#home-bento .hb-wide {
+  display: flex;
+  flex-direction: row;
+}
+
+#home-bento .hb-wide .hb-wide-img {
+  width: 40%;
+  flex: 0 0 40%;
+  overflow: hidden;
+  background: var(--tag-bg);
+}
+
+#home-bento .hb-wide .hb-wide-body {
+  flex: 1;
+  min-width: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#home-bento .hb-wide .hb-card-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 8px 0 6px;
+}
+
+#home-bento .hb-wide .hb-card-desc {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin: 0 0 12px;
+}
+
+/* --- 变体 E：高卡（图 + 渐变 + 文字叠加，仅 lg 跨两行） --- */
+#home-bento .hb-tall {
+  position: relative;
+  display: block;
+  background: var(--tag-bg);
+}
+
+#home-bento .hb-tall .hb-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#home-bento .hb-tall::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.2) 50%, transparent);
+}
+
+#home-bento .hb-tall .hb-hero-body {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+  color: #fff;
+}
+
+#home-bento .hb-tall .hb-hero-title {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0 0 8px;
+}
+
+#home-bento .hb-tall .hb-hero-desc {
+  font-size: 12px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.68);
+  margin: 0 0 12px;
+}
+
+#home-bento .hb-tall .hb-meta { color: rgba(255, 255, 255, 0.55); }
+
+/* --- 变体 C / G / I / K：纯文字小卡 --- */
+#home-bento .hb-text {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+#home-bento .hb-text .hb-card-title {
+  margin: auto 0 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+#home-bento .hb-text .hb-card-desc {
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 6px 0 0;
+  opacity: 0.75;
+}
+
+#home-bento .hb-text .hb-text-date {
+  margin-top: 12px;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+/* C：深色 */
+#home-bento .hb-dark { background: #171717; border-color: #171717; color: #fff; }
+#home-bento .hb-dark .hb-card-title { color: #fff; }
+#home-bento .hb-dark .hb-card-desc { color: rgba(255, 255, 255, 0.45); }
+#home-bento .hb-dark .hb-text-date { color: rgba(255, 255, 255, 0.35); }
+#home-bento .hb-dark .hb-pill { background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); }
+
+/* G：浅靛蓝 */
+#home-bento .hb-indigo { background: #eef2ff; border-color: #e0e7ff; }
+#home-bento .hb-indigo .hb-card-title { color: #1e1b4b; }
+#home-bento .hb-indigo .hb-card-desc { color: rgba(30, 27, 75, 0.55); }
+#home-bento .hb-indigo .hb-text-date { color: rgba(30, 27, 75, 0.4); }
+#home-bento .hb-indigo .hb-pill { background: #e0e7ff; color: #6366f1; }
+
+/* I：浅琥珀 */
+#home-bento .hb-amber { background: #fef3c7; border-color: #fde68a; }
+#home-bento .hb-amber .hb-card-title { color: #451a03; }
+#home-bento .hb-amber .hb-card-desc { color: rgba(69, 26, 3, 0.55); }
+#home-bento .hb-amber .hb-text-date { color: rgba(69, 26, 3, 0.4); }
+#home-bento .hb-amber .hb-pill { background: rgba(253, 230, 138, 0.7); color: #b45309; }
+
+/* 暗色模式下三个彩色文字卡改为深色底 */
+[data-theme="dark"] #home-bento .hb-indigo { background: #1e1b4b; border-color: #312e81; }
+[data-theme="dark"] #home-bento .hb-indigo .hb-card-title { color: #e0e7ff; }
+[data-theme="dark"] #home-bento .hb-indigo .hb-card-desc { color: rgba(224, 231, 255, 0.6); }
+[data-theme="dark"] #home-bento .hb-indigo .hb-text-date { color: rgba(224, 231, 255, 0.45); }
+[data-theme="dark"] #home-bento .hb-amber { background: #3f2d0b; border-color: #78350f; }
+[data-theme="dark"] #home-bento .hb-amber .hb-card-title { color: #fef3c7; }
+[data-theme="dark"] #home-bento .hb-amber .hb-card-desc { color: rgba(254, 243, 199, 0.6); }
+[data-theme="dark"] #home-bento .hb-amber .hb-text-date { color: rgba(254, 243, 199, 0.45); }
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] #home-bento .hb-indigo { background: #1e1b4b; border-color: #312e81; }
+  [data-theme="auto"] #home-bento .hb-indigo .hb-card-title { color: #e0e7ff; }
+  [data-theme="auto"] #home-bento .hb-indigo .hb-card-desc { color: rgba(224, 231, 255, 0.6); }
+  [data-theme="auto"] #home-bento .hb-indigo .hb-text-date { color: rgba(224, 231, 255, 0.45); }
+  [data-theme="auto"] #home-bento .hb-amber { background: #3f2d0b; border-color: #78350f; }
+  [data-theme="auto"] #home-bento .hb-amber .hb-card-title { color: #fef3c7; }
+  [data-theme="auto"] #home-bento .hb-amber .hb-card-desc { color: rgba(254, 243, 199, 0.6); }
+  [data-theme="auto"] #home-bento .hb-amber .hb-text-date { color: rgba(254, 243, 199, 0.45); }
+}
+
+/* --- 变体 D/F/H/J：白卡 + 顶图 --- */
+#home-bento .hb-top {
+  display: flex;
+  flex-direction: column;
+}
+
+#home-bento .hb-top .hb-top-img {
+  height: 45%;
+  flex: 0 0 45%;
+  overflow: hidden;
+  background: var(--tag-bg);
+}
+
+#home-bento .hb-top .hb-top-body {
+  flex: 1;
+  min-width: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+#home-bento .hb-top .hb-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+#home-bento .hb-top .hb-card-desc {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin: 4px 0 0;
+}
+
+#home-bento .hb-top .hb-meta { margin-top: auto; }
+
+/* --- 变体 K：白卡 + 描边纯文字 --- */
+#home-bento .hb-outline { border-color: var(--border); }
+
+/* ===== 全部文章：等高网格 ===== */
+#home-bento .articles-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+@media (min-width: 640px) {
+  #home-bento .articles-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  #home-bento .articles-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+#home-bento .hb-acard {
+  display: flex;
+  flex-direction: column;
+  height: var(--hb-card-h);
+}
+
+#home-bento .hb-acard .hb-a-img {
+  height: var(--hb-acard-img);
+  flex: 0 0 var(--hb-acard-img);
+  overflow: hidden;
+  background: var(--tag-bg);
+}
+
+#home-bento .hb-acard .hb-a-body {
+  flex: 1;
+  min-width: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+#home-bento .hb-acard .hb-a-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+#home-bento .hb-acard .hb-a-desc {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin: 8px 0 0;
+}
+
+#home-bento .hb-acard .hb-a-meta {
+  margin-top: auto;
+  padding-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* 卡片上的浏览量（热门排序启用时显示） */
+#home-bento .hb-views { white-space: nowrap; }
+
+/* ===== 最新 / 热门 切换 ===== */
+#home-bento .hb-tabs {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  #home-bento .hb-tabs { display: flex; }
+}
+
+#home-bento .hb-tab {
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+#home-bento .hb-tab:hover { background: var(--tag-bg); color: var(--text); }
+
+#home-bento .hb-tab.is-active {
+  background: var(--text);
+  color: var(--card-bg);
+}
+
+/* ===== 加载更多 ===== */
+#home-bento .hb-more-wrap {
+  margin-top: 48px;
+  display: flex;
+  justify-content: center;
+}
+
+#home-bento .hb-empty {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+#home-bento .hb-more {
+  padding: 10px 24px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+#home-bento .hb-more:hover {
+  color: var(--text);
+  border-color: var(--text-secondary);
+  box-shadow: var(--hb-shadow);
+}
+
+#home-bento .hb-more[hidden] { display: none; }
+
+/* 手机端隐藏「日期 · 标签」里的小圆点，避免换行 */
+@media (max-width: 420px) {
+  #home-bento .hb-meta .hb-dot { display: none; }
+}

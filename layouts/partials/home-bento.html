@@ -1,0 +1,167 @@
+{{- /* ============================================================
+  home-bento.html — 新版主页（精选 Bento Grid + 全部文章等高网格）
+  ------------------------------------------------------------
+   由 home/list.html 在 [home] layout = "bento" 时调用。
+   结构按参考稿：
+     #featured  精选（.bento-grid，变体由 featured 槽位决定）
+     #articles  全部文章（.articles-grid，等高卡片 360px）
+   服务端先渲染内容（利于 SEO 与首屏速度）：
+     · 精选 manual：按配置槽位渲染；auto：先用最新若干篇占位，
+       前端取到浏览量/评论数后按热度替换内容（无 JS 时也完整可见）
+     · 全部文章：全部渲染，超过「初始行数」的先 hidden，由前端按当前列数逐行显示
+  ============================================================ */ -}}
+{{- $bento := .Site.Params.home.bento | default dict -}}
+{{- $home := .Site.Params.home | default dict -}}
+{{- $lang := .Site.Language.Lang | default "zh" -}}
+
+{{- /* 摘要截断字数：沿用文章卡片那套中英文配置 */ -}}
+{{- $fallbackLen := $home.summary_length | default 120 -}}
+{{- $descLenZh := $home.summary_length_zh | default $fallbackLen -}}
+{{- $descLenEn := $home.summary_length_en | default $fallbackLen -}}
+
+{{- /* 文案：配置优先，支持 _zh / _en 分别设置，留空则用 i18n 默认值 */ -}}
+{{- $introEyebrow := $bento.intro_eyebrow | default "" -}}
+{{- $introTitle := $bento.intro_title | default "" -}}
+{{- $introDesc := $bento.intro_desc | default "" -}}
+{{- with index $bento (printf "intro_eyebrow_%s" $lang) }}{{ $introEyebrow = . }}{{ end -}}
+{{- with index $bento (printf "intro_title_%s" $lang) }}{{ $introTitle = . }}{{ end -}}
+{{- with index $bento (printf "intro_desc_%s" $lang) }}{{ $introDesc = . }}{{ end -}}
+{{- $featuredTitle := $bento.featured_title | default (i18n "hb-featured" | default "精选") -}}
+{{- $featuredSub := $bento.featured_sub | default (i18n "hb-featured-sub" | default "值得先读的几篇") -}}
+{{- with index $bento (printf "featured_sub_%s" $lang) }}{{ $featuredSub = . }}{{ end -}}
+{{- $articlesTitle := $bento.articles_title | default (i18n "hb-all" | default "全部文章") -}}
+{{- $allLinkText := $bento.articles_link_text | default (i18n "hb-all-link" | default "全部 →") -}}
+
+{{- /* 文章列表：按日期倒序（「最新」） */ -}}
+{{- $mainSections := $home.mainSections | default (slice "posts") -}}
+{{- $posts := where .Site.RegularPages "Section" "in" $mainSections -}}
+{{- $posts = $posts.ByDate.Reverse -}}
+{{- $total := len $posts -}}
+
+{{- $defaultImage := $bento.default_image | default "" -}}
+{{- $initialRows := $bento.initial_rows | default 3 -}}
+{{- $initialVisible := mul $initialRows 3 -}}
+{{- $variants := slice "hero" "wide" "dark" "top" "tall" "top" "indigo" "top" "amber" "top" "outline" -}}
+{{- $mode := $bento.featured_mode | default "auto" -}}
+
+<section id="home-bento">
+  {{- /* ===== 顶部简介 ===== */ -}}
+  {{- if or $introEyebrow $introTitle $introDesc }}
+  <div class="hb-intro">
+    {{- with $introEyebrow }}<p class="hb-eyebrow">{{ . }}</p>{{ end }}
+    {{- with $introTitle }}<h1 class="hb-title">{{ . }}</h1>{{ end }}
+    {{- with $introDesc }}<p class="hb-desc">{{ . }}</p>{{ end }}
+  </div>
+  {{- end }}
+
+  {{- /* ===== 精选区（Bento Grid）===== */ -}}
+  <section id="featured">
+    <div class="hb-sec-head">
+      <div>
+        <h2 class="hb-sec-title">{{ $featuredTitle }}</h2>
+        {{- with $featuredSub }}<p class="hb-sec-sub">{{ . }}</p>{{ end }}
+      </div>
+      <a href="#articles" class="hb-sec-link">{{ $allLinkText }}</a>
+    </div>
+
+    <div class="bento-grid" id="hbFeatured">
+      {{- $count := 0 -}}
+      {{- if and (eq $mode "manual") (gt (len ($bento.featured | default slice)) 0) -}}
+        {{- range $i, $slot := $bento.featured -}}
+          {{- $page := "" -}}
+          {{- with $slot.url }}{{ $page = site.GetPage . }}{{ end -}}
+          {{- if $page -}}
+            {{- $cat := "" -}}
+            {{- with $page.Params.categories }}{{ $cat = index . 0 }}{{ end -}}
+            {{- if not $cat }}{{ with $page.Params.tags }}{{ $cat = index . 0 }}{{ end }}{{ end -}}
+            {{- $img := $slot.image | default $page.Params.image | default $page.Params.img | default $defaultImage -}}
+            {{- if and $img (not (or (hasPrefix $img "http://") (hasPrefix $img "https://"))) }}{{ $img = $img | absURL }}{{ end -}}
+            {{- $len := cond (eq $page.Language.Lang "en") $descLenEn $descLenZh -}}
+            {{- $desc := $slot.desc | default ($page.Description | default $page.Summary | plainify | truncate $len) -}}
+            {{- partial "home-bento-slot.html" (dict
+                "variant" ($slot.variant | default (index $variants (mod $i (len $variants))))
+                "url" $page.RelPermalink
+                "title" ($slot.title | default $page.Title)
+                "desc" $desc
+                "image" $img
+                "date" ($slot.date | default ($page.Date.Format "2006-01-02"))
+                "tag" ($slot.tag | default $cat)
+                "badge" ($slot.badge | default "")
+                "eager" (eq $i 0)) -}}
+            {{- $count = add $count 1 -}}
+          {{- end -}}
+        {{- end -}}
+      {{- else -}}
+        {{- $n := $bento.featured_auto_count | default 11 -}}
+        {{- range $i, $page := first $n $posts -}}
+          {{- $cat := "" -}}
+          {{- with $page.Params.categories }}{{ $cat = index . 0 }}{{ end -}}
+          {{- if not $cat }}{{ with $page.Params.tags }}{{ $cat = index . 0 }}{{ end }}{{ end -}}
+          {{- $img := $page.Params.image | default $page.Params.img | default $defaultImage -}}
+          {{- if and $img (not (or (hasPrefix $img "http://") (hasPrefix $img "https://"))) }}{{ $img = $img | absURL }}{{ end -}}
+          {{- $len := cond (eq $page.Language.Lang "en") $descLenEn $descLenZh -}}
+          {{- $badge := "" -}}
+          {{- if eq $i 0 }}{{ $badge = $bento.featured_auto_badge | default "" }}{{ end -}}
+          {{- partial "home-bento-slot.html" (dict
+              "variant" (index $variants (mod $i (len $variants)))
+              "url" $page.RelPermalink
+              "title" $page.Title
+              "desc" ($page.Description | default $page.Summary | plainify | truncate $len)
+              "image" $img
+              "date" ($page.Date.Format "2006-01-02")
+              "tag" $cat
+              "badge" $badge
+              "eager" (eq $i 0)) -}}
+          {{- $count = add $count 1 -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if eq $count 0 }}
+      <p class="hb-empty">{{ i18n "hb-empty" | default "暂无文章" }}</p>
+      {{- end }}
+    </div>
+  </section>
+
+  {{- /* ===== 全部文章（等高网格）===== */ -}}
+  <section id="articles">
+    <div class="hb-sec-head">
+      <div>
+        <h2 class="hb-sec-title">{{ $articlesTitle }}</h2>
+        <p class="hb-sec-sub" data-hb-sub>{{ printf (i18n "hb-sub-latest" | default "共 %d 篇 · 按时间排序") $total }}</p>
+      </div>
+      <div class="hb-tabs" role="tablist" aria-label="{{ $articlesTitle }}">
+        <button type="button" class="hb-tab is-active" data-hb-sort="latest" aria-pressed="true">{{ i18n "hb-tab-latest" | default "最新" }}</button>
+        <button type="button" class="hb-tab" data-hb-sort="hot" aria-pressed="false">{{ i18n "hb-tab-hot" | default "热门" }}</button>
+      </div>
+    </div>
+
+    <div class="articles-grid" id="hbArticles">
+      {{- range $i, $page := $posts -}}
+        {{- $cat := "" -}}
+        {{- with $page.Params.categories }}{{ $cat = index . 0 }}{{ end -}}
+        {{- if not $cat }}{{ with $page.Params.tags }}{{ $cat = index . 0 }}{{ end }}{{ end -}}
+        {{- $img := $page.Params.image | default $page.Params.img | default $defaultImage -}}
+        {{- if and $img (not (or (hasPrefix $img "http://") (hasPrefix $img "https://"))) }}{{ $img = $img | absURL }}{{ end -}}
+        {{- $len := cond (eq $page.Language.Lang "en") $descLenEn $descLenZh -}}
+        {{- $hidden := ge $i $initialVisible -}}
+      <a class="hb-card hb-acard" href="{{ $page.RelPermalink }}" data-hb-card data-hb-date="{{ $page.Date.Format "2006-01-02T15:04:05Z07:00" }}"{{ if $hidden }} hidden{{ end }}>
+        <div class="hb-a-img">
+          {{- with $img }}<img class="hb-img" src="{{ . }}" alt="{{ $page.Title | plainify }}" loading="lazy" decoding="async">{{ end }}
+        </div>
+        <div class="hb-a-body">
+          <h3 class="hb-a-title hb-clamp-1" data-hb-title>{{ $page.Title }}</h3>
+          <p class="hb-a-desc hb-clamp-2" data-hb-desc>{{ $page.Description | default $page.Summary | plainify | truncate $len }}</p>
+          <div class="hb-a-meta">
+            <span data-hb-date>{{ $page.Date.Format "2006-01-02" }}</span>
+            {{- with $cat }}<span class="hb-dot"></span><span>#<span data-hb-tag>{{ . }}</span></span>{{ end }}
+            <span class="hb-views" data-hb-views hidden></span>
+          </div>
+        </div>
+      </a>
+      {{- end }}
+    </div>
+
+    <div class="hb-more-wrap">
+      <button type="button" class="hb-more" data-hb-more>{{ i18n "hb-more" | default "加载更多" }}</button>
+    </div>
+  </section>
+</section>
