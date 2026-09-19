@@ -26,7 +26,7 @@
         {{- range .Pages -}}
         <a class="garden-card" href="{{ .RelPermalink }}" style="text-decoration:none;color:inherit;">
           {{- if .Params.img }}
-          <img class="card-img" src="{{ .Params.img | relURL }}" alt="{{ .Title }}" loading="lazy" />
+          <div class="card-img"><img src="{{ .Params.img | relURL }}" alt="{{ .Title }}" loading="lazy" /></div>
           {{- end }}
           <div class="card-body">
             {{- with .Params.categories }}

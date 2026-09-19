@@ -114,8 +114,8 @@ navName_en = "Example Site"
 [home]
   paginate = 20                     # 每页最多显示文章数量
   columns = 4                       # 卡片列数（1-4）
-  stagger_offset = 60               # 第 2、4 列整体下移的像素数（0 = 完全对齐，不做错落）
-  image_ratio = "4 / 3"             # 封面图统一比例（可写 4 / 3、1 / 1、16 / 9）
+  row_stagger = 50                  # 偶数列首格矮、末格高的像素数（内部交错、四周对齐；0 = 不错落）
+  image_ratio = "4 / 3"             # 封面图统一比例，写成 "宽 / 高"（4 / 3、1 / 1、16 / 9）
   title_lines = 2                   # 标题固定行数（超出显示省略号）
   width_ratio = 90                  # 内容区域宽度占比（1-100，100=全宽）
   show_images = true                # 是否显示文章封面图

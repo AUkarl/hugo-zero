@@ -1,22 +1,24 @@
 /* ============================================================
-   home.css — 主页 / 列表页文章卡片（规整网格）
+   home.css — 主页 / 列表页文章卡片（规整网格 + 内部交错）
    ------------------------------------------------------------
    布局：4 列等宽等高的卡片网格（由 home.js 按数据顺序分列，
-        保证阅读顺序为「从左到右、从上到下」）；
-        第 2、4 列整体下移 --stagger-offset（默认 60px），
-        保留截图中那种错落感，但同排卡片严格对齐。
-   卡片：封面统一比例、标题固定 1~2 行、摘要固定行数、
+        保证阅读顺序为「从左到右、从上到下」）。
+   交错：第 2、4 列的首格图片矮 --row-stagger、末格图片高 --row-stagger，
+        两者相抵，所以整列高度不变 —— 上下左右四周对齐，
+        而中间各格上移 50px 形成内部的错落感。
+   卡片：封面统一比例、标题固定行数、摘要固定行数、
         底部一行「日期 …… #标签」，因此所有卡片等高。
-   行数/字数/下移量/图片比例都来自 params.toml 的 [home]。
+   行数/字数/交错量/图片比例都来自 params.toml 的 [home]。
    ============================================================ */
 
-/* 默认值（home/list.html 会用站点配置覆盖这些变量） */
+/* 默认值（home/list.html 与 _default/list.html 会用站点配置覆盖这些变量） */
 :root {
-  --stagger-offset: 60px;
   --card-title-lines: 2;
   --summary-lines-zh: 3;
   --summary-lines-en: 3;
-  --card-image-ratio: 4 / 3;
+  --card-image-pct: 75%;      /* 4:3 → 高度 = 宽度 × 75% */
+  --card-image-delta: 0px;    /* 首/末格的高度微调（±row-stagger） */
+  --row-stagger: 50px;
   --card-title-line-height: 1.45;
   --card-desc-line-height: 1.6;
 }
@@ -39,10 +41,10 @@
   flex: 1;
 }
 
-/* ===== 分列网格（JS 版，顺序正确 + 偶数列错落）=====
+/* ===== 分列网格（JS 版，顺序正确 + 内部交错）=====
    home.js 把卡片按数据顺序轮流塞进 .garden-col：
    第 1 张在第 1 列顶部，第 2 张在其右侧，……，第 n+1 张回到第 1 列继续往下。
-   卡片等高，所以各列自然形成对齐的行；偶数列整体下移形成错落。 */
+   卡片等高，所以各列自然形成对齐的行。 */
 .garden-grid.is-columns {
   display: flex;
   align-items: flex-start;   /* 每列各自堆叠，不互相拉伸 */
@@ -57,9 +59,13 @@
   gap: 20px;                 /* 同一列内卡片间距 */
 }
 
-/* 第 2、4 列整体下移（--stagger-offset 设为 0 即完全对齐） */
-.garden-grid.is-columns .garden-col:nth-child(even) {
-  margin-top: var(--stagger-offset);
+/* --- 内部交错：偶数列首格矮、末格高，整列净高度不变，四周对齐 --- */
+.garden-grid.is-columns .garden-col:nth-child(even) > .garden-card:first-child:not(:last-child) {
+  --card-image-delta: calc(-1 * var(--row-stagger));
+}
+
+.garden-grid.is-columns .garden-col:nth-child(even) > .garden-card:last-child:not(:first-child) {
+  --card-image-delta: var(--row-stagger);
 }
 
 .garden-grid.is-columns .garden-card {
@@ -87,19 +93,23 @@
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
 }
 
-/* --- 卡片封面图：统一比例，随列宽等比缩放 --- */
+/* --- 卡片封面图 ---
+   用 padding-top 撑出高度：百分比相对卡片宽度计算，所以图片随列宽等比缩放，
+   同时允许 ±--row-stagger 的像素微调（这是 aspect-ratio 做不到的）。 */
 .garden-card .card-img {
-  width: 100%;
-  height: auto;
-  aspect-ratio: var(--card-image-ratio);
-  object-fit: cover;
-  background: #f4f4f4;
-  display: block;
   position: relative;
+  display: block;
+  width: 100%;
+  height: 0;
+  padding-top: calc(var(--card-image-pct) + var(--card-image-delta));
+  background: #f4f4f4;
   overflow: hidden;
 }
 
 .garden-card .card-img img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -107,6 +117,9 @@
 }
 
 .card-img-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, var(--border) 0%, var(--card-bg) 100%);
@@ -269,10 +282,5 @@ html:lang(en) .garden-card p {
 @media (max-width: 500px) {
   .garden-grid {
     --home-columns: 1 !important;
-  }
-
-  /* 单列时没有错落的必要 */
-  .garden-grid.is-columns .garden-col:nth-child(even) {
-    margin-top: 0;
   }
 }
