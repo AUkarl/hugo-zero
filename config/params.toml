@@ -612,7 +612,8 @@ aboutName = "示例名称"
   stats_server_url = ""             # 留空 = 自动取评论配置里的地址
   stats_views_weight = 1
   stats_comments_weight = 10
-  stats_comment_probe = 12
+  stats_comment_probe = 6           # 最多探测前几篇的评论数（避免一次发太多请求）
+  stats_cache_minutes = 360         # 统计结果在浏览器缓存多少分钟（再次打开立即按热度渲染，避免闪烁）
 
   # 手动模式：逐槽位配置（variant 不写则按 hero→wide→dark→top→tall→… 依次套用）
   # [[home.bento.featured]]

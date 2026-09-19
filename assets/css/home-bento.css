@@ -17,6 +17,14 @@
   --hb-shadow-hover: 0 18px 36px -14px rgba(0, 0, 0, 0.22);
   --hb-card-h: 360px;
   --hb-acard-img: 52%;
+
+  /* 无图卡片的莫兰迪暖色（低饱和、浅色，明暗模式都用这一套） */
+  --hb-morandi-1: #efe6db;   /* 暖米杏 */
+  --hb-morandi-2: #ead9d0;   /* 浅陶土 */
+  --hb-morandi-3: #e9e3d5;   /* 暖卡其 */
+  --hb-morandi-4: #f1e9df;   /* 暖白米 */
+  --hb-morandi-ink: #4b4139; /* 暖褐灰文字 */
+  --hb-placeholder: #eee5da; /* 无封面图时的底色 */
 }
 
 /* 平滑滚动（仅新版主页需要，#featured / #articles 锚点跳转） */
@@ -342,7 +350,7 @@ html { scroll-behavior: smooth; }
 
 #home-bento .hb-tall .hb-meta { color: rgba(255, 255, 255, 0.55); }
 
-/* --- 变体 C / G / I / K：纯文字小卡 --- */
+/* --- 变体 C / G / I / K：无图纯文字小卡（莫兰迪暖色，明暗模式一致） --- */
 #home-bento .hb-text {
   display: flex;
   flex-direction: column;
@@ -369,47 +377,32 @@ html { scroll-behavior: smooth; }
   opacity: 0.6;
 }
 
-/* C：深色 */
-#home-bento .hb-dark { background: #171717; border-color: #171717; color: #fff; }
-#home-bento .hb-dark .hb-card-title { color: #fff; }
-#home-bento .hb-dark .hb-card-desc { color: rgba(255, 255, 255, 0.45); }
-#home-bento .hb-dark .hb-text-date { color: rgba(255, 255, 255, 0.35); }
-#home-bento .hb-dark .hb-pill { background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); }
-
-/* G：浅靛蓝 */
-#home-bento .hb-indigo { background: #eef2ff; border-color: #e0e7ff; }
-#home-bento .hb-indigo .hb-card-title { color: #1e1b4b; }
-#home-bento .hb-indigo .hb-card-desc { color: rgba(30, 27, 75, 0.55); }
-#home-bento .hb-indigo .hb-text-date { color: rgba(30, 27, 75, 0.4); }
-#home-bento .hb-indigo .hb-pill { background: #e0e7ff; color: #6366f1; }
-
-/* I：浅琥珀 */
-#home-bento .hb-amber { background: #fef3c7; border-color: #fde68a; }
-#home-bento .hb-amber .hb-card-title { color: #451a03; }
-#home-bento .hb-amber .hb-card-desc { color: rgba(69, 26, 3, 0.55); }
-#home-bento .hb-amber .hb-text-date { color: rgba(69, 26, 3, 0.4); }
-#home-bento .hb-amber .hb-pill { background: rgba(253, 230, 138, 0.7); color: #b45309; }
-
-/* 暗色模式下三个彩色文字卡改为深色底 */
-[data-theme="dark"] #home-bento .hb-indigo { background: #1e1b4b; border-color: #312e81; }
-[data-theme="dark"] #home-bento .hb-indigo .hb-card-title { color: #e0e7ff; }
-[data-theme="dark"] #home-bento .hb-indigo .hb-card-desc { color: rgba(224, 231, 255, 0.6); }
-[data-theme="dark"] #home-bento .hb-indigo .hb-text-date { color: rgba(224, 231, 255, 0.45); }
-[data-theme="dark"] #home-bento .hb-amber { background: #3f2d0b; border-color: #78350f; }
-[data-theme="dark"] #home-bento .hb-amber .hb-card-title { color: #fef3c7; }
-[data-theme="dark"] #home-bento .hb-amber .hb-card-desc { color: rgba(254, 243, 199, 0.6); }
-[data-theme="dark"] #home-bento .hb-amber .hb-text-date { color: rgba(254, 243, 199, 0.45); }
-
-@media (prefers-color-scheme: dark) {
-  [data-theme="auto"] #home-bento .hb-indigo { background: #1e1b4b; border-color: #312e81; }
-  [data-theme="auto"] #home-bento .hb-indigo .hb-card-title { color: #e0e7ff; }
-  [data-theme="auto"] #home-bento .hb-indigo .hb-card-desc { color: rgba(224, 231, 255, 0.6); }
-  [data-theme="auto"] #home-bento .hb-indigo .hb-text-date { color: rgba(224, 231, 255, 0.45); }
-  [data-theme="auto"] #home-bento .hb-amber { background: #3f2d0b; border-color: #78350f; }
-  [data-theme="auto"] #home-bento .hb-amber .hb-card-title { color: #fef3c7; }
-  [data-theme="auto"] #home-bento .hb-amber .hb-card-desc { color: rgba(254, 243, 199, 0.6); }
-  [data-theme="auto"] #home-bento .hb-amber .hb-text-date { color: rgba(254, 243, 199, 0.45); }
+#home-bento .hb-text .hb-pill {
+  background: rgba(75, 65, 57, 0.09);
+  color: var(--hb-morandi-ink);
+  opacity: 0.85;
 }
+
+#home-bento .hb-text,
+#home-bento .hb-text .hb-card-title,
+#home-bento .hb-text .hb-card-desc,
+#home-bento .hb-text .hb-text-date {
+  color: var(--hb-morandi-ink);
+}
+
+#home-bento .hb-text { border-color: rgba(75, 65, 57, 0.08); }
+
+/* C：暖米杏 */
+#home-bento .hb-dark { background: var(--hb-morandi-1); }
+
+/* G：浅陶土 */
+#home-bento .hb-indigo { background: var(--hb-morandi-2); }
+
+/* I：暖卡其 */
+#home-bento .hb-amber { background: var(--hb-morandi-3); }
+
+/* K：暖白米 + 描边 */
+#home-bento .hb-outline { background: var(--hb-morandi-4); }
 
 /* --- 变体 D/F/H/J：白卡 + 顶图 --- */
 #home-bento .hb-top {
@@ -583,4 +576,76 @@ html { scroll-behavior: smooth; }
 /* 手机端隐藏「日期 · 标签」里的小圆点，避免换行 */
 @media (max-width: 420px) {
   #home-bento .hb-meta .hb-dot { display: none; }
+}
+
+/* ============================================================
+   无图卡片 / 无封面图：统一用莫兰迪暖色底（不用纯白、纯黑、高饱和色）
+   ============================================================ */
+#home-bento .hb-a-img,
+#home-bento .hb-top-img,
+#home-bento .hb-wide-img,
+#home-bento .hb-hero,
+#home-bento .hb-tall {
+  background: var(--hb-placeholder);
+}
+
+/* ============================================================
+   精选「自动」取数期间的骨架态：
+   服务端先渲染最新若干篇，取到浏览量/评论数后会换成最热的那几篇。
+   取数期间把卡片里的文字和图片藏起来（卡片底色即是骨架，尺寸不变），
+   取数完成再一次性显示 —— 避免"先最新、后最热"的跳动闪烁。
+   ============================================================ */
+#home-bento .bento-grid.hb-pending .hb-hero-img,
+#home-bento .bento-grid.hb-pending img,
+#home-bento .bento-grid.hb-pending h3,
+#home-bento .bento-grid.hb-pending p,
+#home-bento .bento-grid.hb-pending .hb-pill,
+#home-bento .bento-grid.hb-pending .hb-badge,
+#home-bento .bento-grid.hb-pending .hb-meta,
+#home-bento .bento-grid.hb-pending .hb-text-date {
+  visibility: hidden;
+}
+
+/* 没有 JS（或取数失败）时不要留白 */
+#home-bento .bento-grid.hb-revealed .hb-hero-img,
+#home-bento .bento-grid.hb-revealed img,
+#home-bento .bento-grid.hb-revealed h3,
+#home-bento .bento-grid.hb-revealed p,
+#home-bento .bento-grid.hb-revealed .hb-pill,
+#home-bento .bento-grid.hb-revealed .hb-badge,
+#home-bento .bento-grid.hb-revealed .hb-meta,
+#home-bento .bento-grid.hb-revealed .hb-text-date {
+  visibility: visible;
+}
+
+/* ============================================================
+   移动端兜底：不让长串文本/图片撑出横向拖动条
+   ============================================================ */
+@media (max-width: 768px) {
+  html, body { overflow-x: hidden; }
+
+  #home-bento { max-width: 100%; }
+}
+
+#home-bento img { max-width: 100%; }
+
+#home-bento .hb-hero-title,
+#home-bento .hb-hero-desc,
+#home-bento .hb-card-title,
+#home-bento .hb-card-desc,
+#home-bento .hb-a-title,
+#home-bento .hb-a-desc,
+#home-bento .hb-meta,
+#home-bento .hb-text-date {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+#home-bento .bento-grid,
+#home-bento .articles-grid,
+#home-bento .hb-card,
+#home-bento .hb-wide-body,
+#home-bento .hb-top-body,
+#home-bento .hb-a-body {
+  min-width: 0;
 }

@@ -1,11 +1,29 @@
 {{- /* ============================================================
-  home-bento-styles.html — 新版主页（bento）的样式引入
-  只在 [home] layout = "bento" 时被 home/list.html 调用
+  home-bento-styles.html — 新版主页（bento）的样式引入与预连接
+  只在 [home] layout = "bento" 时被 home/list.html 的 styles 块调用（即 <head> 内）
   ============================================================ */ -}}
 {{- $bento := .Site.Params.home.bento -}}
+{{- $stats := partial "home-bento-stats-config.html" . -}}
+{{- /* 预连接统计服务：省掉一次 DNS + TLS 握手，精选/热门取数更快 */ -}}
+{{- with $stats.serverUrl }}
+<link rel="preconnect" href="{{ . }}" crossorigin>
+<link rel="dns-prefetch" href="{{ . }}">
+{{- end }}
 {{- $css := resources.Get "css/home-bento.css" | minify | fingerprint -}}
 <link rel="stylesheet" href="{{ $css.RelPermalink }}">
 <style>
-  /* 新版主页的内容宽度（与参考稿一致：最大 1280px，左右 24px 内边距） */
+  /* 新版主页的内容宽度（与参考稿一致：最大 1280px，内边距交给主题的 .main） */
   .main { max-width: {{ $bento.max_width | default 1280 }}px; margin-left: auto; margin-right: auto; }
 </style>
+<noscript>
+  <style>
+    /* 没有 JS 时不要把「骨架态」的精选区一直藏起来 */
+    #home-bento .bento-grid.hb-pending img,
+    #home-bento .bento-grid.hb-pending h3,
+    #home-bento .bento-grid.hb-pending p,
+    #home-bento .bento-grid.hb-pending .hb-pill,
+    #home-bento .bento-grid.hb-pending .hb-badge,
+    #home-bento .bento-grid.hb-pending .hb-meta,
+    #home-bento .bento-grid.hb-pending .hb-text-date { visibility: visible; }
+  </style>
+</noscript>

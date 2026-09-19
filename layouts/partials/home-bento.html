@@ -65,7 +65,7 @@
       <a href="#articles" class="hb-sec-link">{{ $allLinkText }}</a>
     </div>
 
-    <div class="bento-grid" id="hbFeatured">
+    <div class="bento-grid hb-pending" id="hbFeatured">
       {{- $count := 0 -}}
       {{- if and (eq $mode "manual") (gt (len ($bento.featured | default slice)) 0) -}}
         {{- range $i, $slot := $bento.featured -}}

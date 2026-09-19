@@ -6,8 +6,12 @@
 //      没有更多时隐藏按钮（行数在 config 的 [home.bento] 里配）
 //   2) 最新 / 热门 切换：最新 = 服务端渲染的日期倒序；热门 = 按统计分数倒序
 //   3) 统计：按评论系统自动选择数据源（Waline：浏览量+评论数；Twikoo：评论数）
-//   4) 精选·自动：拿到统计后，把精选槽位按热度重排内容（无 JS 时是「最新」）
-// 所有请求都在页面加载完之后才发，不阻塞首屏。
+//   4) 精选·自动：拿到统计后按热度重排精选槽位
+//
+// 加载体验（避免"先显示最新、再跳成最热"的闪烁）：
+//   · 统计结果缓存在 localStorage（默认 6 小时）：再次打开时立刻按热度渲染，零等待
+//   · 页面上先渲染骨架态（卡片底色，尺寸不变），取数完成一次性显示
+//   · 页面一解析完就并行发起统计请求（不占用首屏关键资源）
 // ============================================================
 (function () {
   'use strict';
@@ -17,6 +21,7 @@
   if (!root) return;
 
   var grid = document.getElementById('hbArticles');
+  var featured = document.getElementById('hbFeatured');
   var moreBtn = root.querySelector('[data-hb-more]');
   var subEl = root.querySelector('[data-hb-sub]');
   var tabs = Array.prototype.slice.call(root.querySelectorAll('[data-hb-sort]'));
@@ -31,25 +36,18 @@
 
   // 当前列数（跟着 CSS 断点走，1 / 2 / 3）
   function columns() {
-    var tpl = getComputedStyle(grid).gridTemplateColumns;
-    var n = tpl.split(' ').filter(Boolean).length;
+    var n = getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length;
     return n > 0 ? n : 1;
   }
 
-  function visibleCount() {
-    return Math.max(1, (initialRows + extraRows) * columns());
-  }
+  function visibleCount() { return Math.max(1, (initialRows + extraRows) * columns()); }
 
   // ==================== 加载更多 ====================
   function applyVisibility() {
     var list = cards();
     var limit = visibleCount();
     list.forEach(function (el, i) { el.hidden = i >= limit; });
-    if (moreBtn) {
-      var done = limit >= list.length;
-      moreBtn.hidden = done;
-      if (!done) moreBtn.textContent = cfg.labelMore || '加载更多';
-    }
+    if (moreBtn) moreBtn.hidden = limit >= list.length;
   }
 
   if (moreBtn) {
@@ -59,7 +57,6 @@
     });
   }
 
-  // 窗口尺寸变化 → 列数变了，重新按行数计算显示数量
   var resizeTimer = null;
   window.addEventListener('resize', function () {
     if (resizeTimer) clearTimeout(resizeTimer);
@@ -70,17 +67,17 @@
   var latestOrder = cards();      // 服务端就是日期倒序
   var stats = null;               // { views: Map, comments: Map }
 
-  function scoreOf(card) {
-    if (!stats) return 0;
-    var path = pathOf(card);
-    var v = (stats.views && stats.views.get(path)) || 0;
-    var c = (stats.comments && stats.comments.get(path)) || 0;
-    return v * (cfg.viewsWeight || 1) + c * (cfg.commentsWeight || 10);
-  }
-
   function pathOf(card) {
     try { return new URL(card.getAttribute('href'), location.origin).pathname; }
     catch (e) { return card.getAttribute('href') || ''; }
+  }
+
+  function scoreOf(card) {
+    if (!stats) return 0;
+    var p = pathOf(card);
+    var v = (stats.views && stats.views.get(p)) || 0;
+    var c = (stats.comments && stats.comments.get(p)) || 0;
+    return v * (cfg.viewsWeight || 1) + c * (cfg.commentsWeight || 10);
   }
 
   function setSort(kind) {
@@ -97,9 +94,8 @@
       btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
     if (subEl) {
-      var total = list.length;
       var tpl = kind === 'hot' ? (cfg.labelSubHot || '共 %d 篇 · 按热度排序') : (cfg.labelSubLatest || '共 %d 篇 · 按时间排序');
-      subEl.textContent = tpl.replace('%d', total);
+      subEl.textContent = tpl.replace('%d', list.length);
     }
     applyVisibility();
   }
@@ -112,7 +108,39 @@
     });
   });
 
-  // ==================== 统计（浏览量 / 评论数） ====================
+  // ==================== 骨架态显隐 ====================
+  function reveal() {
+    if (!featured) return;
+    featured.classList.remove('hb-pending');
+    featured.classList.add('hb-revealed');
+  }
+
+  // ==================== 统计缓存 ====================
+  var CACHE_KEY = 'hbStats:v1:' + location.pathname;
+  function cacheMinutes() { return typeof cfg.cacheMinutes === 'number' ? cfg.cacheMinutes : 360; }
+
+  function readCache() {
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      if (!obj || !obj.t) return null;
+      if (Date.now() - obj.t > cacheMinutes() * 60000) return null;
+      return { views: new Map(obj.v || []), comments: new Map(obj.c || []) };
+    } catch (e) { return null; }
+  }
+
+  function writeCache(s) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        t: Date.now(),
+        v: Array.from(s.views || []),
+        c: Array.from(s.comments || [])
+      }));
+    } catch (e) { /* 隐私模式等写不了，忽略 */ }
+  }
+
+  // ==================== 统计请求 ====================
   function getJSON(url) {
     return fetch(url, { credentials: 'omit' }).then(function (r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -124,6 +152,7 @@
     var provider = cfg.provider;
     if (!provider || provider === 'none' || !cfg.serverUrl) return Promise.resolve(null);
     var paths = cards().map(pathOf);
+    if (!paths.length) return Promise.resolve(null);
 
     if (provider === 'waline') {
       // 浏览量：一次请求批量取回（顺序与传入的 path 一致）
@@ -131,11 +160,13 @@
         .then(function (arr) {
           var views = new Map();
           paths.forEach(function (p, i) { views.set(p, Array.isArray(arr) ? (arr[i] || 0) : (arr || 0)); });
-          // 评论数：只探测浏览量最高的前若干篇，避免几十个请求
-          var probe = paths.slice().sort(function (a, b) { return (views.get(b) || 0) - (views.get(a) || 0); })
-            .slice(0, cfg.commentProbe || 12);
           var comments = new Map();
-          return Promise.all(probe.map(function (p) {
+          // 评论数只在需要时探测（权重为 0 就不取），且只取浏览量前几名，控制请求数
+          var weight = cfg.commentsWeight || 0;
+          var probe = weight > 0 ? Math.max(0, cfg.commentProbe || 6) : 0;
+          if (!probe) return { views: views, comments: comments };
+          var top = paths.slice().sort(function (a, b) { return (views.get(b) || 0) - (views.get(a) || 0); }).slice(0, probe);
+          return Promise.all(top.map(function (p) {
             return getJSON(cfg.serverUrl + '/comment?path=' + encodeURIComponent(p) + '&type=count')
               .then(function (n) { comments.set(p, typeof n === 'number' ? n : 0); })
               .catch(function () { /* 单条失败忽略 */ });
@@ -159,22 +190,20 @@
     return Promise.resolve(null);
   }
 
-  // 卡片上显示浏览量（配置开启时）
+  // ==================== 应用统计结果 ====================
   function paintViews() {
     if (!cfg.showViews || !stats || !stats.views) return;
     cards().forEach(function (card) {
       var el = card.querySelector('[data-hb-views]');
       if (!el) return;
-      var n = stats.views.get(pathOf(card)) || 0;
-      el.textContent = (cfg.labelViews || '%d 次浏览').replace('%d', n);
+      el.textContent = (cfg.labelViews || '%d 次浏览').replace('%d', stats.views.get(pathOf(card)) || 0);
       el.hidden = false;
     });
   }
 
-  // 精选·自动：按热度重排精选槽位的内容
   function refillFeatured() {
-    if (cfg.featuredMode !== 'auto' || !stats) return;
-    var slots = Array.prototype.slice.call(root.querySelectorAll('#hbFeatured [data-hb-slot]'));
+    if (cfg.featuredMode !== 'auto' || !stats || !featured) return;
+    var slots = Array.prototype.slice.call(featured.querySelectorAll('[data-hb-slot]'));
     if (!slots.length) return;
     var ranked = cards().slice().sort(function (a, b) { return scoreOf(b) - scoreOf(a); });
     slots.forEach(function (slot, i) {
@@ -195,52 +224,55 @@
       if (slotImg && img) {
         slotImg.setAttribute('src', img.getAttribute('src'));
         slotImg.setAttribute('alt', title || '');
-        slotImg.removeAttribute('fetchpriority');
-        slotImg.setAttribute('loading', 'lazy');
       }
     });
   }
 
-  function text(el, sel) {
-    var n = el.querySelector(sel);
-    return n ? n.textContent.trim() : '';
+  function text(el, sel) { var n = el.querySelector(sel); return n ? n.textContent.trim() : ''; }
+  function set(el, sel, value) { var n = el.querySelector(sel); if (n) n.textContent = value; }
+
+  function applyStats() {
+    paintViews();
+    refillFeatured();
+    if (currentSort === 'hot') setSort('hot');
   }
 
-  function set(el, sel, value) {
-    var n = el.querySelector(sel);
-    if (n) n.textContent = value;
+  function hideHotTab() {
+    tabs.forEach(function (btn) {
+      if (btn.getAttribute('data-hb-sort') === 'hot') btn.hidden = true;
+    });
   }
 
   // ==================== 启动 ====================
   applyVisibility();
 
-  // 统计在页面加载完成后的空闲时段再请求，避免和首屏抢带宽
-  function start() {
+  // 1) 先用缓存立刻按热度渲染（再次打开本页时零等待、无闪烁）
+  var cached = readCache();
+  if (cached) {
+    stats = cached;
+    root.setAttribute('data-hb-stats', 'cache');
+    applyStats();
+    reveal();
+  }
+
+  // 2) 并行取最新统计（解析完就发，不等 idle）
+  function refresh() {
     loadStats().then(function (s) {
       if (!s) {
-        // 拿不到统计：隐藏「热门」，保留「最新」
-        root.setAttribute('data-hb-stats', 'none');
-        tabs.forEach(function (btn) {
-          if (btn.getAttribute('data-hb-sort') === 'hot') btn.hidden = true;
-        });
+        if (!cached) { root.setAttribute('data-hb-stats', 'none'); hideHotTab(); }
+        reveal();
         return;
       }
       stats = s;
       root.setAttribute('data-hb-stats', 'ready');
-      paintViews();
-      refillFeatured();
-      if (currentSort === 'hot') setSort('hot');
+      writeCache(s);
+      applyStats();
+      reveal();
     }).catch(function () {
-      root.setAttribute('data-hb-stats', 'error');
-      tabs.forEach(function (btn) {
-        if (btn.getAttribute('data-hb-sort') === 'hot') btn.hidden = true;
-      });
+      if (!cached) { root.setAttribute('data-hb-stats', 'error'); hideHotTab(); }
+      reveal();
     });
   }
 
-  if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(start, { timeout: 2000 });
-  } else {
-    window.addEventListener('load', function () { setTimeout(start, 200); });
-  }
+  refresh();
 })();

@@ -1,0 +1,29 @@
+{{- /* ============================================================
+  home-bento-stats-config.html — 新版主页的统计来源解析（返回 dict）
+  ------------------------------------------------------------
+  返回：provider（waline / twikoo / artalk / none）、serverUrl
+  规则：
+    [home.bento].stats_provider = auto 时，读文章页用的评论系统
+    （[comment.article].provider → [comment].provider，两种键名都兼容）
+    stats_server_url 留空时，按 provider 从评论配置里取服务地址
+  head 里的预连接与页面底部的脚本共用这一份逻辑，避免两处不一致。
+  ============================================================ */ -}}
+{{- $bento := .Site.Params.home.bento | default dict -}}
+{{- $comment := .Site.Params.comment | default dict -}}
+{{- $cArticle := $comment.article | default dict -}}
+{{- $provider := $cArticle.provider | default ($cArticle.comment_provider | default ($comment.provider | default ($comment.comment_provider | default ""))) -}}
+{{- $statsProvider := $bento.stats_provider | default "auto" -}}
+{{- if eq $statsProvider "auto" }}{{ $statsProvider = $provider }}{{ end -}}
+{{- if not $statsProvider }}{{ $statsProvider = "none" }}{{ end -}}
+{{- if not ($bento.enable_hot | default true) }}{{ $statsProvider = "none" }}{{ end -}}
+{{- $serverUrl := $bento.stats_server_url | default "" -}}
+{{- if not $serverUrl -}}
+  {{- if eq $statsProvider "waline" -}}
+    {{- $serverUrl = $cArticle.waline_server_url | default ($comment.waline_server_url | default "") -}}
+  {{- else if eq $statsProvider "twikoo" -}}
+    {{- $serverUrl = $cArticle.twikoo_env_id | default ($comment.twikoo_env_id | default "") -}}
+  {{- else if eq $statsProvider "artalk" -}}
+    {{- $serverUrl = $cArticle.artalk_server | default ($comment.artalk_server | default "") -}}
+  {{- end -}}
+{{- end -}}
+{{- return (dict "provider" $statsProvider "serverUrl" $serverUrl) -}}
