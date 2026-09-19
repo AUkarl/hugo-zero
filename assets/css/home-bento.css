@@ -208,7 +208,7 @@ html { scroll-behavior: smooth; }
 #home-bento .hb-hero {
   position: relative;
   display: block;
-  background: var(--tag-bg);
+  background: var(--hb-placeholder);
 }
 
 #home-bento .hb-hero .hb-hero-img {
@@ -275,7 +275,7 @@ html { scroll-behavior: smooth; }
   width: 40%;
   flex: 0 0 40%;
   overflow: hidden;
-  background: var(--tag-bg);
+  background: var(--hb-placeholder);
 }
 
 #home-bento .hb-wide .hb-wide-body {
@@ -305,7 +305,7 @@ html { scroll-behavior: smooth; }
 #home-bento .hb-tall {
   position: relative;
   display: block;
-  background: var(--tag-bg);
+  background: var(--hb-placeholder);
 }
 
 #home-bento .hb-tall .hb-hero-img {
@@ -414,7 +414,7 @@ html { scroll-behavior: smooth; }
   height: 45%;
   flex: 0 0 45%;
   overflow: hidden;
-  background: var(--tag-bg);
+  background: var(--hb-placeholder);
 }
 
 #home-bento .hb-top .hb-top-body {
@@ -470,7 +470,7 @@ html { scroll-behavior: smooth; }
   height: var(--hb-acard-img);
   flex: 0 0 var(--hb-acard-img);
   overflow: hidden;
-  background: var(--tag-bg);
+  background: var(--hb-placeholder);
 }
 
 #home-bento .hb-acard .hb-a-body {
@@ -581,13 +581,6 @@ html { scroll-behavior: smooth; }
 /* ============================================================
    无图卡片 / 无封面图：统一用莫兰迪暖色底（不用纯白、纯黑、高饱和色）
    ============================================================ */
-#home-bento .hb-a-img,
-#home-bento .hb-top-img,
-#home-bento .hb-wide-img,
-#home-bento .hb-hero,
-#home-bento .hb-tall {
-  background: var(--hb-placeholder);
-}
 
 /* ============================================================
    精选「自动」取数期间的骨架态：
