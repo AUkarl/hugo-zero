@@ -592,7 +592,8 @@ aboutName = "示例名称"
 #           layout = "grid" （旧的卡片网格布局）
 # 详见站点仓库 README「主页卡片布局」一节。
 [home.bento]
-  max_width = 1280                  # 内容区最大宽度（px）
+  width_ratio = 90                  # 内容区宽度占比（%），默认 90
+  max_width = 0                     # 可选像素上限：0 = 不限制
   intro_eyebrow = ""                # 顶部小字标签（留空不显示）
   intro_title = ""                  # 主标题（留空不显示）
   intro_desc = ""                   # 简介（留空不显示）

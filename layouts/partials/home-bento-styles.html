@@ -2,18 +2,34 @@
   home-bento-styles.html — 新版主页（bento）的样式引入与预连接
   只在 [home] layout = "bento" 时被 home/list.html 的 styles 块调用（即 <head> 内）
   ============================================================ */ -}}
-{{- $bento := .Site.Params.home.bento -}}
+{{- $bento := .Site.Params.home.bento | default dict -}}
+{{- $home := .Site.Params.home | default dict -}}
 {{- $stats := partial "home-bento-stats-config.html" . -}}
 {{- /* 预连接统计服务：省掉一次 DNS + TLS 握手，精选/热门取数更快 */ -}}
 {{- with $stats.serverUrl }}
 <link rel="preconnect" href="{{ . }}" crossorigin>
 <link rel="dns-prefetch" href="{{ . }}">
 {{- end }}
+{{- /* 内容区宽度：width_ratio 为百分比（默认 90，沿用旧版布局同名语义；
+       没单独配置时回退到 [home] width_ratio）；
+       max_width 是可选像素上限，0/留空表示不限制（默认 0，这样 90% 在大屏也生效） */ -}}
+{{- $ratio := 90 -}}
+{{- if isset $home "width_ratio" }}{{ $ratio = $home.width_ratio }}{{ end -}}
+{{- if isset $bento "width_ratio" }}{{ $ratio = $bento.width_ratio }}{{ end -}}
+{{- $cap := 0 -}}
+{{- if isset $bento "max_width" }}{{ $cap = $bento.max_width }}{{ end -}}
 {{- $css := resources.Get "css/home-bento.css" | minify | fingerprint -}}
 <link rel="stylesheet" href="{{ $css.RelPermalink }}">
 <style>
-  /* 新版主页的内容宽度（与参考稿一致：最大 1280px，内边距交给主题的 .main） */
-  .main { max-width: {{ $bento.max_width | default 1280 }}px; margin-left: auto; margin-right: auto; }
+  .main {
+    {{- if gt $cap 0 }}
+    max-width: min({{ $ratio }}%, {{ $cap }}px);
+    {{- else }}
+    max-width: {{ $ratio }}%;
+    {{- end }}
+    margin-left: auto;
+    margin-right: auto;
+  }
 </style>
 <noscript>
   <style>
