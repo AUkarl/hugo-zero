@@ -113,11 +113,18 @@ navName_en = "MOL Cloud."
 [home]
   paginate = 20                     # 每页最多显示文章数量
   columns = 4                       # 卡片列数（1-4）
+  stagger_offset = 60               # 第 2、4 列整体下移的像素数（0 = 完全对齐，不做错落）
+  image_ratio = "4 / 3"             # 封面图统一比例（可写 4 / 3、1 / 1、16 / 9）
+  title_lines = 2                   # 标题固定行数（超出显示省略号）
   width_ratio = 90                  # 内容区域宽度占比（1-100，100=全宽）
   mainSections = ["posts"]
   show_images = true                # 是否显示文章封面图
   show_summary = true               # 是否显示文章摘要
-  summary_length = 120              # 摘要最大字数
+  summary_length = 120              # 摘要最大字数（旧参数：中/英文没单独配置时的回退值）
+  summary_length_zh = 120           # 中文摘要截断字数
+  summary_length_en = 220           # 英文摘要截断字符数（英文单词更长，一般给大一些）
+  summary_lines_zh = 3              # 中文摘要固定显示行数（超出省略号）
+  summary_lines_en = 3              # 英文摘要固定显示行数
 
   # 主页描述文字（显示在页面标题下方）
   show_desc = true                  # 是否显示主页描述

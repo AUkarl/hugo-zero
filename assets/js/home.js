@@ -1,6 +1,8 @@
 // ============================================================
 // home.js - 首页（Home）文章卡片列表功能
-// 包含：瀑布流渲染、分页、分类筛选、搜索
+// 包含：卡片分列网格渲染、分页、分类筛选、搜索
+// 卡片本身等高（行数由配置固定），所以分列后各列自然形成对齐的行，
+// 偶数列再由 CSS 下移 --stagger-offset 形成错落。
 // 适用于 Hugo 主题，数据由模板直接渲染，无需动态加载
 // ============================================================
 
@@ -40,13 +42,14 @@ function locPermalink(item) {
   return item.permalink || '#';
 }
 
-// ==================== 瀑布流分列 ====================
+// ==================== 卡片分列 ====================
 // CSS 的 column-count 是「先竖着填满第一列，再填第二列」，
 // 卡片顺序看起来会和时间顺序对不上。
 // 这里改成：按数据顺序把卡片轮流分配到各列
 // （第 1 张进第 1 列、第 2 张进第 2 列……第 n+1 张回到第 1 列继续往下），
-// 阅读顺序即「从左到右、从上到下」，而每列高度独立，仍是瀑布流的错落感。
-const Masonry = {
+// 阅读顺序即「从左到右、从上到下」；卡片等高，各列自然对齐成行，
+// 偶数列再由 CSS 整体下移形成错落感。
+const Columns = {
   // 列数取 CSS 变量 --home-columns（响应式断点写在 home.css 里）
   getColumnCount(grid) {
     const raw = getComputedStyle(grid).getPropertyValue('--home-columns');
@@ -62,7 +65,7 @@ const Masonry = {
     const cards = grid.__gardenCards;
     if (cards.length === 0) return;
 
-    const count = Math.max(1, Math.min(Masonry.getColumnCount(grid), cards.length));
+    const count = Math.max(1, Math.min(Columns.getColumnCount(grid), cards.length));
     const cols = [];
     grid.textContent = '';                 // 清空旧列，卡片节点仍被 cards 引用着
     for (let i = 0; i < count; i++) {
@@ -72,21 +75,21 @@ const Masonry = {
       cols.push(col);
     }
     cards.forEach((card, i) => cols[i % count].appendChild(card));
-    grid.classList.add('is-masonry');
+    grid.classList.add('is-columns');
     grid.__gardenCols = count;
   },
-  // 内容重新渲染后调用：先丢弃旧缓存再分列
+   // 内容重新渲染后调用：先丢弃旧缓存再分列
   refresh(grid) {
     if (!grid) return;
     grid.__gardenCards = null;
-    Masonry.layout(grid);
+    Columns.layout(grid);
   },
-  // 响应式：列数变化时重新分列
+   // 响应式：列数变化时重新分列
   watch() {
     window.addEventListener('resize', function () {
       const grid = document.getElementById('gardenGrid');
       if (!grid || !grid.__gardenCards || grid.__gardenCards.length === 0) return;
-      if (Masonry.getColumnCount(grid) !== grid.__gardenCols) Masonry.layout(grid);
+      if (Columns.getColumnCount(grid) !== grid.__gardenCols) Columns.layout(grid);
     });
   }
 };
@@ -117,11 +120,11 @@ function initGarden() {
     renderGarden();
   } else {
     // 静态列表页（/posts/ 等）：卡片已由 Hugo 渲染好，直接分列
-    Masonry.layout(gridEl);
+    Columns.layout(gridEl);
   }
 
   bindEvents();
-  Masonry.watch();
+  Columns.watch();
 }
 
 // ==================== 渲染文章卡片 ====================
@@ -171,7 +174,7 @@ function renderGarden() {
   });
   gridEl.innerHTML = html;
   // 重新按顺序分列（保证「从左到右、从上到下」）
-  Masonry.refresh(gridEl);
+  Columns.refresh(gridEl);
 
   // 渲染分页
   const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE);

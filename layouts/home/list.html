@@ -1,18 +1,18 @@
 {{- /* ============================================================
-  home/list.html — 主页模板（文章卡片瀑布流）
+  home/list.html — 主页模板（文章卡片规整网格）
   展示所有文章的卡片列表，支持分页、分类筛选、搜索
+  布局：等宽等高卡片网格，第 2、4 列整体下移 stagger_offset（默认 60px）
   数据由 Hugo 从 content/posts/ 目录自动生成
   ============================================================ */ -}}
 
 {{- define "styles" -}}
 {{- $home := .Site.Params.home -}}
-{{- $columns := $home.columns | default 4 -}}
 {{- $widthRatio := $home.width_ratio | default 100 -}}
 {{- $homeCSS := resources.Get "css/home.css" | minify | fingerprint -}}
 <link rel="stylesheet" href="{{ $homeCSS.RelPermalink }}">
+{{- partial "home-grid-vars.html" . }}
 <style>
   /* 从配置注入的 CSS 变量 */
-  .garden-grid { --home-columns: {{ $columns }}; }
   .main { max-width: {{ $widthRatio }}%; margin-left: auto; margin-right: auto; }
 </style>
 {{- end -}}
@@ -20,12 +20,13 @@
 {{- define "main" -}}
 {{- $home := .Site.Params.home -}}
 {{- $paginate := $home.paginate | default 20 -}}
-{{- $summaryLen := $home.summary_length | default 120 -}}
+{{- /* 摘要截断字数：中英文分别配置，未配置时回退到旧参数 summary_length */ -}}
+{{- $fallbackLen := $home.summary_length | default 120 -}}
+{{- $lenZh := $home.summary_length_zh | default $fallbackLen -}}
+{{- $lenEn := $home.summary_length_en | default $fallbackLen -}}
 {{- $showImages := $home.show_images | default true -}}
 {{- $showSummary := $home.show_summary | default true -}}
 {{- $showDesc := $home.show_desc | default true -}}
-{{- $widthRatio := $home.width_ratio | default 100 -}}
-{{- $columns := $home.columns | default 4 -}}
 <main class="main" id="main">
   <section class="section">
     <h1 class="section-title" data-i18n="home-title">{{ i18n "home-title" | default "主页" }}</h1>
@@ -45,9 +46,12 @@
     {{- range $page := $pages -}}
       {{- $cat := "" -}}
       {{- with $page.Params.categories }}{{ $cat = index . 0 }}{{ end -}}
+      {{- /* 摘要按该文章语言的配置字数截断 */ -}}
+      {{- $len := $lenZh -}}
+      {{- if eq $page.Language.Lang "en" }}{{ $len = $lenEn }}{{ end -}}
       {{- $item := dict
         "title" $page.Title
-        "desc" ($page.Description | default $page.Summary | plainify | truncate $summaryLen)
+        "desc" ($page.Description | default $page.Summary | plainify | truncate $len)
         "date" ($page.Date.Format "2006-01-02")
         "category" $cat
         "tags" ($page.Params.tags | default slice)
@@ -58,19 +62,19 @@
         "permalinkZh" "" "permalinkEn" ""
       -}}
       {{- if eq $page.Language.Lang "zh" -}}
-        {{- $item = merge $item (dict "titleZh" $page.Title "descZh" ($page.Description | default $page.Summary | plainify | truncate $summaryLen) "categoryZh" $cat "tagsZh" ($page.Params.tags | default slice) "permalinkZh" $page.RelPermalink) -}}
+        {{- $item = merge $item (dict "titleZh" $page.Title "descZh" ($page.Description | default $page.Summary | plainify | truncate $lenZh) "categoryZh" $cat "tagsZh" ($page.Params.tags | default slice) "permalinkZh" $page.RelPermalink) -}}
       {{- else -}}
-        {{- $item = merge $item (dict "titleEn" $page.Title "descEn" ($page.Description | default $page.Summary | plainify | truncate $summaryLen) "categoryEn" $cat "tagsEn" ($page.Params.tags | default slice) "permalinkEn" $page.RelPermalink) -}}
+        {{- $item = merge $item (dict "titleEn" $page.Title "descEn" ($page.Description | default $page.Summary | plainify | truncate $lenEn) "categoryEn" $cat "tagsEn" ($page.Params.tags | default slice) "permalinkEn" $page.RelPermalink) -}}
       {{- end -}}
       {{- range $page.Translations -}}
         {{- if eq .Language.Lang "en" -}}
           {{- $enCat := "" -}}
           {{- with .Params.categories }}{{ $enCat = index . 0 }}{{ end -}}
-          {{- $item = merge $item (dict "titleEn" .Title "descEn" (.Description | default .Summary | plainify | truncate $summaryLen) "categoryEn" $enCat "tagsEn" (.Params.tags | default slice) "permalinkEn" .RelPermalink) -}}
+          {{- $item = merge $item (dict "titleEn" .Title "descEn" (.Description | default .Summary | plainify | truncate $lenEn) "categoryEn" $enCat "tagsEn" (.Params.tags | default slice) "permalinkEn" .RelPermalink) -}}
         {{- else if eq .Language.Lang "zh" -}}
           {{- $zhCat := "" -}}
           {{- with .Params.categories }}{{ $zhCat = index . 0 }}{{ end -}}
-          {{- $item = merge $item (dict "titleZh" .Title "descZh" (.Description | default .Summary | plainify | truncate $summaryLen) "categoryZh" $zhCat "tagsZh" (.Params.tags | default slice) "permalinkZh" .RelPermalink) -}}
+          {{- $item = merge $item (dict "titleZh" .Title "descZh" (.Description | default .Summary | plainify | truncate $lenZh) "categoryZh" $zhCat "tagsZh" (.Params.tags | default slice) "permalinkZh" .RelPermalink) -}}
         {{- end -}}
       {{- end -}}
       {{- $data = $data | append $item -}}

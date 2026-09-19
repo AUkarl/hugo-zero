@@ -1,13 +1,20 @@
 {{- /* ============================================================
   _default/list.html — 列表页
   文章列表的备用模板，按时间倒序展示
+  卡片布局/行数与主页共用（见 partials/home-grid-vars.html 与 home.css）
   ============================================================ */ -}}
 {{- define "styles" -}}
 {{- $homeCSS := resources.Get "css/home.css" | minify | fingerprint -}}
 <link rel="stylesheet" href="{{ $homeCSS.RelPermalink }}">
+{{- partial "home-grid-vars.html" . }}
 {{- end -}}
 
 {{- define "main" -}}
+{{- $home := .Site.Params.home -}}
+{{- $fallbackLen := $home.summary_length | default 120 -}}
+{{- /* 摘要按当前页面语言的字数配置截断 */ -}}
+{{- $summaryLen := $home.summary_length_zh | default $fallbackLen -}}
+{{- if eq .Site.Language.Lang "en" }}{{ $summaryLen = $home.summary_length_en | default $fallbackLen }}{{ end -}}
 <main class="main" id="main">
   <section class="section">
     <h1 class="section-title">{{ .Title }}</h1>
@@ -26,7 +33,7 @@
             <span class="tag">{{ index . 0 }}</span>
             {{- end }}
             <h3>{{ .Title }}</h3>
-            <p>{{ .Description | default .Summary | plainify | truncate 120 }}</p>
+            <p>{{ .Description | default .Summary | plainify | truncate $summaryLen }}</p>
             <div class="meta">{{ .Date.Format "2006-01-02" }} · {{ .ReadingTime }} min</div>
           </div>
         </a>

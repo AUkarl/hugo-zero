@@ -1,0 +1,26 @@
+{{- /* ============================================================
+  home-grid-vars.html — 主页/列表页卡片布局变量
+  ------------------------------------------------------------
+  把 params.toml 的 [home] 配置注入成 CSS 变量，供 home.css 使用：
+    columns          列数（首页 4 列；窄屏断点由 home.css 覆盖）
+    stagger_offset   第 2、4 列整体下移的像素数，0 = 完全对齐
+    title_lines      标题固定行数（超出省略号）
+    image_ratio      封面图统一比例，如 "4 / 3"、"1 / 1"
+    summary_lines_zh 中文摘要显示行数（超出省略号）
+    summary_lines_en 英文摘要显示行数
+  行数固定后所有卡片等高，各列自然对齐成行。
+  ============================================================ */ -}}
+{{- $home := .Site.Params.home | default dict -}}
+{{- /* stagger_offset 允许为 0（表示不错落），所以不能用 default 判断 */ -}}
+{{- $stagger := 60 -}}
+{{- if isset $home "stagger_offset" }}{{ $stagger = $home.stagger_offset }}{{ end -}}
+<style>
+  :root {
+    --home-columns: {{ $home.columns | default 4 }};
+    --stagger-offset: {{ $stagger }}px;
+    --card-title-lines: {{ $home.title_lines | default 2 }};
+    --card-image-ratio: {{ $home.image_ratio | default "4 / 3" | safeCSS }};
+    --summary-lines-zh: {{ $home.summary_lines_zh | default 3 }};
+    --summary-lines-en: {{ $home.summary_lines_en | default 3 }};
+  }
+</style>
