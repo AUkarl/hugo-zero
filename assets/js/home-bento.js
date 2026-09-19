@@ -16,6 +16,7 @@
 (function () {
   'use strict';
 
+  var startTs = Date.now();
   var cfg = window.hbConfig || {};
   var root = document.getElementById('home-bento');
   if (!root) return;
@@ -148,34 +149,46 @@
     });
   }
 
-  function loadStats() {
-    var provider = cfg.provider;
-    if (!provider || provider === 'none' || !cfg.serverUrl) return Promise.resolve(null);
-    var paths = cards().map(pathOf);
-    if (!paths.length) return Promise.resolve(null);
+  function loadViews() {
+    var provider = cfg.provider, paths = cards().map(pathOf);
+    if (!provider || provider === 'none' || !cfg.serverUrl || !paths.length) return Promise.resolve(null);
 
     if (provider === 'waline') {
-      // 浏览量：一次请求批量取回（顺序与传入的 path 一致）
+      // 浏览量：一次请求批量取回（顺序与传入的 path 一致）—— 最快的那一步，先拿它显示
       return getJSON(cfg.serverUrl + '/article?path=' + encodeURIComponent(paths.join(',')))
         .then(function (arr) {
           var views = new Map();
           paths.forEach(function (p, i) { views.set(p, Array.isArray(arr) ? (arr[i] || 0) : (arr || 0)); });
-          var comments = new Map();
-          // 评论数只在需要时探测（权重为 0 就不取），且只取浏览量前几名，控制请求数
-          var weight = cfg.commentsWeight || 0;
-          var probe = weight > 0 ? Math.max(0, cfg.commentProbe || 6) : 0;
-          if (!probe) return { views: views, comments: comments };
-          var top = paths.slice().sort(function (a, b) { return (views.get(b) || 0) - (views.get(a) || 0); }).slice(0, probe);
-          return Promise.all(top.map(function (p) {
-            return getJSON(cfg.serverUrl + '/comment?path=' + encodeURIComponent(p) + '&type=count')
-              .then(function (n) { comments.set(p, typeof n === 'number' ? n : 0); })
-              .catch(function () { /* 单条失败忽略 */ });
-          })).then(function () { return { views: views, comments: comments }; });
+          return { views: views };
         });
     }
 
     if (provider === 'twikoo') {
-      // Twikoo 没有浏览量，只用评论数
+      // Twikoo 没有浏览量，直接进入评论数阶段
+      return Promise.resolve({ views: new Map() });
+    }
+
+    return Promise.resolve(null);
+  }
+
+  function loadComments(views) {
+    var provider = cfg.provider, paths = cards().map(pathOf);
+    var weight = cfg.commentsWeight || 0;
+    var probe = weight > 0 ? Math.max(0, cfg.commentProbe || 6) : 0;
+    if (!provider || !cfg.serverUrl || !paths.length || !probe) return Promise.resolve(null);
+
+    if (provider === 'waline') {
+      // 评论数只探测浏览量前几名，控制请求数；失败不影响主流程
+      var top = paths.slice().sort(function (a, b) { return (views.get(b) || 0) - (views.get(a) || 0); }).slice(0, probe);
+      var comments = new Map();
+      return Promise.all(top.map(function (p) {
+        return getJSON(cfg.serverUrl + '/comment?path=' + encodeURIComponent(p) + '&type=count')
+          .then(function (n) { comments.set(p, typeof n === 'number' ? n : 0); })
+          .catch(function () { /* 单条失败忽略 */ });
+      })).then(function () { return comments; });
+    }
+
+    if (provider === 'twikoo') {
       return fetch(cfg.serverUrl, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -183,7 +196,7 @@
       }).then(function (r) { return r.json(); }).then(function (arr) {
         var comments = new Map();
         paths.forEach(function (p, i) { comments.set(p, Array.isArray(arr) ? (arr[i] || 0) : 0); });
-        return { views: new Map(), comments: comments };
+        return comments;
       });
     }
 
@@ -256,18 +269,28 @@
   }
 
   // 2) 并行取最新统计（解析完就发，不等 idle）
+  //    先拿浏览量 → 立刻显示正确顺序；评论数后台补，只更新「热门」与缓存，
+  //    不再动精选槽位，避免出现第二次跳动。
   function refresh() {
-    loadStats().then(function (s) {
-      if (!s) {
+    loadViews().then(function (v) {
+      if (!v) {
         if (!cached) { root.setAttribute('data-hb-stats', 'none'); hideHotTab(); }
         reveal();
         return;
       }
-      stats = s;
-      root.setAttribute('data-hb-stats', 'ready');
-      writeCache(s);
+      stats = { views: v.views, comments: new Map() };
+      root.setAttribute('data-hb-stats', 'views');
       applyStats();
       reveal();
+      root.setAttribute('data-hb-init-ms', String(Date.now() - startTs));
+
+      loadComments(v.views).then(function (comments) {
+        if (!comments || !comments.size) return;
+        stats = { views: v.views, comments: comments };
+        root.setAttribute('data-hb-stats', 'ready');
+        writeCache(stats);
+        if (currentSort === 'hot') setSort('hot');
+      }).catch(function () { /* 评论数拿不到就算了，浏览量排序仍然有效 */ });
     }).catch(function () {
       if (!cached) { root.setAttribute('data-hb-stats', 'error'); hideHotTab(); }
       reveal();
