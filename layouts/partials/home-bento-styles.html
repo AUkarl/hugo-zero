@@ -41,5 +41,10 @@
     #home-bento .bento-grid.hb-pending .hb-badge,
     #home-bento .bento-grid.hb-pending .hb-meta,
     #home-bento .bento-grid.hb-pending .hb-text-date { visibility: visible; }
+
+    /* 没有 JS 时：把「加载更多」藏起来的文章全部展开，并去掉点了没反应的按钮/切换 */
+    #home-bento #hbArticles .hb-acard[hidden] { display: flex; }
+    #home-bento .hb-more-wrap,
+    #home-bento .hb-tabs { display: none; }
   </style>
 </noscript>

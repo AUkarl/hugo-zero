@@ -16,7 +16,6 @@
 (function () {
   'use strict';
 
-  var startTs = Date.now();
   var cfg = window.hbConfig || {};
   var root = document.getElementById('home-bento');
   if (!root) return;
@@ -299,7 +298,6 @@
       root.setAttribute('data-hb-stats', 'views');
       applyStats();
       reveal();
-      root.setAttribute('data-hb-init-ms', String(Date.now() - startTs));
 
       loadComments(v.views).then(function (comments) {
         if (!comments || !comments.size) return;

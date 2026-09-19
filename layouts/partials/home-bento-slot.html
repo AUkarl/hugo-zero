@@ -63,10 +63,10 @@
     <div class="hb-meta"><span data-hb-date>{{ $date }}</span><span class="hb-dot"></span><span data-hb-tag>{{ $tag }}</span></div>
   </div>
 </a>
-{{- else if or (eq $v "top") (eq $v "plain") -}}
+{{- else if eq $v "top" -}}
 <a class="hb-card hb-top" href="{{ $url }}" data-hb-slot>
   <div class="hb-top-img">
-    {{- if $image }}<img class="hb-img hb-top-img-el" src="{{ $image }}" alt="{{ $title | plainify }}" loading="{{ $loadAttr }}"{{ $prioAttr | safeHTMLAttr }} decoding="async">{{ end }}
+    {{- if $image }}<img class="hb-img" src="{{ $image }}" alt="{{ $title | plainify }}" loading="{{ $loadAttr }}"{{ $prioAttr | safeHTMLAttr }} decoding="async">{{ end }}
   </div>
   <div class="hb-top-body">
     <h3 class="hb-card-title hb-clamp-1" data-hb-title>{{ $title }}</h3>

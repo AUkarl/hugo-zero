@@ -17,7 +17,6 @@
     commentProbe: {{ $bento.stats_comment_probe | default 6 }},
     cacheMinutes: {{ $bento.stats_cache_minutes | default 360 }},
     fallbackImage: {{ $bento.default_image | default "" | jsonify | safeJS }},
-    labelMore: {{ i18n "hb-more" | default "加载更多" | jsonify | safeJS }},
     labelSubLatest: {{ i18n "hb-sub-latest" | default "共 %d 篇 · 按时间排序" | jsonify | safeJS }},
     labelSubHot: {{ i18n "hb-sub-hot" | default "共 %d 篇 · 按热度排序" | jsonify | safeJS }},
     labelViews: {{ i18n "hb-views" | default "%d 次浏览" | jsonify | safeJS }}

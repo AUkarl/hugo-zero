@@ -91,7 +91,8 @@ hugo server -D
 | 全局设置 | 站点名称、作者、Logo、Favicon |
 | `nav` | 导航栏链接 |
 | `index` | 首页轮播诗句 |
-| `home` | 文章列表页配置 |
+| `home` | 文章列表页配置（`layout = "bento"` 新版 / `"grid"` 旧版） |
+| `home.bento` | 新版主页：精选区、宽度占比、加载行数、热门统计等 |
 | `moment` | 时刻页（在线/离线模式） |
 | `comments` | 评论系统配置 |
 | `footer` | 页脚链接与社交图标 |

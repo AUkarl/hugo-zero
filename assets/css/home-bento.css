@@ -12,7 +12,6 @@
 #home-bento {
   --hb-radius: 16px;
   --hb-gap: 20px;
-  --hb-max: 1280px;
   --hb-shadow: var(--shadow);
   --hb-shadow-hover: 0 18px 36px -14px rgba(0, 0, 0, 0.22);
   --hb-card-h: 360px;
@@ -32,7 +31,6 @@
 html { scroll-behavior: smooth; }
 
 #home-bento {
-  max-width: var(--hb-max);
   margin: 0 auto;
   /* 顶部/左右避让由主题的 .main 负责（padding-top 已含导航高度），这里只留底部间距 */
   padding: 0 0 96px;
@@ -133,15 +131,13 @@ html { scroll-behavior: smooth; }
 
 /* 文本截断工具 */
 #home-bento .hb-clamp-1,
-#home-bento .hb-clamp-2,
-#home-bento .hb-clamp-3 {
+#home-bento .hb-clamp-2 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 #home-bento .hb-clamp-1 { -webkit-line-clamp: 1; }
 #home-bento .hb-clamp-2 { -webkit-line-clamp: 2; }
-#home-bento .hb-clamp-3 { -webkit-line-clamp: 3; }
 
 /* 分类小药丸 */
 #home-bento .hb-pill {
@@ -577,8 +573,6 @@ html { scroll-behavior: smooth; }
   border-color: var(--text-secondary);
   box-shadow: var(--hb-shadow);
 }
-
-#home-bento .hb-more[hidden] { display: none; }
 
 /* 手机端隐藏「日期 · 标签」里的小圆点，避免换行 */
 @media (max-width: 420px) {
