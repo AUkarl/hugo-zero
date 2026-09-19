@@ -18,11 +18,11 @@
   --hb-card-h: 360px;
   --hb-acard-img: 52%;
 
-  /* 无图卡片的莫兰迪色：低饱和、四张明显区分（明暗模式都用这一套浅色） */
-  --hb-morandi-1: #e8d0c6;   /* 陶土粉 */
-  --hb-morandi-2: #eadfb9;   /* 奶黄 */
-  --hb-morandi-3: #d7e0c6;   /* 橄榄绿 */
-  --hb-morandi-4: #d3dde2;   /* 雾蓝 */
+  /* 无图卡片的莫兰迪色：低饱和、四张色相明显不同（明暗模式都用这一套浅色） */
+  --hb-morandi-1: #e5c3b7;   /* 陶土粉 */
+  --hb-morandi-2: #e8d79a;   /* 奶黄 */
+  --hb-morandi-3: #c9d8b4;   /* 橄榄绿 */
+  --hb-morandi-4: #c3d3dc;   /* 雾蓝 */
   --hb-morandi-ink: #463c34; /* 暖褐灰文字 */
   --hb-placeholder: #e9e1d7; /* 无封面图时的底色（中性暖灰，与上面四色区分开） */
 }
