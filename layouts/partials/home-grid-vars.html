@@ -3,37 +3,23 @@
   ------------------------------------------------------------
   把 params.toml 的 [home] 配置注入成 CSS 变量，供 home.css 使用：
     columns          列数（首页 4 列；窄屏断点由 home.css 覆盖）
-    row_stagger      偶数列首格矮、末格高的像素数（内部交错，四周对齐）；
-                     0 = 不错落
+    stagger_offset   第 2、4 列整体下移的比例（卡片宽度的百分比，随屏幕等比缩放）；
+                     0 = 完全对齐，不做错落
     title_lines      标题固定行数（超出省略号）
     image_ratio      封面图统一比例，写成 "宽 / 高"，如 "4 / 3"、"1 / 1"、"16 / 9"
     summary_lines_zh 中文摘要显示行数（超出省略号）
     summary_lines_en 英文摘要显示行数
-  图片高度用 padding-top 百分比撑出（相对卡片宽度），因此能等比缩放，
-  又能叠加 ±row_stagger 的像素微调。
   ============================================================ */ -}}
 {{- $home := .Site.Params.home | default dict -}}
-{{- /* row_stagger 允许为 0（表示不错落），所以不能用 default 判断 */ -}}
-{{- $stagger := 50 -}}
-{{- if isset $home "row_stagger" }}{{ $stagger = $home.row_stagger }}{{ end -}}
-{{- /* 把 "4 / 3" 这样的比例换算成 padding-top 百分比：高 / 宽 × 100% */ -}}
-{{- $ratio := $home.image_ratio | default "4 / 3" -}}
-{{- $parts := split $ratio "/" -}}
-{{- $pct := 75 -}}
-{{- if eq (len $parts) 2 -}}
-  {{- $w := float (trim (index $parts 0) " ") -}}
-  {{- $h := float (trim (index $parts 1) " ") -}}
-  {{- if and $w $h -}}{{- $pct = div (mul $h 100) $w -}}{{- end -}}
-{{- else -}}
-  {{- $n := float $ratio -}}
-  {{- if $n -}}{{- $pct = div 100 $n -}}{{- end -}}
-{{- end -}}
+{{- /* stagger_offset 允许为 0（表示不错落），所以不能用 default 判断 */ -}}
+{{- $stagger := 22 -}}
+{{- if isset $home "stagger_offset" }}{{ $stagger = $home.stagger_offset }}{{ end -}}
 <style>
   :root {
     --home-columns: {{ $home.columns | default 4 }};
-    --row-stagger: {{ $stagger }}px;
+    --stagger-offset: {{ $stagger }}%;
     --card-title-lines: {{ $home.title_lines | default 2 }};
-    --card-image-pct: {{ $pct }}%;
+    --card-image-ratio: {{ $home.image_ratio | default "4 / 3" | safeCSS }};
     --summary-lines-zh: {{ $home.summary_lines_zh | default 3 }};
     --summary-lines-en: {{ $home.summary_lines_en | default 3 }};
   }

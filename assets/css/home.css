@@ -1,24 +1,23 @@
 /* ============================================================
-   home.css — 主页 / 列表页文章卡片（规整网格 + 内部交错）
+   home.css — 主页 / 列表页文章卡片（规整网格 + 列错落）
    ------------------------------------------------------------
    布局：4 列等宽等高的卡片网格（由 home.js 按数据顺序分列，
         保证阅读顺序为「从左到右、从上到下」）。
-   交错：第 2、4 列的首格图片矮 --row-stagger、末格图片高 --row-stagger，
-        两者相抵，所以整列高度不变 —— 上下左右四周对齐，
-        而中间各格上移 50px 形成内部的错落感。
+   错落：第 2、4 列整体下移 --stagger-offset。该值是「卡片宽度的百分比」
+        （margin 百分比按包含块宽度计算），所以屏幕/列数变化时自动等比缩放，
+        不会像固定像素那样在小屏显得夸张、大屏显得太小。
    卡片：封面统一比例、标题固定行数、摘要固定行数、
         底部一行「日期 …… #标签」，因此所有卡片等高。
-   行数/字数/交错量/图片比例都来自 params.toml 的 [home]。
+   行数/字数/下移比例/图片比例都来自 params.toml 的 [home]。
    ============================================================ */
 
 /* 默认值（home/list.html 与 _default/list.html 会用站点配置覆盖这些变量） */
 :root {
+  --stagger-offset: 22%;      /* 第 2、4 列整体下移 = 卡片宽度的 22% */
   --card-title-lines: 2;
   --summary-lines-zh: 3;
   --summary-lines-en: 3;
-  --card-image-pct: 75%;      /* 4:3 → 高度 = 宽度 × 75% */
-  --card-image-delta: 0px;    /* 首/末格的高度微调（±row-stagger） */
-  --row-stagger: 50px;
+  --card-image-ratio: 4 / 3;
   --card-title-line-height: 1.45;
   --card-desc-line-height: 1.6;
 }
@@ -59,13 +58,11 @@
   gap: 20px;                 /* 同一列内卡片间距 */
 }
 
-/* --- 内部交错：偶数列首格矮、末格高，整列净高度不变，四周对齐 --- */
-.garden-grid.is-columns .garden-col:nth-child(even) > .garden-card:first-child:not(:last-child) {
-  --card-image-delta: calc(-1 * var(--row-stagger));
-}
-
-.garden-grid.is-columns .garden-col:nth-child(even) > .garden-card:last-child:not(:first-child) {
-  --card-image-delta: var(--row-stagger);
+/* --- 整列错落：第 2、4 列整体下移 ---
+   百分比相对「本列宽度（即卡片宽度）」计算，所以窄屏列数变少、卡片变大时，
+   下移量会自动跟着变大，观感始终一致。 */
+.garden-grid.is-columns .garden-col:nth-child(even) > .garden-card:first-child {
+  margin-top: var(--stagger-offset);
 }
 
 .garden-grid.is-columns .garden-card {
@@ -93,15 +90,13 @@
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
 }
 
-/* --- 卡片封面图 ---
-   用 padding-top 撑出高度：百分比相对卡片宽度计算，所以图片随列宽等比缩放，
-   同时允许 ±--row-stagger 的像素微调（这是 aspect-ratio 做不到的）。 */
+/* --- 卡片封面图：统一比例，随列宽等比缩放 --- */
 .garden-card .card-img {
   position: relative;
   display: block;
   width: 100%;
-  height: 0;
-  padding-top: calc(var(--card-image-pct) + var(--card-image-delta));
+  height: auto;
+  aspect-ratio: var(--card-image-ratio);
   background: #f4f4f4;
   overflow: hidden;
 }
