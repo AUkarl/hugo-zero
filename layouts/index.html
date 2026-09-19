@@ -136,13 +136,17 @@
 
     /* ===== 工具栏按钮 ===== */
     .index-toolbar {
-      position: absolute;
-      right: 50px;
-      top: 50%;
-      transform: translateY(-50%);
+      /* 与 logo 同处 .box-header 的 flex 行内：
+         不再绝对定位，交给 space-between 排到右侧，保证两者始终在同一行 */
+      position: static;
+      right: auto;
+      top: auto;
+      transform: none;
       z-index: 10;
       display: flex;
+      align-items: center;
       gap: 10px;
+      flex: none;
     }
     .toolbar-btn {
       cursor: pointer;
@@ -171,23 +175,14 @@
       border: none;
     }
     @media (max-width: 992px) {
-      .index-toolbar {
-        right: 20px;
-      }
       .toolbar-btn {
-        width: 40px;
-        height: 40px;
         font-size: 18px;
       }
     }
     @media (max-width: 480px) {
-      .index-toolbar {
-        right: 10px;
-      }
       .toolbar-btn {
-        width: 36px;
-        height: 36px;
         font-size: 16px;
+        padding: 4px;
       }
     }
 
@@ -323,12 +318,14 @@
     }
     .box-header {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      right: 20px;
+      /* 从原来的 20px 往内收，避免 logo 贴到边框 / 背景图边缘 */
+      top: 40px;
+      left: 44px;
+      right: 44px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 16px;
       z-index: 10;
     }
     .box-logo a {
@@ -452,12 +449,20 @@
         font-size: 16px;
       }
       .box-header {
-        top: 15px;
-        left: 15px;
-        right: 15px;
+        top: 20px;
+        left: 22px;
+        right: 22px;
       }
       .box-logo img {
         height: 32px;
+      }
+    }
+    @media (max-width: 480px) {
+      .box-header {
+        top: 16px;
+        left: 16px;
+        right: 16px;
+        gap: 10px;
       }
     }
   </style>
