@@ -11,11 +11,11 @@
 /* ===== 1. 进入视口：轻微上移 + 淡入 ===== */
 html.js [data-reveal] {
   opacity: 0;
-  transform: translate3d(0, 16px, 0);
+  transform: translate3d(0, 22px, 0);
 }
 
 html.js [data-reveal].is-in {
-  animation: motion-reveal 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: motion-reveal 0.72s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   animation-delay: var(--reveal-delay, 0ms);
   will-change: opacity, transform;
 }
@@ -23,7 +23,7 @@ html.js [data-reveal].is-in {
 @keyframes motion-reveal {
   from {
     opacity: 0;
-    transform: translate3d(0, 16px, 0);
+    transform: translate3d(0, 22px, 0);
   }
   to {
     opacity: 1;

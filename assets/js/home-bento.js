@@ -43,24 +43,36 @@
   function visibleCount() { return Math.max(1, (initialRows + extraRows) * columns()); }
 
   // ==================== 加载更多 ====================
-  function applyVisibility() {
+  // opts.animate：点「加载更多」时给新露出来的卡片补一段入场动画
+  //（不能只靠 IntersectionObserver：它要等下一帧，而且新卡可能被滚动位置"跳过"）
+  function applyVisibility(opts) {
+    opts = opts || {};
     var list = cards();
     var limit = visibleCount();
-    list.forEach(function (el, i) { el.hidden = i >= limit; });
+    var newly = [];
+    list.forEach(function (el, i) {
+      var willHide = i >= limit;
+      if (el.hidden && !willHide) newly.push(el);
+      el.hidden = willHide;
+    });
     if (moreBtn) moreBtn.hidden = limit >= list.length;
+    if (opts.animate && newly.length && window.Motion && window.Motion.revealNow) {
+      // 新的一批按行依次出现，节奏比首屏稍慢一点，看得清
+      window.Motion.revealNow(newly, { step: 110, cap: 520 });
+    }
   }
 
   if (moreBtn) {
     moreBtn.addEventListener('click', function () {
       extraRows += loadRows;
-      applyVisibility();
+      applyVisibility({ animate: true });
     });
   }
 
   var resizeTimer = null;
   window.addEventListener('resize', function () {
     if (resizeTimer) clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(applyVisibility, 150);
+    resizeTimer = setTimeout(function () { applyVisibility(); }, 150);
   });
 
   // ==================== 最新 / 热门 ====================

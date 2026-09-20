@@ -47,17 +47,23 @@
   }
 
   // 按「行」分组：先用 offsetTop 找出每行的第一个元素，再按顺序给同一行的元素编号
-  function applyStagger(els) {
+  // opts: { step 同行间隔ms, cap 同批最长等待ms }
+  function applyStagger(els, opts) {
+    opts = opts || {};
+    var step = opts.step || 90;
+    var cap = opts.cap || 450;
     var rows = [];
     els.sort(function (a, b) { return a.offsetTop - b.offsetTop || a.offsetLeft - b.offsetLeft; });
     els.forEach(function (el) {
+      if (el.classList.contains('is-in')) return;   // 已经在播的不要重来
       var row = null;
       for (var i = 0; i < rows.length; i++) {
         if (Math.abs(rows[i].top - el.offsetTop) <= 4) { row = rows[i]; break; }
       }
       if (!row) { row = { top: el.offsetTop, n: 0 }; rows.push(row); }
-      var delay = Math.min(row.n * 60, 300);   // 同行依次，最多等 0.3s
+      var delay = Math.min(row.n * step, cap);   // 同行依次
       row.n++;
+      el.setAttribute('data-reveal', '');
       el.style.setProperty('--reveal-delay', delay + 'ms');
       el.classList.add('is-in');
       el.addEventListener('animationend', function done(ev) {
@@ -70,14 +76,18 @@
     });
   }
 
-  // 保险丝：万一观察器没触发（元素卡在视口边缘、被隐藏后又显示等），
-  // 把视口内的元素直接放出来，宁可少一个动画也不要内容不显示
+  // 保险丝：万一观察器没触发（元素卡在视口边缘等），把视口内的元素直接放出来，
+  // 宁可少一个动画也不要内容不显示。
+  // 注意：display:none（hidden 属性）的元素 rect 是全 0，必须跳过 ——
+  // 否则「加载更多」里还没显示的卡片会在这里被提前放掉，点开后就没有动画了。
   function sweep(scope) {
     var els = [].slice.call((scope || document).querySelectorAll('[data-reveal]:not(.is-in)'));
     if (!els.length) return;
     var vh = window.innerHeight || document.documentElement.clientHeight;
     els.forEach(function (el) {
+      if (el.hidden || el.offsetParent === null) return;
       var r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return;
       if (r.top < vh + 40 && r.bottom > -40) {
         el.removeAttribute('data-reveal');
         el.classList.remove('is-in');
@@ -119,6 +129,26 @@
     // 刚注册的元素如果已经在视口里，观察器会在下一帧回调；
     // 这里再挂一层保险，避免极端情况下内容一直不显示
     if (!safetyArmed) { safetyArmed = true; armSafetyNet(); }
+  }
+
+  /**
+   * 立刻给这批元素播入场动画（不等观察器）——「加载更多」这类由点击触发的新卡片用
+   * @param {Array|NodeList} els
+   * @param {Object} [opts] { step, cap }
+   */
+  function revealNow(els, opts) {
+    var list = [].slice.call(els || []).filter(function (el) {
+      return el && !el.hidden && !el.classList.contains('is-in');
+    });
+    if (!list.length) return;
+    if (reduceMotion()) {
+      list.forEach(function (el) { el.removeAttribute('data-reveal'); el.classList.remove('is-in'); });
+      return;
+    }
+    list.forEach(function (el) {
+      if (revealSeen) revealSeen.add(el);
+    });
+    applyStagger(list, opts || { step: 110, cap: 520 });
   }
 
   /* ============================================================
@@ -234,6 +264,7 @@
 
   window.Motion = {
     reveal: reveal,
+    revealNow: revealNow,
     flip: flip,
     flipByKey: flipByKey,
     lazyImages: lazyImages,

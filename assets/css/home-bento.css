@@ -486,6 +486,10 @@ html { scroll-behavior: smooth; }
   #home-bento .articles-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* 「全部文章」区的入场动画比全局稍慢、位移稍大，节奏看得更清楚 */
+#home-bento .hb-acard[data-reveal].is-in {
+  animation-duration: 0.9s;
+}
 #home-bento .hb-acard {
   display: flex;
   flex-direction: column;
