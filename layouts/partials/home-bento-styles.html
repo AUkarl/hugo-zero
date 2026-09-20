@@ -33,16 +33,8 @@
 </style>
 <noscript>
   <style>
-    /* 没有 JS 时不要把「骨架态」的精选区一直藏起来 */
-    #home-bento .bento-grid.hb-pending img,
-    #home-bento .bento-grid.hb-pending h3,
-    #home-bento .bento-grid.hb-pending p,
-    #home-bento .bento-grid.hb-pending .hb-pill,
-    #home-bento .bento-grid.hb-pending .hb-badge,
-    #home-bento .bento-grid.hb-pending .hb-meta,
-    #home-bento .bento-grid.hb-pending .hb-text-date { visibility: visible; }
-
-    /* 没有 JS 时：把「加载更多」藏起来的文章全部展开，并去掉点了没反应的按钮/切换 */
+    /* 没有 JS 时：把「加载更多」藏起来的文章全部展开，并去掉点了没反应的按钮/切换
+       （精选卡本身不再有骨架遮挡，无需额外处理） */
     #home-bento #hbArticles .hb-acard[hidden] { display: flex; }
     #home-bento .hb-more-wrap,
     #home-bento .hb-tabs { display: none; }

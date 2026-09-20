@@ -606,33 +606,11 @@ html { scroll-behavior: smooth; }
    ============================================================ */
 
 /* ============================================================
-   精选「自动」取数期间的骨架态：
-   服务端先渲染最新若干篇，取到浏览量/评论数后会换成最热的那几篇。
-   取数期间把卡片里的文字和图片藏起来（卡片底色即是骨架，尺寸不变），
-   取数完成再一次性显示 —— 避免"先最新、后最热"的跳动闪烁。
+   精选「自动」的内容切换：
+   服务端先渲染最新若干篇，取到浏览量/评论数后由 JS 换成最热的那几篇。
+   卡片本身从一开始就可见（入场动画也就能立刻播），换内容时走
+   「交叉淡入 + 内容从旧位置滑到新位置」的补位动画，见 home-bento.js 的 refillFeatured。
    ============================================================ */
-#home-bento .bento-grid.hb-pending .hb-hero-img,
-#home-bento .bento-grid.hb-pending img,
-#home-bento .bento-grid.hb-pending h3,
-#home-bento .bento-grid.hb-pending p,
-#home-bento .bento-grid.hb-pending .hb-pill,
-#home-bento .bento-grid.hb-pending .hb-badge,
-#home-bento .bento-grid.hb-pending .hb-meta,
-#home-bento .bento-grid.hb-pending .hb-text-date {
-  visibility: hidden;
-}
-
-/* 没有 JS（或取数失败）时不要留白 */
-#home-bento .bento-grid.hb-revealed .hb-hero-img,
-#home-bento .bento-grid.hb-revealed img,
-#home-bento .bento-grid.hb-revealed h3,
-#home-bento .bento-grid.hb-revealed p,
-#home-bento .bento-grid.hb-revealed .hb-pill,
-#home-bento .bento-grid.hb-revealed .hb-badge,
-#home-bento .bento-grid.hb-revealed .hb-meta,
-#home-bento .bento-grid.hb-revealed .hb-text-date {
-  visibility: visible;
-}
 
 /* ============================================================
    移动端兜底：不让长串文本/图片撑出横向拖动条

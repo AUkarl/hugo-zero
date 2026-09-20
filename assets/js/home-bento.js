@@ -135,14 +135,13 @@
 
   function reveal() {
     if (!featured) return;
-    featured.classList.remove('hb-pending');
-    featured.classList.add('hb-revealed');
     revealFeatured();
     painted = true;
   }
 
-  // 精选区是否已经显示过（显示过之后的重排才需要补位动画）
-  var painted = false;
+  // 首屏卡片现在一解析完就可见（不再有骨架遮挡），所以从开始就算「已经显示过」，
+  // 这样统计一到就能播放「内容滑到新位置」的补位动画
+  var painted = true;
 
   // ==================== 统计缓存 ====================
   var CACHE_KEY = 'hbStats:v1:' + location.pathname;
@@ -262,8 +261,14 @@
     if (!slots.length) return;
     var ranked = cards().slice().sort(function (a, b) { return scoreOf(b) - scoreOf(a); });
 
-    // 已经显示过之后（比如评论数回来导致顺序变化）才做「内容滑到新位置」的补位动画
-    var useMotion = painted && !!window.Motion;
+    // 这次重排会不会真的换人？（顺序没变就不用做动画，避免每次拿数据都抖一下）
+    var willChange = slots.some(function (slot, i) {
+      var src = ranked[i];
+      return src && src.getAttribute('href') !== slot.getAttribute('href');
+    });
+
+    // 已经显示过（首屏卡片一出现就算）→ 用「内容滑到新位置 + 交叉淡入」的补位动画
+    var useMotion = willChange && painted && !!window.Motion;
     var before = null;
     if (useMotion) {
       before = {};
@@ -275,49 +280,64 @@
       });
     }
 
-    slots.forEach(function (slot, i) {
-      var src = ranked[i];
-      if (!src) return;
-      var title = text(src, '[data-hb-title]');
-      var desc = text(src, '[data-hb-desc]');
-      var date = text(src, '[data-hb-date]');
-      var tag = text(src, '[data-hb-tag]');
-      var href = src.getAttribute('href');
-      if (href) slot.setAttribute('href', href);
-      if (title) set(slot, '[data-hb-title]', title);
-      if (desc) set(slot, '[data-hb-desc]', desc);
-      if (date) set(slot, '[data-hb-date]', date);
-      if (tag) { set(slot, '[data-hb-tag]', tag); set(slot, '[data-hb-pill]', tag); }
+    function swapContents() {
+      slots.forEach(function (slot, i) {
+        var src = ranked[i];
+        if (!src) return;
+        var title = text(src, '[data-hb-title]');
+        var desc = text(src, '[data-hb-desc]');
+        var date = text(src, '[data-hb-date]');
+        var tag = text(src, '[data-hb-tag]');
+        var href = src.getAttribute('href');
+        if (href) slot.setAttribute('href', href);
+        if (title) set(slot, '[data-hb-title]', title);
+        if (desc) set(slot, '[data-hb-desc]', desc);
+        if (date) set(slot, '[data-hb-date]', date);
+        if (tag) { set(slot, '[data-hb-tag]', tag); set(slot, '[data-hb-pill]', tag); }
 
-      // 封面：LQIP 换成新文章的（直接读源卡片容器的背景图），高清图重新挂上延迟加载并淡入。
-      // 注意：只有「本来就是图片卡」的槽位才换；纯色文字卡（indigo / amber / outline）
-      // 不能被贴上图，否则会把莫兰迪底色盖掉、文字也没法看。
-      var srcImg = src.querySelector('img');
-      var slotImg = slot.querySelector('img');
-      if (srcImg && slotImg) {
-        var srcWrap = src.querySelector('.hb-a-img');
-        // hero / tall / overlay 的占位直接挂在卡片上，其余变体挂在图片容器上
-        var slotWrap = slot.querySelector('.hb-a-img, .hb-wide-img, .hb-top-img') || slot;
-        if (srcWrap && slotWrap) {
-          var lqipBg = window.getComputedStyle(srcWrap).backgroundImage;
-          if (lqipBg && lqipBg !== 'none') slotWrap.style.backgroundImage = lqipBg;
+        // 封面：LQIP 换成新文章的（直接读源卡片容器的背景图），高清图重新挂上延迟加载并淡入。
+        // 注意：只有「本来就是图片卡」的槽位才换；纯色文字卡（indigo / amber / outline）
+        // 不能被贴上图，否则会把莫兰迪底色盖掉、文字也没法看。
+        var srcImg = src.querySelector('img');
+        var slotImg = slot.querySelector('img');
+        if (srcImg && slotImg) {
+          var srcWrap = src.querySelector('.hb-a-img');
+          // hero / tall / overlay 的占位直接挂在卡片上，其余变体挂在图片容器上
+          var slotWrap = slot.querySelector('.hb-a-img, .hb-wide-img, .hb-top-img') || slot;
+          if (srcWrap && slotWrap) {
+            var lqipBg = window.getComputedStyle(srcWrap).backgroundImage;
+            if (lqipBg && lqipBg !== 'none') slotWrap.style.backgroundImage = lqipBg;
+          }
+          var next = srcImg.getAttribute('data-src') || srcImg.getAttribute('src') || '';
+          var nextSet = srcImg.getAttribute('data-srcset') || '';
+          slotImg.removeAttribute('src');
+          slotImg.removeAttribute('srcset');
+          slotImg.classList.remove('is-loaded');
+          if (next) slotImg.setAttribute('data-src', next);
+          if (nextSet) slotImg.setAttribute('data-srcset', nextSet);
+          // 不覆盖 sizes：槽位自己的 sizes 才对得上它的宽度（首屏大图尤其重要）
+          slotImg.setAttribute('alt', title || '');
+          if (window.Motion) window.Motion.lazyImages(slot);
         }
-        var next = srcImg.getAttribute('data-src') || srcImg.getAttribute('src') || '';
-        var nextSet = srcImg.getAttribute('data-srcset') || '';
-        slotImg.removeAttribute('src');
-        slotImg.removeAttribute('srcset');
-        slotImg.classList.remove('is-loaded');
-        if (next) slotImg.setAttribute('data-src', next);
-        if (nextSet) slotImg.setAttribute('data-srcset', nextSet);
-        // 不覆盖 sizes：槽位自己的 sizes 才对得上它的宽度（首屏大图尤其重要）
-        slotImg.setAttribute('alt', title || '');
-        if (window.Motion) window.Motion.lazyImages(slot);
-      }
-    });
-
-    if (useMotion) {
-      window.Motion.flipByKey(before, function (el) { return el.getAttribute('href'); }, slots, { duration: 440 });
+      });
     }
+
+    if (!useMotion) { swapContents(); return; }
+
+    // 先轻轻淡下去 → 换内容 → 内容从旧位置滑到新位置 → 淡回来
+    var fadeMs = 150;
+    var anims = slots.filter(function (el) { return !el.hasAttribute('data-reveal'); })
+      .map(function (el) {
+        return el.animate([{ opacity: 1 }, { opacity: 0.35 }],
+          { duration: fadeMs, easing: 'ease', fill: 'forwards' });
+      });
+    setTimeout(function () {
+      swapContents();
+      window.Motion.flipByKey(before, function (el) { return el.getAttribute('href'); }, slots, { duration: 460 });
+      anims.forEach(function (a) {
+        try { a.reverse(); } catch (e) { /* 动画被取消就算了 */ }
+      });
+    }, fadeMs);
   }
 
   function text(el, sel) { var n = el.querySelector(sel); return n ? n.textContent.trim() : ''; }
