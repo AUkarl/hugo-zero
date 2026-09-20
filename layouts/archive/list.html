@@ -24,7 +24,21 @@
     {{- end }}
     {{- end }}
     <div class="archive-wrapper">
-      <div class="archive-timeline" id="archiveTimeline"></div>
+      {{- /* 左侧时间刻度尺：本体由 archive-timeline.js 渲染，移动端换成下面的横向月份条 */ -}}
+      <div class="archive-timeline" id="archiveTimeline">
+        <div class="tl-ruler" id="tlRuler" tabindex="0" role="group"
+             aria-label="{{ i18n "archive-timeline-label" | default "时间刻度尺：滚轮或拖拽滑动，方向键切换月份" }}">
+          <div class="tl-viewport" id="tlViewport">
+            <div class="tl-glow" aria-hidden="true"></div>
+            <div class="tl-track" id="tlTrack">
+              <svg class="tl-svg" id="tlSvg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"></svg>
+              <div class="tl-years" id="tlYears" aria-hidden="true"></div>
+              <div class="tl-nodes" id="tlNodes"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tl-chips" id="tlChips"></div>
+      </div>
       <div class="archive-list" id="archiveList"></div>
       <aside class="archive-sidebar">
         <div class="widget">
@@ -98,7 +112,10 @@
       'archive-search': '{{ i18n "archive-search-zh" | default "搜索" }}',
       'archive-categories': '{{ i18n "archive-categories-zh" | default "分类" }}',
       'archive-tags': '{{ i18n "archive-tags-zh" | default "标签" }}',
-      'archive-all': '{{ i18n "archive-all-zh" | default "全部" }}'
+      'archive-all': '{{ i18n "archive-all-zh" | default "全部" }}',
+      'archive-month-count': '{{ i18n "archive-month-count-zh" | default "%d 篇" }}',
+      'archive-month-count-one': '{{ i18n "archive-month-count-one-zh" | default "%d 篇" }}',
+      'archive-empty': '{{ i18n "archive-empty-zh" | default "没有匹配的文章" }}'
     },
     'en': {
       'archive-title': '{{ i18n "archive-title-en" | default "Archive" }}',
@@ -106,7 +123,10 @@
       'archive-search': '{{ i18n "archive-search-en" | default "Search" }}',
       'archive-categories': '{{ i18n "archive-categories-en" | default "Categories" }}',
       'archive-tags': '{{ i18n "archive-tags-en" | default "Tags" }}',
-      'archive-all': '{{ i18n "archive-all-en" | default "All" }}'
+      'archive-all': '{{ i18n "archive-all-en" | default "All" }}',
+      'archive-month-count': '{{ i18n "archive-month-count-en" | default "%d posts" }}',
+      'archive-month-count-one': '{{ i18n "archive-month-count-one-en" | default "%d post" }}',
+      'archive-empty': '{{ i18n "archive-empty-en" | default "No matching articles" }}'
     }
   };
 </script>
@@ -118,6 +138,8 @@
     danmakuLanes: {{ $archiveCfg.danmaku_lanes | default 6 }}
   };
 </script>
+{{- $timelineJS := resources.Get "js/archive-timeline.js" | minify | fingerprint -}}
+<script src="{{ $timelineJS.RelPermalink }}"></script>
 {{- $archiveJS := resources.Get "js/archive.js" | minify | fingerprint -}}
 <script src="{{ $archiveJS.RelPermalink }}"></script>
 {{- end -}}

@@ -83,10 +83,18 @@
   function setSort(kind) {
     currentSort = kind;
     var list = cards();
-    var ordered = kind === 'hot'
-      ? list.slice().sort(function (a, b) { return scoreOf(b) - scoreOf(a); })
-      : latestOrder.slice();
-    ordered.forEach(function (el) { grid.appendChild(el); });
+
+    var apply = function () {
+      var ordered = kind === 'hot'
+        ? list.slice().sort(function (a, b) { return scoreOf(b) - scoreOf(a); })
+        : latestOrder.slice();
+      ordered.forEach(function (el) { grid.appendChild(el); });
+      // 重新排序 + 显隐一起做完，再让 FLIP 按最终位置做补间动画
+      applyVisibility();
+    };
+
+    if (window.Motion) window.Motion.flip(grid, apply, { selector: '[data-hb-card]' });
+    else apply();
 
     tabs.forEach(function (btn) {
       var active = btn.getAttribute('data-hb-sort') === kind;
@@ -97,7 +105,6 @@
       var tpl = kind === 'hot' ? (cfg.labelSubHot || '共 %d 篇 · 按热度排序') : (cfg.labelSubLatest || '共 %d 篇 · 按时间排序');
       subEl.textContent = tpl.replace('%d', list.length);
     }
-    applyVisibility();
   }
 
   tabs.forEach(function (btn) {
@@ -109,11 +116,28 @@
   });
 
   // ==================== 骨架态显隐 ====================
+  // 精选卡片的入场动画只播一次：骨架态（服务端渲染的最新几篇）先不参与，
+  // 等统计到位、内容换成最热的之后再一起错开淡入，避免先跳一次再动一次
+  var featuredAnimated = false;
+
+  function revealFeatured() {
+    if (featuredAnimated || !featured || !window.Motion) return;
+    featuredAnimated = true;
+    var slots = featured.querySelectorAll('[data-hb-slot]');
+    Array.prototype.forEach.call(slots, function (el) { el.setAttribute('data-reveal', ''); });
+    window.Motion.reveal(featured);
+  }
+
   function reveal() {
     if (!featured) return;
     featured.classList.remove('hb-pending');
     featured.classList.add('hb-revealed');
+    revealFeatured();
+    painted = true;
   }
+
+  // 精选区是否已经显示过（显示过之后的重排才需要补位动画）
+  var painted = false;
 
   // ==================== 统计缓存 ====================
   var CACHE_KEY = 'hbStats:v1:' + location.pathname;
@@ -218,6 +242,20 @@
     var slots = Array.prototype.slice.call(featured.querySelectorAll('[data-hb-slot]'));
     if (!slots.length) return;
     var ranked = cards().slice().sort(function (a, b) { return scoreOf(b) - scoreOf(a); });
+
+    // 已经显示过之后（比如评论数回来导致顺序变化）才做「内容滑到新位置」的补位动画
+    var useMotion = painted && !!window.Motion;
+    var before = null;
+    if (useMotion) {
+      before = {};
+      slots.forEach(function (slot) {
+        var h = slot.getAttribute('href');
+        if (!h) return;
+        var r = slot.getBoundingClientRect();
+        before[h] = { x: r.left, y: r.top };
+      });
+    }
+
     slots.forEach(function (slot, i) {
       var src = ranked[i];
       if (!src) return;
@@ -225,19 +263,39 @@
       var desc = text(src, '[data-hb-desc]');
       var date = text(src, '[data-hb-date]');
       var tag = text(src, '[data-hb-tag]');
-      var img = src.querySelector('img');
       var href = src.getAttribute('href');
       if (href) slot.setAttribute('href', href);
       if (title) set(slot, '[data-hb-title]', title);
       if (desc) set(slot, '[data-hb-desc]', desc);
       if (date) set(slot, '[data-hb-date]', date);
       if (tag) { set(slot, '[data-hb-tag]', tag); set(slot, '[data-hb-pill]', tag); }
+
+      // 封面：LQIP 换成新文章的（直接读源卡片容器的背景图），高清图重新挂上延迟加载并淡入
+      var srcWrap = src.querySelector('.hb-a-img');
+      var slotWrap = slot.querySelector('.hb-a-img, .hb-wide-img, .hb-top-img') || slot;
+      if (srcWrap && slotWrap) {
+        var lqipBg = window.getComputedStyle(srcWrap).backgroundImage;
+        if (lqipBg && lqipBg !== 'none') slotWrap.style.backgroundImage = lqipBg;
+      }
+      var srcImg = src.querySelector('img');
       var slotImg = slot.querySelector('img');
-      if (slotImg && img) {
-        slotImg.setAttribute('src', img.getAttribute('src'));
+      if (srcImg && slotImg) {
+        var next = srcImg.getAttribute('data-src') || srcImg.getAttribute('src') || '';
+        var nextSet = srcImg.getAttribute('data-srcset') || '';
+        slotImg.removeAttribute('src');
+        slotImg.removeAttribute('srcset');
+        slotImg.classList.remove('is-loaded');
+        if (next) slotImg.setAttribute('data-src', next);
+        if (nextSet) slotImg.setAttribute('data-srcset', nextSet);
+        // 不覆盖 sizes：槽位自己的 sizes 才对得上它的宽度（首屏大图尤其重要）
         slotImg.setAttribute('alt', title || '');
+        if (window.Motion) window.Motion.lazyImages(slot);
       }
     });
+
+    if (useMotion) {
+      window.Motion.flipByKey(before, function (el) { return el.getAttribute('href'); }, slots, { duration: 440 });
+    }
   }
 
   function text(el, sel) { var n = el.querySelector(sel); return n ? n.textContent.trim() : ''; }
@@ -275,6 +333,12 @@
   // ==================== 启动 ====================
   applyVisibility();
 
+  // 动效：文章卡片进入视口时错开上移淡入；封面先显示 LQIP，高清图提前 200px 加载
+  if (window.Motion) {
+    window.Motion.reveal(root);
+    window.Motion.lazyImages(root);
+  }
+
   // 1) 先用缓存立刻按热度渲染（再次打开本页时零等待、无闪烁）
   var cached = readCache();
   if (cached) {
@@ -285,8 +349,8 @@
   }
 
   // 2) 并行取最新统计（解析完就发，不等 idle）
-  //    先拿浏览量 → 立刻显示正确顺序；评论数后台补，只更新「热门」与缓存，
-  //    不再动精选槽位，避免出现第二次跳动。
+  //    先拿浏览量 → 立刻显示正确顺序；评论数回来后再按新分数平滑重排一次
+  //    （精选卡此时已经显示，重排走 FLIP 补位动画，不会瞬移）
   function refresh() {
     loadViews().then(function (v) {
       if (!v) {
@@ -304,7 +368,7 @@
         stats = { views: v.views, comments: comments };
         root.setAttribute('data-hb-stats', 'ready');
         writeCache(stats);
-        if (currentSort === 'hot') setSort('hot');
+        applyStats();
       }).catch(function () { /* 评论数拿不到就算了，浏览量排序仍然有效 */ });
     }).catch(function () {
       if (!cached) { root.setAttribute('data-hb-stats', 'error'); hideHotTab(); }

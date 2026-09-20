@@ -21,7 +21,7 @@
         {{- with .Params.images }}
         <div class="moment-images">
           {{- range . }}
-          <img src="{{ . }}" alt="Moment image" loading="lazy">
+          {{ partial "img-pair.html" (dict "src" . "alt" "Moment image" "page" $ "sizes" "(max-width: 820px) 92vw, 560px") }}
           {{- end }}
         </div>
         {{- end }}

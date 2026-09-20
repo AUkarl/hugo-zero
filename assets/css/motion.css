@@ -1,0 +1,97 @@
+/* ============================================================
+   motion.css — 全站动效（进入视口淡入上移、图片模糊→清晰）
+   ------------------------------------------------------------
+   约定：
+   · 只有 html.js（浏览器开着 JS）时才先把元素藏起来，无 JS 时内容照常可见
+   · 只动 opacity / transform / filter，不触发重排
+   · 动画结束后由 motion.js 摘掉 data-reveal，元素回到普通状态（不影响 hover 等样式）
+   · prefers-reduced-motion 时完全不参与动画
+   ============================================================ */
+
+/* ===== 1. 进入视口：轻微上移 + 淡入 ===== */
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+}
+
+html.js [data-reveal].is-in {
+  animation: motion-reveal 0.62s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+@keyframes motion-reveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ===== 2. 两层图片：20px 模糊占位 → 高清图 =====
+   底层是内联 base64 的 LQIP（约 100~300 字节，不发请求），页面立刻有东西可看；
+   高清图在进入视口前 200px 才开始加载（motion.js 的 lazyImages），加载完淡入盖住。
+   两种布局：默认按文档流撑高（正文/时刻页），加 .img-pair-fill 则铺满固定尺寸容器。 */
+.img-pair {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+}
+
+.img-pair-lqip {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(10px);
+  transform: scale(1.04);   /* 吃掉模糊后露出的边缘 */
+  pointer-events: none;
+}
+
+.img-pair > .img-pair-hd {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.img-pair > .img-pair-hd.is-loaded {
+  opacity: 1;
+}
+
+/* 固定尺寸容器（首页卡片封面）：两层都铺满 */
+.img-pair-fill,
+.img-pair-fill > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 兜底：抓取失败退回原始外链、拿不到宽高时，按统一比例先占位（比例可用 --img-ar 覆盖） */
+.img-pair-ratio > img {
+  aspect-ratio: var(--img-ar, 16 / 9);
+  object-fit: contain;
+}
+
+/* ===== 3. 降级：用户要求减少动态效果时全部直出 ===== */
+@media (prefers-reduced-motion: reduce) {
+  html.js [data-reveal],
+  html.js [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .img-pair > .img-pair-hd {
+    opacity: 1;
+    transition: none;
+  }
+}

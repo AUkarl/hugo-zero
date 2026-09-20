@@ -1,12 +1,19 @@
 {{- /*
   render-image.html — Markdown 图片渲染钩子
   将图片包裹在 figure 中，alt 文字作为说明文字显示
+
+  图片处理（见 partials/img-src.html）：
+  · 站内图会读进来生成 400/800/1200 的 WebP + 20px 模糊占位
+  · 外链图由构建时抓取后同样处理（抓不到就退回原始链接，行为跟以前一致）
+  · 页面先显示内联的模糊占位，高清图进入视口前 200px 才加载（motion.js）
+  · 宽高写进 width/height，图片没到也不会顶动下方文字
 */ -}}
 <figure class="figure">
-  <img src="{{ .Destination | safeURL }}"
-       alt="{{ .Text }}"
-       {{ with .Title }}title="{{ . }}"{{ end }}
-       loading="lazy" />
+  {{ partial "img-pair.html" (dict
+      "src" .Destination
+      "alt" .Text
+      "page" .Page
+      "sizes" "(max-width: 820px) 92vw, 760px") }}
   {{- with .Text }}
   <figcaption class="figure-caption">{{ . }}</figcaption>
   {{- end }}

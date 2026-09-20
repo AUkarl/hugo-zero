@@ -152,15 +152,24 @@ function renderGarden() {
     const desc = loc(article, 'desc');
     const tags = locArray(article, 'tags');
     let imgHtml = '';
+    let imgBg = '';
     if (SHOW_IMAGES) {
-      imgHtml = article.image
-        ? `<img src="${article.image}" alt="${title}" loading="lazy" />`
-        : `<div class="card-img-placeholder"></div>`;
+      const im = article.img || {};
+      if (im.src) {
+        // 构建时处理过的封面：先显示 LQIP 占位，进入视口前 200px 再加载高清（motion.js）
+        if (im.lqip) imgBg = ` style="background-image:url(${im.lqip});background-size:cover;background-position:center"`;
+        const dims = (im.w && im.h) ? ` width="${im.w}" height="${im.h}"` : '';
+        imgHtml = `<img data-src="${im.src}" data-srcset="${im.srcset || ''}" sizes="${im.sizes || '100vw'}"${dims} alt="${title}" decoding="async" />`;
+      } else {
+        imgHtml = article.image
+          ? `<img src="${article.image}" alt="${title}" loading="lazy" />`
+          : `<div class="card-img-placeholder"></div>`;
+      }
     }
     const descHtml = SHOW_SUMMARY ? `<p class="card-desc">${desc}</p>` : '';
     html += `
       <a class="garden-card" href="${locPermalink(article)}">
-        ${SHOW_IMAGES ? `<div class="card-img">${imgHtml}</div>` : ''}
+        ${SHOW_IMAGES ? `<div class="card-img"${imgBg}>${imgHtml}</div>` : ''}
         <div class="card-body">
           <h3 class="card-title">${title}</h3>
           ${descHtml}
@@ -175,6 +184,8 @@ function renderGarden() {
   gridEl.innerHTML = html;
   // 重新按顺序分列（保证「从左到右、从上到下」）
   Columns.refresh(gridEl);
+  // 封面进入视口前 200px 再加载高清图
+  if (window.Motion) window.Motion.lazyImages(gridEl);
 
   // 渲染分页
   const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE);

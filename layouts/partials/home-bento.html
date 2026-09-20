@@ -90,6 +90,7 @@
                 "date" ($slot.date | default ($page.Date.Format "2006-01-02"))
                 "tag" ($slot.tag | default $cat)
                 "badge" ($slot.badge | default "")
+                "page" $page
                 "eager" (eq $i 0)) -}}
             {{- $count = add $count 1 -}}
           {{- end -}}
@@ -114,6 +115,7 @@
               "date" ($page.Date.Format "2006-01-02")
               "tag" $cat
               "badge" $badge
+              "page" $page
               "eager" (eq $i 0)) -}}
           {{- $count = add $count 1 -}}
         {{- end -}}
@@ -146,9 +148,18 @@
         {{- if and $img (not (or (hasPrefix $img "http://") (hasPrefix $img "https://"))) }}{{ $img = $img | absURL }}{{ end -}}
         {{- $len := cond (eq $page.Language.Lang "en") $descLenEn $descLenZh -}}
         {{- $hidden := ge $i $initialVisible -}}
-      <a class="hb-card hb-acard" href="{{ $page.RelPermalink }}" data-hb-card data-hb-date="{{ $page.Date.Format "2006-01-02T15:04:05Z07:00" }}"{{ if $hidden }} hidden{{ end }}>
-        <div class="hb-a-img">
-          {{- with $img }}<img class="hb-img" src="{{ . }}" alt="{{ $page.Title | plainify }}" loading="lazy" decoding="async">{{ end }}
+        {{- $info := partial "img-src.html" (dict "src" $img "page" $page "sizes" "(max-width: 768px) 92vw, (max-width: 1024px) 45vw, 28vw" "widths" (slice 400 800)) -}}
+        {{- $bg := "" -}}
+        {{- with $info.lqip }}{{ $bg = printf "background-image:url(%s);background-size:cover;background-position:center;" . | safeCSS }}{{ end -}}
+      <a class="hb-card hb-acard" href="{{ $page.RelPermalink }}" data-hb-card data-reveal data-hb-date="{{ $page.Date.Format "2006-01-02T15:04:05Z07:00" }}"{{ if $hidden }} hidden{{ end }}>
+        <div class="hb-a-img"{{ with $bg }} style="{{ . }}"{{ end }}>
+          {{- if $img -}}
+            {{- if $info.ok -}}
+          <img class="hb-img" data-src="{{ $info.src }}" data-srcset="{{ $info.srcset }}" sizes="{{ $info.sizes }}" width="{{ $info.width }}" height="{{ $info.height }}" alt="{{ $page.Title | plainify }}" decoding="async">
+            {{- else -}}
+          <img class="hb-img is-loaded" src="{{ $img }}" alt="{{ $page.Title | plainify }}" loading="lazy" decoding="async">
+            {{- end -}}
+          {{- end }}
         </div>
         <div class="hb-a-body">
           <h3 class="hb-a-title hb-clamp-1" data-hb-title>{{ $page.Title }}</h3>

@@ -90,10 +90,15 @@
 {{- $moments = $moments.ByDate.Reverse -}}
 {{- $.Scratch.Set "shuoItems" (slice) -}}
 {{- range $p := $moments -}}
+  {{- /* 说说配图也走构建时处理：LQIP + 400/800 WebP（拿不到就留原链） */ -}}
+  {{- $imgs := slice -}}
+  {{- range $img := ($p.Params.images | default slice) -}}
+    {{- $imgs = $imgs | append (partial "img-src.html" (dict "src" $img "page" $p "sizes" "(max-width: 768px) 30vw, 180px" "widths" (slice 400 800))) -}}
+  {{- end -}}
   {{- $.Scratch.Add "shuoItems" (dict
     "id" ($p.File.UniqueID | default "0")
     "text" ($p.Content | plainify)
-    "images" ($p.Params.images | default (slice))
+    "images" $imgs
     "music" ($p.Params.music | default "")
     "video" ($p.Params.video | default "")
     "time" ($p.Date | time.Format "2006-01-02 15:04")

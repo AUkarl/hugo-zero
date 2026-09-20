@@ -208,6 +208,28 @@ a {
   flex: 1;
   justify-content: flex-end;
   flex-wrap: nowrap;
+  position: relative;
+}
+
+/* ===== 导航活跃下划线（桌面端：一根共用的线在各导航项之间滑动） ===== */
+.nav-underline {
+  position: absolute;
+  left: 0;
+  bottom: 1px;
+  height: 2px;
+  width: 0;
+  border-radius: 2px;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+      rgba(123, 238, 199, 0) 0%,
+      #7beec7 22%,
+      #7beec7 78%,
+      rgba(123, 238, 199, 0) 100%);
+  transition: transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1),
+              width 0.32s cubic-bezier(0.22, 0.61, 0.36, 1),
+              opacity 0.2s ease;
+  will-change: transform, width;
 }
 
 .nav-link {
@@ -361,6 +383,11 @@ a {
     border-bottom: 1px solid var(--border);
     white-space: normal;
     display: block;
+  }
+
+  /* 移动端抽屉里不用滑动下划线 */
+  .nav-underline {
+    display: none;
   }
 
   .nav-links .nav-controls {

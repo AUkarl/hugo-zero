@@ -12,7 +12,24 @@
 <!DOCTYPE html>
 <html lang="{{ .Site.Language.Lang | default "zh-CN" }}">
 <head>
+  {{- /* 标记「有 JS」，配合 motion.css 决定是否启用入场动画；
+         兜底：motion.js 是同步脚本，DOMContentLoaded 时还没起来就说明它没加载成功，
+         立刻撤掉标记，避免内容被 opacity:0 藏住 */ -}}
+  <script>
+    (function () {
+      var d = document.documentElement;
+      function fallback() {
+        if (!window.Motion) d.className = d.className.replace(/\bjs\b/, '');
+      }
+      d.className += ' js';
+      document.addEventListener('DOMContentLoaded', fallback);
+      setTimeout(fallback, 1500);
+    })();
+  </script>
   {{- partial "head.html" . -}}
+  {{- /* 全站动效样式（很小，需在首屏前生效，避免闪一下） */ -}}
+  {{- $motionCSS := resources.Get "css/motion.css" | minify | fingerprint -}}
+  <link rel="stylesheet" href="{{ $motionCSS.RelPermalink }}">
   {{- /* 页面级样式（由子模板通过 define 注入） */ -}}
   {{- block "styles" . }}{{ end -}}
   {{- /* 自定义 head 内容 */ -}}
@@ -39,6 +56,10 @@
     {{- partial "footer.html" . -}}
     {{- partial "scroll-buttons.html" . -}}
   {{- end -}}
+
+  {{- /* 全站动效工具（进入视口淡入 / FLIP 重排 / 图片模糊→清晰） */ -}}
+  {{- $motionJS := resources.Get "js/motion.js" | minify | fingerprint -}}
+  <script src="{{ $motionJS.RelPermalink }}"></script>
 
   {{- /* 公共 JS */ -}}
   {{- $commonJS := resources.Get "js/common.js" | minify | fingerprint -}}

@@ -17,6 +17,8 @@
   display: block;
   margin-left: auto;
   margin-right: auto;
+  /* 图片没加载出来时先占一块浅色底，占位比例由 motion.css 的 .img-pair 负责 */
+  background: var(--tag-bg);
 }
 
 .article-body .figure img {
@@ -63,6 +65,13 @@
   border-radius: var(--radius);
 }
 
+/* 播放器高度固定，避免元数据加载完之后把下面的内容顶下去 */
+.audio-player audio {
+  display: block;
+  width: 100%;
+  min-height: 54px;
+}
+
 .audio-info {
   display: flex;
   align-items: baseline;
@@ -82,7 +91,9 @@
 }
 
 .audio-player audio {
+  display: block;
   width: 100%;
+  min-height: 54px;
 }
 
 /* ===== video 视频播放器 ===== */
@@ -93,6 +104,9 @@
 .video-player video {
   width: 100%;
   max-width: 100%;
+  /* 没写 width/height 时按 16:9 先占位，视频元数据到了也不会顶动下方 */
+  aspect-ratio: var(--video-ar, 16 / 9);
+  height: auto;
   border-radius: var(--radius);
   background: #000;
 }

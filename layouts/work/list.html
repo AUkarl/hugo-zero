@@ -28,14 +28,14 @@
       {{- range .Site.Params.works }}
       {{- $link := .url | default .link -}}
       {{- if $link }}
-      <a class="work-card work-card-link" href="{{ $link }}" target="_blank" rel="noopener">
+      <a class="work-card work-card-link" data-reveal href="{{ $link }}" target="_blank" rel="noopener">
         <h4 data-i18n="{{ .i18nKey }}-title">{{ if eq $lang "en" }}{{ .titleEn }}{{ else }}{{ .titleZh }}{{ end }}</h4>
         <p data-i18n="{{ .i18nKey }}-desc">{{ if eq $lang "en" }}{{ .descEn }}{{ else }}{{ .descZh }}{{ end }}</p>
         <span class="status" data-i18n="{{ .i18nKey }}-status">{{ if eq $lang "en" }}{{ .statusEn }}{{ else }}{{ .statusZh }}{{ end }}</span>
         <i class="fas fa-external-link-alt work-ext-icon"></i>
       </a>
       {{- else }}
-      <div class="work-card">
+      <div class="work-card" data-reveal>
         <h4 data-i18n="{{ .i18nKey }}-title">{{ if eq $lang "en" }}{{ .titleEn }}{{ else }}{{ .titleZh }}{{ end }}</h4>
         <p data-i18n="{{ .i18nKey }}-desc">{{ if eq $lang "en" }}{{ .descEn }}{{ else }}{{ .descZh }}{{ end }}</p>
         <span class="status" data-i18n="{{ .i18nKey }}-status">{{ if eq $lang "en" }}{{ .statusEn }}{{ else }}{{ .statusZh }}{{ end }}</span>

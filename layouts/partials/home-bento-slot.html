@@ -6,11 +6,15 @@
     url      文章链接（必填）
     title    标题（留空则由调用方补）
     desc     摘要
-    image    封面图
+    image    封面图（外链/站内都行）
     date     日期字符串
     tag      分类/标签文字（药丸或 #标签）
     badge    角标文字（如「置顶」），留空不显示
     eager    true → 该图优先加载（首屏大图用，提升 LCP）
+    page     当前页面（用于查找页面资源里的图）
+
+  图片：交给 partials/img-src.html 处理成 LQIP + 400/800/1200 WebP，
+  页面先显示容器上的模糊占位，高清图进入视口前 200px 才加载（motion.js）。
   每个变体都带 data-hb-* 标记，方便「自动精选」在前端换内容。
   ============================================================ */ -}}
 {{- $v := .variant | default "top" -}}
@@ -21,19 +25,43 @@
 {{- $date := .date | default "" -}}
 {{- $tag := .tag | default "" -}}
 {{- $badge := .badge | default "" -}}
-{{- $loadAttr := "lazy" -}}
-{{- $prioAttr := "" -}}
-{{- if .eager -}}{{- $loadAttr = "eager" -}}{{- $prioAttr = ` fetchpriority="high"` -}}{{- end -}}
-{{- $imgCls := "hb-top-img" -}}
-{{- if or (eq $v "hero") (eq $v "tall") (eq $v "overlay") -}}{{- $imgCls = "hb-hero-img" -}}{{- end -}}
-{{- $imgTag := "" -}}
-{{- if $image -}}
-  {{- $imgTag = printf `<img class="hb-img %s" src="%s" alt="%s" loading="%s"%s decoding="async">` $imgCls $image ($title | plainify) $loadAttr $prioAttr -}}
+{{- $eager := .eager | default false -}}
+{{- $page := .page -}}
+
+{{- /* 大卡片（hero/wide）给到 1200w；sizes 按实测宽度给，避免多下档位
+     （1440 下大卡 ~618px、小卡 ~299px；1024 以下大卡几乎占满整行） */ -}}
+{{- $big := or (eq $v "hero") (eq $v "wide") -}}
+{{- $sizes := "(max-width: 768px) 92vw, (max-width: 1024px) 45vw, 21vw" -}}
+{{- $widths := slice 400 800 -}}
+{{- if $big -}}
+  {{- $sizes = "(max-width: 768px) 92vw, (max-width: 1024px) 86vw, 43vw" -}}
+  {{- $widths = slice 400 800 1200 -}}
 {{- end -}}
+
+{{- $info := partial "img-src.html" (dict "src" $image "page" $page "sizes" $sizes "widths" $widths) -}}
+{{- $bg := "" -}}
+{{- with $info.lqip -}}
+  {{- $bg = printf "background-image:url(%s);background-size:cover;background-position:center;" . | safeCSS -}}
+{{- end -}}
+
+{{- /* 高清图标签：拿得到处理结果就用 srcset（未加载前挂 data-*，交给 motion.js 延迟加载） */ -}}
+{{- $imgAttrs := "" -}}
+{{- if $info.ok -}}
+  {{- $lazy := printf ` data-src="%s" data-srcset="%s"` $info.src $info.srcset -}}
+  {{- $load := $lazy -}}
+  {{- if $eager -}}
+    {{- $load = printf ` src="%s" srcset="%s" fetchpriority="high"` $info.src $info.srcset -}}
+  {{- end -}}
+  {{- $imgAttrs = printf `%s sizes="%s" width="%d" height="%d" alt="%s" decoding="async"` $load $info.sizes $info.width $info.height ($title | plainify) -}}
+{{- else -}}
+  {{- $imgAttrs = printf ` src="%s" alt="%s" loading="%s" decoding="async"` $image ($title | plainify) (cond $eager "eager" "lazy") -}}
+{{- end -}}
+{{- $statusCls := cond $info.ok "" " is-loaded" -}}
+
 {{- if or (eq $v "hero") (eq $v "overlay") -}}
 {{- $cls := cond (eq $v "hero") "hb-hero" "hb-overlay" -}}
-<a class="hb-card {{ $cls }}" href="{{ $url }}" data-hb-slot>
-  {{ $imgTag | safeHTML }}
+<a class="hb-card {{ $cls }}" href="{{ $url }}" data-hb-slot{{ with $bg }} style="{{ . }}"{{ end }}{{ with $info.lqip }}{{ end }}>
+  {{- if $image }}<img class="hb-img hb-hero-img{{ $statusCls }}"{{ $imgAttrs | safeHTMLAttr }}>{{ end }}
   <div class="hb-hero-body">
     {{- with $badge }}<span class="hb-badge">{{ . }}</span>{{ end }}
     <h3 class="hb-hero-title hb-clamp-2" data-hb-title>{{ $title }}</h3>
@@ -42,8 +70,8 @@
   </div>
 </a>
 {{- else if eq $v "tall" -}}
-<a class="hb-card hb-tall" href="{{ $url }}" data-hb-slot>
-  {{ $imgTag | safeHTML }}
+<a class="hb-card hb-tall" href="{{ $url }}" data-hb-slot{{ with $bg }} style="{{ . }}"{{ end }}{{ with $info.lqip }}{{ end }}>
+  {{- if $image }}<img class="hb-img hb-hero-img{{ $statusCls }}"{{ $imgAttrs | safeHTMLAttr }}>{{ end }}
   <div class="hb-hero-body">
     {{- with $badge }}<span class="hb-badge">{{ . }}</span>{{ end }}
     <h3 class="hb-hero-title hb-clamp-2" data-hb-title>{{ $title }}</h3>
@@ -53,8 +81,8 @@
 </a>
 {{- else if eq $v "wide" -}}
 <a class="hb-card hb-wide" href="{{ $url }}" data-hb-slot>
-  <div class="hb-wide-img">
-    {{- if $image }}<img class="hb-img" src="{{ $image }}" alt="{{ $title | plainify }}" loading="{{ $loadAttr }}"{{ $prioAttr | safeHTMLAttr }} decoding="async">{{ end }}
+  <div class="hb-wide-img"{{ with $bg }} style="{{ . }}"{{ end }}{{ with $info.lqip }}{{ end }}>
+    {{- if $image }}<img class="hb-img{{ $statusCls }}"{{ $imgAttrs | safeHTMLAttr }}>{{ end }}
   </div>
   <div class="hb-wide-body">
     {{- with $tag }}<span class="hb-pill" data-hb-pill>{{ . }}</span>{{ end }}
@@ -65,8 +93,8 @@
 </a>
 {{- else if eq $v "top" -}}
 <a class="hb-card hb-top" href="{{ $url }}" data-hb-slot>
-  <div class="hb-top-img">
-    {{- if $image }}<img class="hb-img" src="{{ $image }}" alt="{{ $title | plainify }}" loading="{{ $loadAttr }}"{{ $prioAttr | safeHTMLAttr }} decoding="async">{{ end }}
+  <div class="hb-top-img"{{ with $bg }} style="{{ . }}"{{ end }}{{ with $info.lqip }}{{ end }}>
+    {{- if $image }}<img class="hb-img{{ $statusCls }}"{{ $imgAttrs | safeHTMLAttr }}>{{ end }}
   </div>
   <div class="hb-top-body">
     <h3 class="hb-card-title hb-clamp-1" data-hb-title>{{ $title }}</h3>

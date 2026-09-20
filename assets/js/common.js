@@ -26,20 +26,78 @@ const _savedNavSiteName = {
 document.addEventListener('DOMContentLoaded', function() {
 
   // ==================== 导航高亮 ====================
-  // 根据当前页面路径自动高亮对应导航项
+  // 服务端（header.html）已经按当前页面写好 active / aria-current，
+  // 这里只做补充：万一某页没匹配上，再按路径最后一段补一次。
+  // 注意别再删服务端给的结果——之前那样做会把 /work/ 这类页面的高亮清掉，
+  // 新的导航下划线（.nav-underline）就找不到"当前项"了。
   function highlightNav() {
-    const currentPath = window.location.pathname.split('/').pop() || 'Home.html';
-    const navLinks = document.querySelectorAll('.nav-link:not(.blog-link)');
-    navLinks.forEach(link => {
-      const href = link.getAttribute('href');
-      if (href === currentPath) {
-        link.classList.add('active');
-      } else {
-        link.classList.remove('active');
-      }
+    const segments = window.location.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+    const current = segments.length ? segments[segments.length - 1] : '';
+    document.querySelectorAll('.nav-link:not(.blog-link)').forEach(link => {
+      if (link.classList.contains('active')) return;
+      const href = (link.getAttribute('href') || '').replace(/\/+$/, '');
+      const tail = href.split('/').filter(Boolean).pop() || '';
+      if (current && tail && tail === current) link.classList.add('active');
     });
   }
   highlightNav();
+
+  // ==================== 导航活跃下划线（桌面端滑动） ====================
+  // 一根共用的下划线：当前页默认停在 active 项下面，鼠标移到别的项时滑过去，
+  // 移开后滑回来。移动端抽屉里不显示（CSS 里隐藏）。
+  (function navUnderline() {
+    const container = document.querySelector('.nav-links');
+    const links = Array.from(document.querySelectorAll('.nav-link:not(.blog-link)'));
+    if (!container || links.length < 2) return;
+
+    const bar = document.createElement('span');
+    bar.className = 'nav-underline';
+    bar.setAttribute('aria-hidden', 'true');
+    container.appendChild(bar);
+
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const activeLink = () => document.querySelector('.nav-link.active:not(.blog-link)') || null;
+
+    function place(link, animate) {
+      if (!link) { bar.style.opacity = '0'; return; }
+      const c = container.getBoundingClientRect();
+      const r = link.getBoundingClientRect();
+      if (!r.width) { bar.style.opacity = '0'; return; }
+      if (!animate) bar.style.transition = 'none';
+      bar.style.opacity = '1';
+      bar.style.width = r.width + 'px';
+      bar.style.transform = 'translate3d(' + (r.left - c.left) + 'px,0,0)';
+      if (!animate) {
+        void bar.offsetWidth;                     // 强制回流，让下面的过渡重新生效
+        bar.style.transition = '';
+      }
+    }
+
+    // 首次定位不要有动画（避免页面一打开下划线从左边滑过来）
+    requestAnimationFrame(() => place(activeLink(), false));
+
+    links.forEach(link => {
+      link.addEventListener('mouseenter', () => place(link, !reduceMotion));
+      link.addEventListener('focus', () => place(link, !reduceMotion));
+    });
+    container.addEventListener('mouseleave', () => place(activeLink(), !reduceMotion));
+    container.addEventListener('focusout', (e) => {
+      if (!container.contains(e.relatedTarget)) place(activeLink(), !reduceMotion);
+    });
+
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => place(activeLink(), false), 120);
+    });
+    // 语言切换会改导航文字宽度，重新定位
+    document.addEventListener('langApplied', () => requestAnimationFrame(() => place(activeLink(), false)));
+    // 网络字体/图标加载完成后文字宽度会变，也要重新对一次（否则下划线会偏）
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => place(activeLink(), false));
+    }
+    window.addEventListener('load', () => place(activeLink(), false));
+  })();
 
   // ==================== 抽屉菜单 ====================
   // 移动端侧滑导航，768px 断点以下生效

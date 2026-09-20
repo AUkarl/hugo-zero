@@ -1,90 +1,308 @@
 /* ============================================================
    archive.css — 归档页
-   三栏布局：时间线 | 文章列表 | 侧边栏（搜索/分类/标签弹幕）
+   三栏布局：时间刻度尺 | 文章列表（按年月分组） | 侧边栏（搜索/分类/标签弹幕）
    ============================================================ */
 
 /* ===== 三栏网格布局 ===== */
 .archive-wrapper {
   display: grid;
-  grid-template-columns: 120px 1fr 280px;
+  grid-template-columns: 200px minmax(0, 1fr) 280px;
   gap: 32px;
   align-items: start;
+
+  /* 时间刻度尺 / 列表共用的强调色（浅色主题：深一点的薄荷，白底上看得清） */
+  --tl-accent: #2eb39c;
+  --tl-accent-soft: rgba(46, 179, 156, 0.14);
+  --tl-accent-glow: rgba(46, 179, 156, 0.13);
 }
 
-/* ===== 左侧时间线 ===== */
+/* 深色主题换成更亮的薄荷 */
+[data-theme="dark"] .archive-wrapper {
+  --tl-accent: #7beec7;
+  --tl-accent-soft: rgba(123, 238, 199, 0.16);
+  --tl-accent-glow: rgba(123, 238, 199, 0.15);
+}
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] .archive-wrapper {
+    --tl-accent: #7beec7;
+    --tl-accent-soft: rgba(123, 238, 199, 0.16);
+    --tl-accent-glow: rgba(123, 238, 199, 0.15);
+  }
+}
+
+/* 关闭年份分组时（group_by_year = false）退回两栏，不显示刻度尺 */
+.archive-wrapper.is-flat {
+  grid-template-columns: minmax(0, 1fr) 280px;
+}
+.archive-wrapper.is-flat .archive-timeline {
+  display: none;
+}
+
+/* 筛选后没有匹配文章时也退回两栏 */
+.archive-wrapper.is-empty {
+  grid-template-columns: minmax(0, 1fr) 280px;
+}
+.archive-wrapper.is-empty .archive-timeline {
+  display: none;
+}
+
+/* ============================================================
+   左侧：时间刻度尺
+   ============================================================ */
 .archive-timeline {
-  position: relative;
-  padding-top: 10px;
+  --tl-axis-x: 34px;
+  --tl-axis: var(--border);
+  --tl-tick: var(--border);
+  position: sticky;
+  top: calc(var(--nav-height) + 24px);
+  align-self: start;
 }
 
-.archive-timeline::before {
-  content: '';
+.tl-ruler {
+  position: relative;
+  height: min(66vh, 620px);
+  min-height: 320px;
+  border-radius: 10px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.tl-ruler:focus-visible {
+  outline: 2px solid var(--tl-accent);
+  outline-offset: 6px;
+}
+
+.tl-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%, #000 12%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to bottom,
+      transparent 0%, #000 12%, #000 88%, transparent 100%);
+}
+.tl-viewport.is-dragging { cursor: grabbing; }
+
+/* 焦点处的淡光晕（横向椭圆，像一条柔和的光带）
+   半径用百分比：横向 46%（= 0.46×刻度尺宽），渐变到 72% 就完全透明，
+   所以左右端点分别落在 12.9% 和 79.1% 处，任何宽度下都不会被容器裁出直边 */
+.tl-glow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 46%;              /* 和 JS 里的焦点线 CENTER_RATIO 保持一致 */
+  height: 200px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(ellipse 46% 54px at 42% 50%,
+              var(--tl-accent-glow) 0%,
+              rgba(0, 0, 0, 0) 72%);
+}
+
+.tl-track {
+  position: absolute;
+  left: var(--tl-axis-x);
+  top: 0;
+  width: 0;
+  height: 0;
+  will-change: transform;
+}
+
+.tl-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.tl-axis {
+  stroke: var(--tl-axis);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.tl-tick-line {
+  stroke: var(--tl-tick);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  transition: stroke 0.36s cubic-bezier(.4, 0, .2, 1),
+              stroke-width 0.36s cubic-bezier(.4, 0, .2, 1);
+}
+.tl-tick-line.is-active {
+  stroke: var(--tl-accent);
+  stroke-width: 2.4;
+  filter: drop-shadow(0 0 6px var(--tl-accent-soft));
+}
+
+.tl-tick-dot {
+  fill: var(--tl-tick);
+  transition: fill 0.36s cubic-bezier(.4, 0, .2, 1);
+}
+.tl-tick-dot.is-active {
+  fill: var(--tl-accent);
+  filter: drop-shadow(0 0 5px var(--tl-accent-soft));
+}
+
+/* 年份层：不参与缩放，只做淡入淡出 */
+.tl-years {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.tl-year-label {
+  position: absolute;
+  left: 0;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 月份节点层 */
+.tl-nodes {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  z-index: 2;
+}
+
+.tl-node {
+  position: absolute;
+  width: 0;
+  height: 0;
+  will-change: opacity;
+}
+
+.tl-month-text {
   position: absolute;
   top: 0;
-  left: 50%;
-  width: 2px;
-  height: 100%;
-  background: var(--border);
-  transform: translateX(-50%);
+  transform: translateY(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.36s cubic-bezier(.4, 0, .2, 1);
 }
 
-.archive-year-marker {
-  position: relative;
-  margin-bottom: 30px;
-  text-align: center;
+.tl-node.is-active .tl-month-text {
+  color: var(--tl-accent);
+  font-weight: 600;
 }
 
-.archive-year-marker .year {
-  display: inline-block;
-  background: var(--card-bg);
-  padding: 4px 12px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  position: relative;
-  z-index: 2;
+/* 鼠标指到某个月份时给一点即时反馈（当前月份保持强调色） */
+.tl-node.is-hover:not(.is-active) .tl-month-text { color: var(--text); }
+.tl-tick-line.is-hover:not(.is-active) { stroke: var(--text-secondary); }
+.tl-tick-dot.is-hover:not(.is-active) { fill: var(--text-secondary); }
+
+.tl-month-count {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
 }
 
-.archive-year-marker .dot {
-  display: block;
-  width: 12px;
-  height: 12px;
-  background: #7beec7;
-  border-radius: 50%;
-  margin: 6px auto 0;
-  border: 2px solid var(--border);
-  position: relative;
-  z-index: 2;
+.tl-hit {
+  position: absolute;
+  top: -22px;
+  height: 44px;
+  cursor: pointer;
 }
 
-/* ===== 中间文章列表 ===== */
+/* 移动端月份快捷条：桌面端不显示 */
+.tl-chips { display: none; }
+
+/* ============================================================
+   中间：按年月分组的文章列表
+   ============================================================ */
 .archive-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 30px;
+  min-width: 0;
+}
+
+.archive-month {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.archive-month-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 2px 0 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+  scroll-margin-top: calc(var(--nav-height) + 28px);
+  border-radius: var(--radius);
+  transition: background 0.55s ease, box-shadow 0.55s ease;
+}
+
+/* 从刻度尺跳到某个月时，小标题闪一下薄荷底，方便定位 */
+.archive-month-head.is-flash {
+  background: var(--tl-accent-soft);
+  box-shadow: -8px 0 0 var(--tl-accent-soft), 8px 0 0 var(--tl-accent-soft);
+  transition: none;
+}
+
+.archive-month-head .ym {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.archive-month-head .cnt {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
 }
 
 .archive-item {
   display: flex;
   align-items: baseline;
   gap: 16px;
-  padding: 6px 0 6px 12px;
+  padding: 9px 10px 9px 12px;
   border-bottom: 1px solid var(--border);
-  transition: background 0.2s;
+  transition: background 0.2s, padding-left 0.25s ease, color 0.2s;
 }
+
+.archive-item:last-child { border-bottom: none; }
 
 .archive-item:hover {
   background: var(--tag-bg);
   border-radius: var(--radius);
+  padding-left: 18px;
 }
 
 .archive-item .date {
   font-size: 0.82rem;
   color: var(--text-secondary);
   flex-shrink: 0;
-  width: 80px;
+  width: 58px;              /* 只显示「月-日」，年份在月份小标题里 */
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .archive-item .title {
@@ -92,6 +310,15 @@
   font-weight: 400;
   color: var(--text);
   cursor: pointer;
+  transition: color 0.2s;
+}
+
+.archive-item:hover .title { color: var(--tl-accent); }
+
+.archive-empty {
+  padding: 26px 4px;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
 }
 
 /* ===== 右侧边栏 ===== */
@@ -260,11 +487,22 @@
 }
 
 /* ===== 响应式 ===== */
+@media (max-width: 1180px) {
+  .archive-wrapper {
+    grid-template-columns: 160px minmax(0, 1fr) 280px;
+    gap: 24px;
+  }
+  .archive-timeline { --tl-axis-x: 24px; }
+  .tl-year-label { font-size: 17px; }
+  .tl-month-text { font-size: 12px; }
+}
+
+/* 和原来的断点保持一致：820px 以下侧边栏在前、刻度尺变横向月份条、列表在最后 */
 @media (max-width: 820px) {
   .archive-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
   }
   .archive-sidebar {
     order: -1;
@@ -274,26 +512,59 @@
     order: 2;
     width: 100%;
   }
+  /* 刻度尺换成横向月份条，吸在导航栏下方 */
   .archive-timeline {
     order: 0;
     width: 100%;
+    position: sticky;
+    top: var(--nav-height);
+    z-index: 6;
+    background: var(--bg);
+    padding: 8px 0 9px;
+    margin-bottom: -8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tl-ruler { display: none; }
+  .tl-chips {
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding-top: 0;
-  }
-  .archive-timeline::before {
-    display: none;
-  }
-  .archive-year-marker {
-    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    margin-bottom: 0;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 2px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
-  .archive-year-marker .dot {
-    display: none;
+  .tl-chips::-webkit-scrollbar { display: none; }
+
+  .tl-chip {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.22s, color 0.22s, border-color 0.22s, transform 0.22s;
   }
+  .tl-chip:hover { transform: translateY(-1px); }
+  .tl-chip.is-active {
+    background: var(--tl-accent-soft);
+    border-color: var(--tl-accent);
+    color: var(--tl-accent);
+    font-weight: 600;
+  }
+  .tl-chip-n {
+    font-size: 0.68rem;
+    opacity: 0.75;
+    font-variant-numeric: tabular-nums;
+  }
+
   .danmaku-wrapper {
     min-height: 160px;
   }

@@ -236,6 +236,8 @@
   margin: 16px 0;
   display: block;
   border: 1px solid var(--border);
+  /* 图片没加载出来时先占一块浅色底（配合 motion 的模糊→清晰） */
+  background: var(--tag-bg);
 }
 
 .article-body figure {

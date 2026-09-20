@@ -24,7 +24,11 @@
 {{- $image := .Params.image | default .Params.img -}}
 {{- if not $image }}{{ $image = $seo.og_image_default }}{{ end -}}
 {{- if not $image }}{{ $image = .Site.Params.favicon | default "img/logo.png" }}{{ end -}}
-{{- if not (or (hasPrefix $image "http://") (hasPrefix $image "https://")) -}}
+{{- /* 抓得到就换成构建时处理过的 1200w WebP（外链也能处理），拿不到就退回原地址 */ -}}
+{{- $ogInfo := partial "img-src.html" (dict "src" $image "page" . "widths" (slice 1200) "lqip" false) -}}
+{{- if $ogInfo.ok -}}
+  {{- $image = $ogInfo.src | absURL -}}
+{{- else if not (or (hasPrefix $image "http://") (hasPrefix $image "https://")) -}}
   {{- $image = $image | absURL -}}
 {{- end -}}
 {{- $keywords := .Params.keywords | default $seo.default_keywords -}}

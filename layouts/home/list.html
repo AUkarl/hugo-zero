@@ -59,6 +59,9 @@
       {{- /* 摘要按该文章语言的配置字数截断 */ -}}
       {{- $len := $lenZh -}}
       {{- if eq $page.Language.Lang "en" }}{{ $len = $lenEn }}{{ end -}}
+      {{- $imgRaw := $page.Params.image | default $page.Params.img -}}
+      {{- if and $imgRaw (not (or (hasPrefix $imgRaw "http://") (hasPrefix $imgRaw "https://"))) }}{{ $imgRaw = $imgRaw | absURL }}{{ end -}}
+      {{- $imgInfo := partial "img-src.html" (dict "src" $imgRaw "page" $page "sizes" "(max-width: 768px) 92vw, (max-width: 1024px) 45vw, 28vw" "widths" (slice 400 800)) -}}
       {{- $item := dict
         "title" $page.Title
         "desc" ($page.Description | default $page.Summary | plainify | truncate $len)
@@ -66,6 +69,7 @@
         "category" $cat
         "tags" ($page.Params.tags | default slice)
         "image" $page.Params.image
+        "img" $imgInfo
         "permalink" $page.RelPermalink
         "titleZh" "" "descZh" "" "categoryZh" "" "tagsZh" slice
         "titleEn" "" "descEn" "" "categoryEn" "" "tagsEn" slice

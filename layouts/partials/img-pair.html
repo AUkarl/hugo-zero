@@ -1,0 +1,59 @@
+{{- /* ============================================================
+  img-pair.html — 两层图片：底层 20px 模糊占位，上层高清图
+  ------------------------------------------------------------
+  入参（dict）：
+    src      图片地址（外链/站内都行，见 img-src.html）
+    alt      替代文字
+    sizes    sizes 属性
+    class    加在最外层容器上的类（沿用原来的图片类，比如 hb-hero-img）
+    imgClass 加在高清 img 上的类（默认 hb-img，保持原来的 hover 效果）
+    fill     true = 容器尺寸固定（卡片封面），两层都铺满；默认按文档流撑高
+    eager    true = 首屏大图，直接给真 src + fetchpriority=high（不做延迟加载）
+    page / widths / quality / lqip  透传给 img-src.html
+
+  行为：
+    · 页面渲染时只有 LQIP（内联 base64，不发请求）
+    · 图片进入视口前 200px 时，motion.js 才把高清 srcset 填上
+    · 高清加载完成 → 淡入盖住 LQIP；加载失败 → 保留 LQIP（不会出现破图）
+    · 抓取失败时退回原始外链，行为跟改造前一致
+  ============================================================ */ -}}
+{{- $src := .src | default "" -}}
+{{- $alt := .alt | default "" -}}
+{{- $cls := .class | default "" -}}
+{{- $imgCls := .imgClass | default "hb-img" -}}
+{{- $sizes := .sizes | default "100vw" -}}
+{{- $fill := .fill | default false -}}
+{{- $eager := .eager | default false -}}
+{{- $info := partial "img-src.html" (dict
+    "src" $src
+    "page" .page
+    "sizes" $sizes
+    "widths" .widths
+    "quality" .quality
+    "lqip" .lqip) -}}
+{{- $pairCls := "img-pair" -}}
+{{- if $fill -}}{{- $pairCls = printf "%s img-pair-fill" $pairCls -}}{{- end -}}
+{{- with $cls }}{{- $pairCls = printf "%s %s" $pairCls . -}}{{- end -}}
+{{- if not $src -}}
+{{- else if $info.ok -}}
+<span class="{{ $pairCls }}">
+  <img class="img-pair-lqip" src="{{ $info.lqip | safeURL }}" alt="" aria-hidden="true" decoding="async">
+  {{- if $eager }}
+  <img class="{{ $imgCls }} img-pair-hd is-loaded"
+       src="{{ $info.src }}" srcset="{{ $info.srcset }}" sizes="{{ $info.sizes }}"
+       width="{{ $info.width }}" height="{{ $info.height }}"
+       alt="{{ $alt }}" decoding="async" fetchpriority="high">
+  {{- else }}
+  <img class="{{ $imgCls }} img-pair-hd"
+       data-src="{{ $info.src }}" data-srcset="{{ $info.srcset }}" sizes="{{ $info.sizes }}"
+       width="{{ $info.width }}" height="{{ $info.height }}"
+       alt="{{ $alt }}" decoding="async">
+  {{- end }}
+</span>
+{{- else -}}
+{{- /* 抓不到/处理不了：退回原始外链；宽高未知，用统一比例先占位，避免顶动下方文字 */ -}}
+<span class="{{ $pairCls }} img-pair-ratio">
+  <img class="{{ $imgCls }} is-loaded" src="{{ $info.orig }}" alt="{{ $alt }}"
+       {{ if $eager }}fetchpriority="high"{{ else }}loading="lazy"{{ end }} decoding="async">
+</span>
+{{- end -}}

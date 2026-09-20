@@ -36,7 +36,18 @@ document.addEventListener('DOMContentLoaded', function() {
       var cls = 'count-' + countImg;
       imagesHtml = '<div class="shuo-images ' + cls + '">';
       item.images.forEach(function(img) {
-        imagesHtml += '<img class="shuo-img" src="' + img + '" alt="image" />';
+        // 构建时处理过的图片：先用 LQIP 占位，进入视口前 200px 再加载高清（motion.js）
+        if (img && typeof img === 'object') {
+          if (img.src) {
+            var bg = img.lqip ? ' style="background-image:url(' + img.lqip + ');background-size:cover;background-position:center"' : '';
+            var dims = (img.w && img.h) ? ' width="' + img.w + '" height="' + img.h + '"' : '';
+            imagesHtml += '<img class="shuo-img" data-src="' + img.src + '" data-srcset="' + (img.srcset || '') + '" sizes="' + (img.sizes || '33vw') + '"' + dims + bg + ' alt="image" decoding="async" />';
+          } else if (img.orig) {
+            imagesHtml += '<img class="shuo-img" src="' + img.orig + '" alt="image" loading="lazy" />';
+          }
+        } else if (img) {
+          imagesHtml += '<img class="shuo-img" src="' + img + '" alt="image" />';
+        }
       });
       imagesHtml += '</div>';
     }
@@ -132,6 +143,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     list.appendChild(fragment);
     bindItemEvents(list);
+    // 图片进入视口前 200px 再加载高清（先显示 LQIP 占位）
+    if (window.Motion) window.Motion.lazyImages(list);
     renderedCount = end;
 
     removeSentinel();

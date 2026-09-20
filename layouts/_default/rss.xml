@@ -30,10 +30,14 @@
     {{- range (where site.RegularPages "Type" "in" (slice "post" "posts" "article" "blog" "shuo")) | first $limit }}
     {{- $html := .Summary -}}
     {{- if $full }}{{ $html = .Content }}{{ end -}}
-    {{- /* 正文里没有图片时，把文章封面图补到最前面，保证订阅里能看到配图 */ -}}
+    {{- /* 正文里没有图片时，把文章封面图补到最前面，保证订阅里能看到配图
+           （封面走一遍构建时处理，取最大的 WebP，抓不到才用原始外链） */ -}}
     {{- $cover := .Params.image | default .Params.img -}}
     {{- if and $full $cover (not (in $html "<img")) -}}
-      {{- if not (or (hasPrefix $cover "http://") (hasPrefix $cover "https://")) -}}
+      {{- $info := partial "img-src.html" (dict "src" $cover "page" . "widths" (slice 1200) "lqip" false) -}}
+      {{- if $info.ok -}}
+        {{- $cover = $info.src | absURL -}}
+      {{- else if not (or (hasPrefix $cover "http://") (hasPrefix $cover "https://")) -}}
         {{- $cover = $cover | absURL -}}
       {{- end -}}
       {{- $html = printf "<p><img src=%q alt=%q loading=\"lazy\"></p>%s" $cover (.Title | plainify) $html -}}

@@ -57,6 +57,7 @@
       var catName = t(cat.category);
       var catDiv = document.createElement('div');
       catDiv.className = 'tool-category';
+      catDiv.setAttribute('data-reveal', '');
       var subHtml = cat.subItems.map(function (sub) {
         return '<span class="tool-sub-item" data-category="' + cat.category + '" data-sub="' + sub + '">' + t(sub) + '</span>';
       }).join('');
@@ -64,6 +65,10 @@
       container.appendChild(catDiv);
     });
     bindToolEvents();
+    // 分类卡片进入视口时错开淡入（渲染完再注册，避免刚生成就被判定为已进入）
+    if (window.Motion) {
+      requestAnimationFrame(function () { window.Motion.reveal(container); });
+    }
   }
 
   function bindToolEvents() {
