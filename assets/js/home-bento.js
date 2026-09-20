@@ -270,16 +270,19 @@
       if (date) set(slot, '[data-hb-date]', date);
       if (tag) { set(slot, '[data-hb-tag]', tag); set(slot, '[data-hb-pill]', tag); }
 
-      // 封面：LQIP 换成新文章的（直接读源卡片容器的背景图），高清图重新挂上延迟加载并淡入
-      var srcWrap = src.querySelector('.hb-a-img');
-      var slotWrap = slot.querySelector('.hb-a-img, .hb-wide-img, .hb-top-img') || slot;
-      if (srcWrap && slotWrap) {
-        var lqipBg = window.getComputedStyle(srcWrap).backgroundImage;
-        if (lqipBg && lqipBg !== 'none') slotWrap.style.backgroundImage = lqipBg;
-      }
+      // 封面：LQIP 换成新文章的（直接读源卡片容器的背景图），高清图重新挂上延迟加载并淡入。
+      // 注意：只有「本来就是图片卡」的槽位才换；纯色文字卡（indigo / amber / outline）
+      // 不能被贴上图，否则会把莫兰迪底色盖掉、文字也没法看。
       var srcImg = src.querySelector('img');
       var slotImg = slot.querySelector('img');
       if (srcImg && slotImg) {
+        var srcWrap = src.querySelector('.hb-a-img');
+        // hero / tall / overlay 的占位直接挂在卡片上，其余变体挂在图片容器上
+        var slotWrap = slot.querySelector('.hb-a-img, .hb-wide-img, .hb-top-img') || slot;
+        if (srcWrap && slotWrap) {
+          var lqipBg = window.getComputedStyle(srcWrap).backgroundImage;
+          if (lqipBg && lqipBg !== 'none') slotWrap.style.backgroundImage = lqipBg;
+        }
         var next = srcImg.getAttribute('data-src') || srcImg.getAttribute('src') || '';
         var nextSet = srcImg.getAttribute('data-srcset') || '';
         slotImg.removeAttribute('src');
