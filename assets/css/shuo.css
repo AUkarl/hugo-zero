@@ -280,15 +280,7 @@
   }
 }
 
-/* ===== Waline 评论头像固定大小 ===== */
-.wl-user img,
-.wl-user .wl-avatar img,
-.wl-comment .wl-avatar img {
-  width: 48px !important;
-  height: 48px !important;
-  border-radius: 50% !important;
-  object-fit: cover !important;
-}
+/* Waline 评论头像的尺寸/圆形裁切统一在 common.css（含防止 flex 把头像拉成竖椭圆），此处不再重复 */
 
 /* ===== Waline 深色模式适配 ===== */
 [data-theme="dark"] .wl-panel,

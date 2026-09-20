@@ -24,6 +24,7 @@
      ============================================================ */
   var revealObserver = null;
   var revealSeen = typeof WeakSet === 'function' ? new WeakSet() : null;
+  var safetyArmed = false;
 
   function makeObserver() {
     if (revealObserver) return revealObserver;
@@ -32,10 +33,16 @@
       var batch = [];
       entries.forEach(function (entry) {
         if (!entry.isIntersecting) return;
+        revealObserver.unobserve(entry.target);
         batch.push(entry.target);
       });
       if (batch.length) applyStagger(batch);
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.01 });
+    }, {
+      // 不再用负的底部 margin：那会让"停在视口底部 8% 里"的元素永远触发不了，
+      // 表现出来就是"动画时灵时不灵 / 有的卡片一直不出现"
+      rootMargin: '0px 0px 0px 0px',
+      threshold: 0
+    });
     return revealObserver;
   }
 
@@ -49,7 +56,7 @@
         if (Math.abs(rows[i].top - el.offsetTop) <= 4) { row = rows[i]; break; }
       }
       if (!row) { row = { top: el.offsetTop, n: 0 }; rows.push(row); }
-      var delay = Math.min(row.n * 70, 420);   // 同行依次，最多等 0.42s
+      var delay = Math.min(row.n * 60, 300);   // 同行依次，最多等 0.3s
       row.n++;
       el.style.setProperty('--reveal-delay', delay + 'ms');
       el.classList.add('is-in');
@@ -61,6 +68,27 @@
         el.style.removeProperty('--reveal-delay');
       });
     });
+  }
+
+  // 保险丝：万一观察器没触发（元素卡在视口边缘、被隐藏后又显示等），
+  // 把视口内的元素直接放出来，宁可少一个动画也不要内容不显示
+  function sweep(scope) {
+    var els = [].slice.call((scope || document).querySelectorAll('[data-reveal]:not(.is-in)'));
+    if (!els.length) return;
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    els.forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.top < vh + 40 && r.bottom > -40) {
+        el.removeAttribute('data-reveal');
+        el.classList.remove('is-in');
+      }
+    });
+  }
+
+  function armSafetyNet() {
+    var runs = [1200, 2600];
+    runs.forEach(function (ms) { setTimeout(function () { sweep(document); }, ms); });
+    window.addEventListener('load', function () { setTimeout(function () { sweep(document); }, 300); });
   }
 
   /**
@@ -88,6 +116,9 @@
     }
     var io = makeObserver();
     els.forEach(function (el) { io.observe(el); });
+    // 刚注册的元素如果已经在视口里，观察器会在下一帧回调；
+    // 这里再挂一层保险，避免极端情况下内容一直不显示
+    if (!safetyArmed) { safetyArmed = true; armSafetyNet(); }
   }
 
   /* ============================================================

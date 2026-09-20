@@ -211,6 +211,41 @@ a {
   position: relative;
 }
 
+/* ===== Waline 评论头像：一律正方形 + 圆形，防止被 flex 拉成竖椭圆 =====
+   登录后评论框左侧那个头像是 Waline 的 .wl-cards .wl-user .wl-user-avatar
+   （div 里包着 img），在窄屏下会被 flex 纵向拉伸：宽度 48px 不变、高度被撑高，
+   看起来就是"竖椭圆"。这里同时覆盖 img 与「带背景图的 div」两种形态，
+   锁死四个方向的尺寸、关掉 flex 拉伸，再统一圆形裁切。 */
+.wl-avatar,
+.wl-user .wl-avatar,
+.wl-user .wl-user-avatar,
+.wl-user-avatar,
+.wl-header-avatar,
+.wl-user img,
+.wl-avatar img,
+.wl-user .wl-avatar img,
+.wl-user .wl-user-avatar img,
+.wl-user-avatar img,
+.wl-header-avatar img,
+.wl-comment .wl-avatar,
+.wl-comment .wl-avatar img {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  max-width: 48px !important;
+  max-height: 48px !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  flex: 0 0 auto !important;
+  align-self: center !important;
+  box-sizing: border-box;
+}
+
 /* ===== 导航活跃下划线（桌面端：一根共用的线在各导航项之间滑动） ===== */
 .nav-underline {
   position: absolute;

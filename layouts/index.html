@@ -349,7 +349,9 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       {{- end }}
       display: table;
+      table-layout: fixed;   /* 不让里面的长句把整个主视觉撑宽（英文诗句较长） */
       width: 100%;
+      max-width: 100%;
       position: relative;
     }
     .bg-film {
@@ -367,6 +369,7 @@
     .box-words-wrapper {
       display: inline-block;
       position: relative;
+      max-width: 100%;
     }
     .box-words-wrapper b {
       display: inline-block;
@@ -375,8 +378,12 @@
       left: 0;
       top: 0;
     }
+    /* 正在显示的那一句参与排版：允许换行，英文长句在窄屏才不会被切掉 */
     .box-words-wrapper b.is-visible {
       position: relative;
+      white-space: normal;
+      max-width: 100%;
+      overflow-wrap: anywhere;
     }
     .box-headline.rotate-2 .box-words-wrapper {
       perspective: 300px;
@@ -438,15 +445,21 @@
 
     @media (max-width: 992px) {
       .box-intro h1 {
-        font-size: 25px;
-        letter-spacing: 5px;
+        font-size: clamp(20px, 6.4vw, 25px);
+        letter-spacing: clamp(1px, 1.2vw, 5px);
+        /* 英文问候语（Hey, long time no see）比中文长，窄屏必须允许换行 */
+        white-space: normal;
+        overflow-wrap: anywhere;
+        max-width: 92%;
       }
       .box-intro h3 {
-        font-size: 12px;
-        letter-spacing: 8px;
+        font-size: clamp(12px, 3.4vw, 16px);
+        letter-spacing: clamp(1px, 1vw, 5px);
+        line-height: 2.4;
       }
       .enter-text {
         font-size: 16px;
+        letter-spacing: 0.35em;
       }
       .box-header {
         top: 22px;

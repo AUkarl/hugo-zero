@@ -15,7 +15,7 @@ html.js [data-reveal] {
 }
 
 html.js [data-reveal].is-in {
-  animation: motion-reveal 0.62s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: motion-reveal 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   animation-delay: var(--reveal-delay, 0ms);
   will-change: opacity, transform;
 }

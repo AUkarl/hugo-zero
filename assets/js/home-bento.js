@@ -116,16 +116,21 @@
   });
 
   // ==================== 骨架态显隐 ====================
-  // 精选卡片的入场动画只播一次：骨架态（服务端渲染的最新几篇）先不参与，
-  // 等统计到位、内容换成最热的之后再一起错开淡入，避免先跳一次再动一次
+  // 精选卡片的入场动画（data-reveal）已经由模板直接写在卡片上，
+  // 页面一解析完就由 motion.js 开始播 —— 不再等统计接口（那会让动画晚 1 秒以上）。
+  // 骨架态只负责"内容"的显隐：统计到位前卡片里是空的，到位后一次性显示内容，
+  // 因此也不会出现"先显示最新、再跳成最热"的闪烁。
   var featuredAnimated = false;
 
   function revealFeatured() {
     if (featuredAnimated || !featured || !window.Motion) return;
     featuredAnimated = true;
-    var slots = featured.querySelectorAll('[data-hb-slot]');
-    Array.prototype.forEach.call(slots, function (el) { el.setAttribute('data-reveal', ''); });
-    window.Motion.reveal(featured);
+    // 只为可能后来才插入的槽位兜底（正常情况模板里已经带了 data-reveal）
+    var slots = featured.querySelectorAll('[data-hb-slot]:not([data-reveal])');
+    if (slots.length) {
+      Array.prototype.forEach.call(slots, function (el) { el.setAttribute('data-reveal', ''); });
+      window.Motion.reveal(featured);
+    }
   }
 
   function reveal() {
@@ -165,10 +170,24 @@
   }
 
   // ==================== 统计请求 ====================
+  // 带超时：统计接口偶尔会卡住不返回，不设超时的话下面的 then/catch 都不会执行，
+  // 精选区就会一直停在骨架态（看起来就是「动画迟迟不出现 / 时灵时不灵」）
+  var REQ_TIMEOUT = 2600;
   function getJSON(url) {
-    return fetch(url, { credentials: 'omit' }).then(function (r) {
+    var opts = { credentials: 'omit' };
+    var timer = null;
+    if (typeof AbortController === 'function') {
+      var ac = new AbortController();
+      opts.signal = ac.signal;
+      timer = setTimeout(function () { ac.abort(); }, REQ_TIMEOUT);
+    }
+    return fetch(url, opts).then(function (r) {
+      if (timer) clearTimeout(timer);
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
+    }).catch(function (e) {
+      if (timer) clearTimeout(timer);
+      throw e;
     });
   }
 
@@ -354,6 +373,15 @@
   // 2) 并行取最新统计（解析完就发，不等 idle）
   //    先拿浏览量 → 立刻显示正确顺序；评论数回来后再按新分数平滑重排一次
   //    （精选卡此时已经显示，重排走 FLIP 补位动画，不会瞬移）
+  // 兜底：无论统计接口是慢是挂，2.8 秒后精选区一定要显示出来（宁可没有动画，
+  // 也不能让首屏一直停在骨架态）
+  setTimeout(function () {
+    if (painted) return;
+    root.setAttribute('data-hb-stats', 'timeout');
+    hideHotTab();
+    reveal();
+  }, 2800);
+
   function refresh() {
     loadViews().then(function (v) {
       if (!v) {

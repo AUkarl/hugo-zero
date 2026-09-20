@@ -60,7 +60,7 @@
 
 {{- if or (eq $v "hero") (eq $v "overlay") -}}
 {{- $cls := cond (eq $v "hero") "hb-hero" "hb-overlay" -}}
-<a class="hb-card {{ $cls }}" href="{{ $url }}" data-hb-slot{{ with $bg }} style="{{ . }}"{{ end }}{{ with $info.lqip }}{{ end }}>
+<a data-reveal class="hb-card {{ $cls }}" href="{{ $url }}" data-hb-slot{{ with $bg }} style="{{ . }}"{{ end }}{{ with $info.lqip }}{{ end }}>
   {{- if $image }}<img class="hb-img hb-hero-img{{ $statusCls }}"{{ $imgAttrs | safeHTMLAttr }}>{{ end }}
   <div class="hb-hero-body">
     {{- with $badge }}<span class="hb-badge">{{ . }}</span>{{ end }}
@@ -70,7 +70,7 @@
   </div>
 </a>
 {{- else if eq $v "tall" -}}
-<a class="hb-card hb-tall" href="{{ $url }}" data-hb-slot{{ with $bg }} style="{{ . }}"{{ end }}{{ with $info.lqip }}{{ end }}>
+<a data-reveal class="hb-card hb-tall" href="{{ $url }}" data-hb-slot{{ with $bg }} style="{{ . }}"{{ end }}{{ with $info.lqip }}{{ end }}>
   {{- if $image }}<img class="hb-img hb-hero-img{{ $statusCls }}"{{ $imgAttrs | safeHTMLAttr }}>{{ end }}
   <div class="hb-hero-body">
     {{- with $badge }}<span class="hb-badge">{{ . }}</span>{{ end }}
@@ -80,7 +80,7 @@
   </div>
 </a>
 {{- else if eq $v "wide" -}}
-<a class="hb-card hb-wide" href="{{ $url }}" data-hb-slot>
+<a data-reveal class="hb-card hb-wide" href="{{ $url }}" data-hb-slot>
   <div class="hb-wide-img"{{ with $bg }} style="{{ . }}"{{ end }}{{ with $info.lqip }}{{ end }}>
     {{- if $image }}<img class="hb-img{{ $statusCls }}"{{ $imgAttrs | safeHTMLAttr }}>{{ end }}
   </div>
@@ -92,7 +92,7 @@
   </div>
 </a>
 {{- else if eq $v "top" -}}
-<a class="hb-card hb-top" href="{{ $url }}" data-hb-slot>
+<a data-reveal class="hb-card hb-top" href="{{ $url }}" data-hb-slot>
   <div class="hb-top-img"{{ with $bg }} style="{{ . }}"{{ end }}{{ with $info.lqip }}{{ end }}>
     {{- if $image }}<img class="hb-img{{ $statusCls }}"{{ $imgAttrs | safeHTMLAttr }}>{{ end }}
   </div>
@@ -104,7 +104,7 @@
 </a>
 {{- else -}}
 {{- /* 纯文字卡：dark（深色）/ indigo（浅靛蓝）/ amber（浅琥珀）/ outline（白底描边） */ -}}
-<a class="hb-card hb-text hb-{{ $v }}" href="{{ $url }}" data-hb-slot>
+<a data-reveal class="hb-card hb-text hb-{{ $v }}" href="{{ $url }}" data-hb-slot>
   {{- with $tag }}<span class="hb-pill" data-hb-pill>{{ . }}</span>{{ end }}
   <h3 class="hb-card-title hb-clamp-2" data-hb-title>{{ $title }}</h3>
   <p class="hb-card-desc hb-clamp-2" data-hb-desc>{{ $desc }}</p>
