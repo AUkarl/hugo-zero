@@ -350,7 +350,11 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       {{- end }}
       display: table;
-      table-layout: fixed;   /* 不让里面的长句把整个主视觉撑宽（英文诗句较长） */
+      /* 注意：这里不要用 table-layout: fixed。
+         深色模式的遮罩是 .box-intro::after（content:"" + 绝对定位），Chrome 会把它当成
+         表格的匿名单元格，表格就变成"两个格子"；一旦 fixed，两格各占 50%，
+         正文被挤到左半边（深色模式下内容靠左就是这个原因）。
+         英文长句的溢出由 .box-words-wrapper b.is-visible 的换行规则解决。 */
       width: 100%;
       max-width: 100%;
       position: relative;
