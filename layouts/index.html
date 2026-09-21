@@ -17,23 +17,24 @@
   <link rel="icon" href="{{ "img/logo.png" | relURL }}">
   <link rel="apple-touch-icon" href="{{ "img/logo.png" | relURL }}">
   {{- /* 预连接外部资源，减少首屏建连等待 */ -}}
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  {{- /* 以下三个外部样式表改为非阻塞加载（原先是同步加载，占掉约 2.3s 首屏时间） */ -}}
-  {{- $fontURL := "https://fonts.googleapis.com/css?family=Cantarell:400,700|Lato:300,400,900&display=swap" -}}
-  {{- $faURL := "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" -}}
+      <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  {{- /* 以下两个外部样式表改为非阻塞加载（原先是同步加载，占掉约 2.3s 首屏时间）。
+         原先这里还有一个 Google Fonts 的样式表，因为国内不可达 + 字体晚到会引起文本重排，
+         已经移除，改为只用系统字体栈（见 common.css 的 --font）。 */ -}}
+    {{- $faURL := "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" -}}
   {{- $animateURL := "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" -}}
-  <link rel="stylesheet" href="{{ $fontURL }}" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="{{ $faURL }}" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="{{ $animateURL }}" media="print" onload="this.media='all'">
   <noscript>
-    <link rel="stylesheet" href="{{ $fontURL }}">
-    <link rel="stylesheet" href="{{ $faURL }}">
+        <link rel="stylesheet" href="{{ $faURL }}">
     <link rel="stylesheet" href="{{ $animateURL }}">
   </noscript>
   <style>
     /* ===== 主题变量 ===== */
+    /* 这个页面不加载 common.css，字体变量要自己定义（否则 var(--font) 取不到值会退化成衬线体） */
+    :root {
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    }
     body {
       --bg-color: #fff;
       --text-color: #777;
@@ -46,7 +47,7 @@
       transition: background 0.4s, color 0.4s;
       margin: 0;
       overflow: hidden;
-      font-family: 'Cantarell', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: var(--font);
     }
 
     /* ===== 无障碍：跳过链接（键盘聚焦时才出现） ===== */
@@ -435,7 +436,7 @@
       line-height: 1.4;
     }
     .box-intro h3 {
-      font-family: "Cantarell", sans-serif;
+      font-family: var(--font);
       font-size: 14px;
       letter-spacing: 10px;
       text-transform: uppercase;

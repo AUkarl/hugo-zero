@@ -160,6 +160,20 @@
   color: var(--text-secondary);
 }
 
+/* 「字数 / 阅读时间 / 浏览量」是 JS 回填的（Hugo 对中文的字数统计不准），
+   预留数字宽度，否则数字变长会把这一行挤成多行、把正文顶下去（实测 CLS 0.14） */
+.article-header .article-meta #wordCount,
+.article-header .article-meta #readTime,
+.article-header .article-meta .waline-pageview-count {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+
+.article-header .article-meta #wordCount { min-width: 4.5ch; }
+.article-header .article-meta #readTime { min-width: 2.5ch; }
+.article-header .article-meta .waline-pageview-count { min-width: 2.5ch; }
+
 .article-header .article-meta span {
   display: inline-flex;
   align-items: center;

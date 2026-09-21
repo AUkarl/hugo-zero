@@ -13,13 +13,15 @@
   --radius: 4px;
   --nav-height: 64px;
   --max-width: 1200px;
-  --font: 'Cantarell', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   --tag-bg: #f8f8f8;
   --tag-active-bg: #e0e0e0;
   --tag-active-color: #000000;
   --scroll-btn-bg: rgba(255, 255, 255, 0.9);
   --scroll-btn-color: #555555;
   --shuo-submit-color: #ffffff;
+  /* 品牌色 #7beec7 在浅色底上只有 1.4:1，文字场景用这个加深版（白底 4.7:1） */
+  --logo-accent-text: #0d8368;
 }
 
 [data-theme="dark"] {
@@ -38,6 +40,7 @@
   --scroll-btn-bg: rgba(30, 30, 30, 0.9);
   --scroll-btn-color: #aaaaaa;
   --shuo-submit-color: #000000;
+  --logo-accent-text: #7beec7;
 }
 
 :root {
@@ -198,7 +201,9 @@ a {
 }
 
 .nav-logo span {
-  color: #7beec7;
+  /* 品牌色 #7beec7 在白色底上对比度只有 1.4:1（WCAG 要 4.5:1），
+     文字场景改用变量：浅色模式是加深版 #0d8368（4.7:1），深色模式仍是薄荷绿 */
+  color: var(--logo-accent-text, #0d8368);
 }
 
 .nav-links {
@@ -526,12 +531,11 @@ a {
 
 .footer .footer-left .designer {
   font-size: 0.75rem;
-  opacity: 0.7;
+  /* 原来这里叠了 opacity: 0.7，实测 #888/白 = 3.54:1 不达标；去掉就是 --text-secondary（7:1） */
 }
 
 .footer .footer-left .powered-by {
   font-size: 0.75rem;
-  opacity: 0.7;
 }
 
 .footer .footer-center {
@@ -604,6 +608,11 @@ a {
 .footer .footer-center .footer-icp a {
   color: var(--text-secondary);
   text-decoration: none;
+  /* 触控目标要 ≥24×24（Lighthouse target-size）：备案号字号小，不加内边距不好点 */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 1px;
 }
 
 .footer .footer-center .footer-icp a:hover {

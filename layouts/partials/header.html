@@ -13,11 +13,15 @@
 <nav class="site-nav" aria-label="{{ i18n "nav-main-label" | default "主导航" }}">
   <div class="nav-inner">
     <div class="nav-logo">
+      {{- /* 给 logo 写上宽高：否则图片加载完会撑动导航、把整页内容顶一下（CLS）。
+             取不到尺寸（SVG / 外链）时就不写，靠 CSS 的 height 兜底。 */ -}}
+      {{- $logoPath := .Site.Params.logo | default "img/logo.png" -}}
+      {{- $logoDim := try (imageConfig (printf "static%s" ($logoPath | relURL))) -}}
       {{- if .Site.Params.show_logo | default true -}}
         {{- if .Site.Params.logo -}}
-      <a href="{{ "home/" | relLangURL }}"><img src="{{ .Site.Params.logo | relURL }}" alt="{{ .Site.Params.navName | default .Site.Title }}"></a>
+      <a href="{{ "home/" | relLangURL }}"><img src="{{ .Site.Params.logo | relURL }}" alt="{{ .Site.Params.navName | default .Site.Title }}"{{ with $logoDim.Value }} width="{{ .Width }}" height="{{ .Height }}"{{ end }}></a>
         {{- else -}}
-      <a href="{{ "home/" | relLangURL }}"><img src="{{ "img/logo.png" | relURL }}" alt="{{ .Site.Params.navName | default .Site.Title }}"></a>
+      <a href="{{ "home/" | relLangURL }}"><img src="{{ "img/logo.png" | relURL }}" alt="{{ .Site.Params.navName | default .Site.Title }}"{{ with $logoDim.Value }} width="{{ .Width }}" height="{{ .Height }}"{{ end }}></a>
         {{- end -}}
       {{- end -}}
       {{- if .Site.Params.show_site_name | default true -}}

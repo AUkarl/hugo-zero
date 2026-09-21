@@ -325,7 +325,17 @@
           slotImg.removeAttribute('src');
           slotImg.removeAttribute('srcset');
           slotImg.classList.remove('is-loaded');
-          if (next) slotImg.setAttribute('data-src', next);
+          // 视口里的槽位直接给 src（并提优先级）：否则要等懒加载观察器下一帧才发请求，
+          // 换封面这一下会把首屏大图的 LCP 推后。视口外的仍然走 data-src 懒加载。
+          var rect = slot.getBoundingClientRect();
+          var inView = rect.bottom > 0 && rect.top < (window.innerHeight || 800) + 200;
+          if (next) {
+            slotImg.setAttribute('data-src', next);
+            if (inView) {
+              slotImg.setAttribute('src', next);
+              slotImg.setAttribute('fetchpriority', 'high');
+            }
+          }
           if (nextSet) slotImg.setAttribute('data-srcset', nextSet);
           // 不覆盖 sizes：槽位自己的 sizes 才对得上它的宽度（首屏大图尤其重要）
           slotImg.setAttribute('alt', title || '');

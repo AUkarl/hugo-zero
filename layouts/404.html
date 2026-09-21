@@ -10,17 +10,12 @@
   <title>404 · {{ .Site.Title }}</title>
   {{- /* SEO：404 页面自动输出 noindex + description/canonical */ -}}
   {{- partial "seo.html" . }}
-  {{- /* 预连接 + 非阻塞加载外部样式 */ -}}
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  {{- $fontURL := "https://fonts.googleapis.com/css?family=Cantarell:400,700|Lato:300,400,900&display=swap" -}}
-  {{- $faURL := "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" -}}
-  <link rel="stylesheet" href="{{ $fontURL }}" media="print" onload="this.media='all'">
+  {{- /* 预连接 + 非阻塞加载外部样式（Google Fonts 已移除，改用系统字体栈） */ -}}
+      <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    {{- $faURL := "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" -}}
   <link rel="stylesheet" href="{{ $faURL }}" media="print" onload="this.media='all'">
   <noscript>
-    <link rel="stylesheet" href="{{ $fontURL }}">
-    <link rel="stylesheet" href="{{ $faURL }}">
+        <link rel="stylesheet" href="{{ $faURL }}">
   </noscript>
   {{- $commonCSS := resources.Get "css/common.css" | minify | fingerprint }}
   <link rel="stylesheet" href="{{ $commonCSS.RelPermalink }}">

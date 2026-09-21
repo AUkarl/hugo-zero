@@ -61,20 +61,27 @@
 {{- end -}}
 
 {{- /* ===== 外部资源：预连接，提前建连 ===== */ -}}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
-{{- /* Google Fonts（非阻塞） */ -}}
-{{- $fontURL := "https://fonts.googleapis.com/css?family=Cantarell:400,700|Lato:300,400,900&display=swap" -}}
-<link rel="stylesheet" href="{{ $fontURL }}" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="{{ $fontURL }}"></noscript>
+{{- /* 字体：只使用系统字体栈（见 common.css 的 --font）。
+     原来这里引 Google Fonts，但它在国内基本不可达，还会多一次失败请求 + 字体晚到导致的
+     文本重排（实测文章页 CLS 0.13 就是它引起的），因此彻底去掉。 */ -}}
 
 {{- /* Font Awesome 图标库（非阻塞） */ -}}
 {{- $faURL := "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" -}}
 <link rel="stylesheet" href="{{ $faURL }}" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="{{ $faURL }}"></noscript>
+
+{{- /* 时刻页横幅是 CSS 背景图，属于该页 LCP 元素但发现太晚（lcp-discovery 不通过），
+       这里提前 preload 一下 */ -}}
+{{- if and (eq .Kind "section") (eq .Section "moments") -}}
+  {{- $m := .Site.Params.moment -}}
+  {{- $banner := "" -}}
+  {{- if $m.online_publish -}}{{- with $m.online.banner -}}{{- $banner = .background_image | default "" -}}{{- end -}}
+  {{- else -}}{{- with $m.offline.banner -}}{{- $banner = .background_image | default "" -}}{{- end -}}{{- end -}}
+  {{- with $banner }}<link rel="preload" as="image" href="{{ . | relURL }}" fetchpriority="high">{{ end -}}
+{{- end -}}
 
 {{- /* 公共样式（关键样式，保持同步加载） */ -}}
 {{- $commonCSS := resources.Get "css/common.css" | minify | fingerprint -}}

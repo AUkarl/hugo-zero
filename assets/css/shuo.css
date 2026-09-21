@@ -95,6 +95,9 @@
   margin: 0 auto;
   padding: 20px 0;
   box-sizing: border-box;
+  /* 评论是异步渲染的：不预留高度时，评论列表出现会把页脚往下顶约 680px
+     （实测 CLS 0.135）。这里按「编辑框 + 几条评论」的高度先占位。 */
+  min-height: 700px;
 }
 
 .moment-comment-wrapper #moment-comment {

@@ -12,6 +12,8 @@
 
   /* 时间刻度尺 / 列表共用的强调色（浅色主题：深一点的薄荷，白底上看得清） */
   --tl-accent: #2eb39c;
+  /* chip 上的文字用加深版强调色：原色在 --tl-accent-soft 上只有 1.9~2.3:1 */
+  --tl-accent-text: #0b7a63;
   --tl-accent-soft: rgba(46, 179, 156, 0.14);
   --tl-accent-glow: rgba(46, 179, 156, 0.13);
 }
@@ -21,6 +23,7 @@
   --tl-accent: #7beec7;
   --tl-accent-soft: rgba(123, 238, 199, 0.16);
   --tl-accent-glow: rgba(123, 238, 199, 0.15);
+  --tl-accent-text: #7beec7;
 }
 @media (prefers-color-scheme: dark) {
   [data-theme="auto"] .archive-wrapper {
@@ -202,7 +205,7 @@
 }
 
 .tl-node.is-active .tl-month-text {
-  color: var(--tl-accent);
+  color: var(--tl-accent-text, #0b7a63);
   font-weight: 600;
 }
 
@@ -313,7 +316,7 @@
   transition: color 0.2s;
 }
 
-.archive-item:hover .title { color: var(--tl-accent); }
+.archive-item:hover .title { color: var(--tl-accent-text, #0b7a63); }
 
 .archive-empty {
   padding: 26px 4px;
@@ -555,13 +558,13 @@
   .tl-chip:hover { transform: translateY(-1px); }
   .tl-chip.is-active {
     background: var(--tl-accent-soft);
-    border-color: var(--tl-accent);
-    color: var(--tl-accent);
+    border-color: var(--tl-accent-text, #0b7a63);
+    color: var(--tl-accent-text, #0b7a63);
     font-weight: 600;
   }
   .tl-chip-n {
     font-size: 0.68rem;
-    opacity: 0.75;
+    /* 不再叠透明度：叠了之后对比度只有 2.9:1（继承的加深色也会被稀释） */
     font-variant-numeric: tabular-nums;
   }
 
