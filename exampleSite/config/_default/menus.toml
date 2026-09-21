@@ -32,7 +32,7 @@
 # 博客（外部链接）
 [[main]]
   name = "blog"
-  url = "https://blog.molyun.com"
+  url = "https://example.com"
   weight = 4
   [main.params]
     external = true                   # 标记为外部链接（新标签页打开）
@@ -52,7 +52,7 @@
 # 邮件
 [[main]]
   name = "email"
-  url = "https://mail.molx.net"
+  url = "https://mail.example.com"
   weight = 7
 
 # 关于
