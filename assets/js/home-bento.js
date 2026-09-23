@@ -347,18 +347,26 @@
     if (!useMotion) { swapContents(); return; }
 
     // 先轻轻淡下去 → 换内容 → 内容从旧位置滑到新位置 → 淡回来
+    //
+    // 注意：这里刻意不写 fill: 'forwards'（fw 会把终值一直按住）。
+    // 全新浏览器第一次打开时统计请求慢，会在入场动画结束后才回来，此时首行卡片
+    // 已经没有 data-reveal、会被这里选中；一旦用 fill:'forwards'，淡出的 0.35 会一直生效，
+    // 如果后续恢复动作没成功（动画已结束/被取消），首行就永久停在半透明——冷加载时
+    // 图片还没下来（只剩极淡的 LQIP），看起来就是"整行空白"；刷新后走缓存路径不再触发这段
+    // 动画，所以只有新浏览器第一次打开才遇到。
+    // 不写 fill 时，动画跑完/被取消后元素自动回到 CSS 的 opacity:1，从根上不会卡住；
+    // 淡出+淡回用同一个动画，中间那 150ms 是保持的 0.35，避免两段动画交接时闪一下。
     var fadeMs = 150;
-    var anims = slots.filter(function (el) { return !el.hasAttribute('data-reveal'); })
-      .map(function (el) {
-        return el.animate([{ opacity: 1 }, { opacity: 0.35 }],
-          { duration: fadeMs, easing: 'ease', fill: 'forwards' });
-      });
+    var fading = slots.filter(function (el) { return !el.hasAttribute('data-reveal'); });
+    fading.forEach(function (el) {
+      el.animate(
+        [{ opacity: 1 }, { opacity: 0.35 }, { opacity: 0.35 }, { opacity: 1 }],
+        { duration: fadeMs + 260, easing: 'ease' }
+      );
+    });
     setTimeout(function () {
       swapContents();
       window.Motion.flipByKey(before, function (el) { return el.getAttribute('href'); }, slots, { duration: 460 });
-      anims.forEach(function (a) {
-        try { a.reverse(); } catch (e) { /* 动画被取消就算了 */ }
-      });
     }, fadeMs);
   }
 
