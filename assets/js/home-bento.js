@@ -367,7 +367,38 @@
     setTimeout(function () {
       swapContents();
       window.Motion.flipByKey(before, function (el) { return el.getAttribute('href'); }, slots, { duration: 460 });
+      // 动画窗口过后，把"确实卡住"的槽位强行拉回可见（下面 releaseStuckSlots 的说明）
+      setTimeout(function () { releaseStuckSlots(); }, 400);
     }, fadeMs);
+  }
+
+  /**
+   * 兜底：把视口内「透明且没有任何动画在跑」的精选卡强行恢复可见。
+   *
+   * 为什么需要它：换内容时会先淡出再淡回，如果浏览器把动画中途掐掉又没清干净
+   * （有个别浏览器/极端时序会这样），卡片就会永久停在半透明；而冷启动时图片还没下来，
+   * 看起来就是"整行空白"，刷新才恢复。这里只处理"已经不动了却还是透明"的元素——
+   * 正在正常播入场动画的卡片（animations 里还有 running 的）一律不碰，避免打断动效。
+   */
+  function releaseStuckSlots() {
+    if (!featured) return;
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    Array.prototype.forEach.call(featured.querySelectorAll('[data-hb-slot]'), function (el) {
+      var rect = el.getBoundingClientRect();
+      var inView = rect.bottom > 0 && rect.top < vh;
+      if (!inView || !rect.width || !rect.height) return;
+      if (parseFloat(window.getComputedStyle(el).opacity) >= 1) return;
+      var busy = false;
+      if (typeof el.getAnimations === 'function') {
+        el.getAnimations().forEach(function (a) { if (a.playState === 'running') busy = true; });
+      }
+      if (busy) return;                     // 还在播，交给它自己结束
+      el.removeAttribute('data-reveal');    // 静止态回到 opacity:1
+      el.classList.remove('is-in');
+      if (typeof el.getAnimations === 'function') {
+        el.getAnimations().forEach(function (a) { try { a.cancel(); } catch (e) { /* 忽略 */ } });
+      }
+    });
   }
 
   function text(el, sel) { var n = el.querySelector(sel); return n ? n.textContent.trim() : ''; }
@@ -410,6 +441,10 @@
     window.Motion.reveal(root);
     window.Motion.lazyImages(root);
   }
+
+  // 兜底检查：不管走缓存还是走请求、不管动画有没有被浏览器掐断，
+  // 这几个时间点各检查一次"视口内透明且已静止"的精选卡，强行恢复可见。
+  [1600, 4000, 8000].forEach(function (ms) { setTimeout(releaseStuckSlots, ms); });
 
   // 1) 先用缓存立刻按热度渲染（再次打开本页时零等待、无闪烁）
   var cached = readCache();
