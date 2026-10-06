@@ -31,15 +31,14 @@
     {{- $html := .Summary -}}
     {{- if $full }}{{ $html = .Content }}{{ end -}}
     {{- /* ---------- 封面：给阅读器一个"原图直链" ----------
-           阅读器普遍不认 WebP、也不会执行懒加载 JS，所以这里用 img-src 返回的原始地址
+           阅读器普遍不认 WebP、也不会执行懒加载 JS，所以这里直接用封面原始地址
            （例如 R2 上那张 jpg/png），而不是构建时生成的 WebP，否则会出现"不显示"或
-           "只有一张特别小的模糊图"的问题。 */ -}}
+           "只有一张特别小的模糊图"的问题。
+           注意：这里刻意不再调用 img-src.html —— 那会为每篇文章做一次远程取图，
+           既拖慢构建又多一次网络依赖；直接用原地址转绝对路径就够了。 */ -}}
     {{- $cover := .Params.image | default .Params.img -}}
     {{- $coverURL := "" -}}
-    {{- with $cover -}}
-      {{- $info := partial "img-src.html" (dict "src" . "page" $ "widths" (slice 1200) "lqip" false) -}}
-      {{- $coverURL = $info.orig | default . | absURL -}}
-    {{- end -}}
+    {{- with $cover -}}{{- $coverURL = . | absURL -}}{{- end -}}
     {{- if and $full $coverURL (not (in $html "<img")) -}}
       {{- $html = printf "<p><img src=%q alt=%q loading=\"lazy\"></p>%s" $coverURL (.Title | plainify) $html -}}
     {{- end -}}

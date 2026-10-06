@@ -105,9 +105,30 @@ document.addEventListener('DOMContentLoaded', function() {
   // ==================== 导航子菜单（点击展开/收起） ====================
   // 菜单项在 config 里写 identifier / parent 就会生成子菜单；
   // 这里负责点击展开、点击别处或按 Esc 收起、同步 aria-expanded，键盘也能用。
+  // 桌面端下拉用 position: fixed（导航条有 overflow 会裁掉绝对定位的下拉），
+  // 所以展开时要由 JS 把它贴到父项正下方，并在窗口尺寸变化时重新贴一次。
   (function navSubmenus() {
     const parents = Array.from(document.querySelectorAll('[data-nav-parent]'));
     if (!parents.length) return;
+
+    const isDrawer = () => window.matchMedia('(max-width: 768px)').matches;
+
+    function placeMenu(btn, menu) {
+      if (!btn || !menu || isDrawer()) {
+        if (menu) { menu.style.left = ''; menu.style.top = ''; }
+        return;
+      }
+      const r = btn.getBoundingClientRect();
+      const bar = document.querySelector('.site-nav');
+      const barBottom = bar ? bar.getBoundingClientRect().bottom : r.bottom;
+      menu.style.left = Math.round(r.left) + 'px';
+      // 贴着按钮下沿；但不要压到导航条本身，至少落到导航条下沿之外
+      menu.style.top = Math.round(Math.max(r.bottom + 6, barBottom + 4)) + 'px';
+      // 贴右边界时向左回避，避免被视口裁掉
+      const w = menu.getBoundingClientRect().width;
+      const over = r.left + w - (window.innerWidth - 8);
+      if (over > 0) menu.style.left = Math.round(r.left - over) + 'px';
+    }
 
     function closeAll(except) {
       parents.forEach(btn => {
@@ -130,9 +151,16 @@ document.addEventListener('DOMContentLoaded', function() {
         e.stopPropagation();
         const isOpen = btn.getAttribute('aria-expanded') === 'true';
         closeAll(btn);                                  // 同时只开一个
-        btn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-        item.classList.toggle('is-open', !isOpen);
-        menu.hidden = isOpen;
+        if (isOpen) {
+          btn.setAttribute('aria-expanded', 'false');
+          item.classList.remove('is-open');
+          menu.hidden = true;
+          return;
+        }
+        btn.setAttribute('aria-expanded', 'true');
+        item.classList.add('is-open');
+        menu.hidden = false;
+        placeMenu(btn, menu);                           // 先摆好位置再显示，避免闪一下
       });
     });
 
@@ -141,6 +169,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeAll(null);
+    });
+
+    let rt = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => {
+        const item = document.querySelector('.nav-item.is-open');
+        if (item) placeMenu(item.querySelector('.nav-parent'), item.querySelector('.nav-submenu'));
+      }, 120);
     });
   })();
 

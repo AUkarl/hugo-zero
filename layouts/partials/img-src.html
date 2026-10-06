@@ -43,7 +43,11 @@
   {{- if $isRemote -}}
     {{- $url := $src -}}
     {{- if hasPrefix $url "//" -}}{{- $url = printf "https:%s" $url -}}{{- end -}}
-    {{- with try (resources.GetRemote $url (dict "maxAge" "8760h")) -}}
+    {{- /* 远程取图加超时：图源慢或不可达时，别让整站构建一直卡住。
+           超时按"抓取失败"处理（回退原始外链，页面照常显示）。
+           默认 20 秒，可用 params.toml 的 remote_image_timeout 调整。 */ -}}
+    {{- $reqTimeout := site.Params.remote_image_timeout | default "20s" -}}
+    {{- with try (resources.GetRemote $url (dict "maxAge" "8760h" "timeout" $reqTimeout)) -}}
       {{- with .Value -}}
         {{- if eq .MediaType.MainType "image" -}}{{- $res = . -}}{{- end -}}
       {{- end -}}

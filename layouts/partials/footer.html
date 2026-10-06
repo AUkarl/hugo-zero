@@ -40,9 +40,14 @@
     <nav class="footer-services" aria-label="{{ i18n "footer-services-label" | default "支持服务" }}">
       {{- range . }}
       {{- $svc := . }}
-      {{- /* 图标二选一：img 填图片路径（站内相对路径或完整外链），否则用 icon 的 Font Awesome 类名；
-             invert = true 时给图片反色（深色模式下的黑色图标适用） */ -}}
-      <a href="{{ $svc.link }}" target="_blank" rel="noopener" title="{{ $svc.name }}" aria-label="{{ $svc.name }}">{{ with $svc.img }}<img class="footer-service-img{{ if $svc.invert }} footer-service-img-invert{{ end }}" src="{{ . | relURL }}" alt="" aria-hidden="true" loading="lazy" decoding="async">{{ else }}<i class="{{ $svc.icon }}" aria-hidden="true"></i>{{ end }} {{ $svc.name }}</a>
+      {{- /* 图标二选一：img 填图片路径（站内相对路径或完整外链），否则用 icon 的 Font Awesome 类名。
+             图片默认"浅色原样、深色反色"（跟站点 logo 一致）；也可强制：
+               invert = true     始终反色
+               no_invert = true  从不反色（图片本身已经是浅色时用） */ -}}
+      {{- $imgCls := "footer-service-img" -}}
+      {{- if $svc.invert }}{{ $imgCls = printf "%s footer-service-img-invert" $imgCls }}{{ end -}}
+      {{- if $svc.no_invert }}{{ $imgCls = printf "%s footer-service-img-noinvert" $imgCls }}{{ end -}}
+      <a href="{{ $svc.link }}" target="_blank" rel="noopener" title="{{ $svc.name }}" aria-label="{{ $svc.name }}">{{ with $svc.img }}<img class="{{ $imgCls }}" src="{{ . | relURL }}" alt="" aria-hidden="true" loading="lazy" decoding="async">{{ else }}<i class="{{ $svc.icon }}" aria-hidden="true"></i>{{ end }} {{ $svc.name }}</a>
       {{- end }}
     </nav>
     {{- end }}

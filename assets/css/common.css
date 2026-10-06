@@ -309,7 +309,10 @@ a {
 }
 
 /* ===== 导航子菜单（菜单项写 identifier/parent 即自动生成） =====
-   桌面端是浮层下拉；移动端抽屉里改为内联展开（见下面的媒体查询） */
+   桌面端是浮层下拉（位置由 common.js 贴在父项下方）；移动端抽屉里改为内联展开。
+   桌面端用 position: fixed 而不是 absolute：导航条 .nav-inner 为了能在中等宽度横向滚动
+   设了 overflow-x: auto，按规范这会让 overflow-y 也算成 auto，绝对定位的下拉菜单会被
+   裁在导航栏高度里（表现为"菜单显示在导航栏内部"）。fixed 不受该裁剪影响。 */
 .nav-item {
   position: relative;
   display: flex;
@@ -333,8 +336,8 @@ a {
 }
 
 .nav-submenu {
-  position: absolute;
-  top: calc(100% + 6px);
+  position: fixed;
+  top: 0;
   left: 0;
   min-width: 150px;
   padding: 6px;
@@ -396,6 +399,14 @@ a {
 
 .nav-controls a.ctrl-btn:hover {
   color: var(--text);
+}
+
+/* 桌面端下拉菜单：fixed 定位由 JS 贴到父项正下方，宽度不足时会自动回避右边界 */
+@media (min-width: 769px) {
+  .nav-submenu {
+    z-index: 1200;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+  }
 }
 
 .nav-controls {
@@ -721,11 +732,18 @@ a {
   display: inline-block;
   vertical-align: -0.15em;
   object-fit: contain;
+  /* 默认跟随站点 logo 的处理方式：浅色模式原样、深色模式自动反色
+     （深色 logo 在白底上看得见、在黑底上也不会糊成一片） */
+  filter: var(--logo-filter, none);
 }
 
-/* 深色模式下如果图片本身是深色图标，可用 invert = true 让它反色 */
+/* invert = true → 始终反色；no_invert = true → 从不反色 */
 .footer .footer-center .footer-services a img.footer-service-img-invert {
   filter: invert(1);
+}
+
+.footer .footer-center .footer-services a img.footer-service-img-noinvert {
+  filter: none;
 }
 
 .footer .footer-center .footer-icp {
