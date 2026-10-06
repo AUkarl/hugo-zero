@@ -47,7 +47,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // 移开后滑回来。移动端抽屉里不显示（CSS 里隐藏）。
   (function navUnderline() {
     const container = document.querySelector('.nav-links');
-    const links = Array.from(document.querySelectorAll('.nav-link:not(.blog-link)'));
+    // 注意：这里要包含外链项（.blog-link，例如「开往」）。之前用 :not(.blog-link)
+    // 把它们排除了，导致后加的导航项鼠标移上去没有下划线动画。
+    // 只有"当前页标记"才需要排除外链（外链不可能是当前页，见下面的 activeLink）。
+    const links = Array.from(document.querySelectorAll('.nav-link'));
     if (!container || links.length < 2) return;
 
     const bar = document.createElement('span');
@@ -97,6 +100,48 @@ document.addEventListener('DOMContentLoaded', function() {
       document.fonts.ready.then(() => place(activeLink(), false));
     }
     window.addEventListener('load', () => place(activeLink(), false));
+  })();
+
+  // ==================== 导航子菜单（点击展开/收起） ====================
+  // 菜单项在 config 里写 identifier / parent 就会生成子菜单；
+  // 这里负责点击展开、点击别处或按 Esc 收起、同步 aria-expanded，键盘也能用。
+  (function navSubmenus() {
+    const parents = Array.from(document.querySelectorAll('[data-nav-parent]'));
+    if (!parents.length) return;
+
+    function closeAll(except) {
+      parents.forEach(btn => {
+        if (btn === except) return;
+        btn.setAttribute('aria-expanded', 'false');
+        const item = btn.closest('.nav-item');
+        if (!item) return;
+        item.classList.remove('is-open');
+        const menu = item.querySelector('.nav-submenu');
+        if (menu) menu.hidden = true;
+      });
+    }
+
+    parents.forEach(btn => {
+      const item = btn.closest('.nav-item');
+      const menu = item && item.querySelector('.nav-submenu');
+      if (!menu) return;
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const isOpen = btn.getAttribute('aria-expanded') === 'true';
+        closeAll(btn);                                  // 同时只开一个
+        btn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+        item.classList.toggle('is-open', !isOpen);
+        menu.hidden = isOpen;
+      });
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.nav-item-sub')) closeAll(null);
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeAll(null);
+    });
   })();
 
   // ==================== 抽屉菜单 ====================

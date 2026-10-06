@@ -15,7 +15,7 @@
 {{- $limit := $rss.limit | default 50 -}}
 {{- $embedRe := `(?s)<div[^>]*class="[^"]*(?:video-embed|shortcode-embed|music163-embed|bilibili-embed|netease-music|kugou-music|qq-music|bilibili-video|tencent-video)[^"]*"[^>]*>.*?</div>` -}}
 {{- printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
     <title>{{ if eq .Title .Site.Title }}{{ .Site.Title }}{{ else }}{{ with .Title }}{{.}} on {{ end }}{{ .Site.Title }}{{ end }}</title>
     <link>{{ .Permalink }}</link>
@@ -30,19 +30,44 @@
     {{- range (where site.RegularPages "Type" "in" (slice "post" "posts" "article" "blog" "shuo")) | first $limit }}
     {{- $html := .Summary -}}
     {{- if $full }}{{ $html = .Content }}{{ end -}}
-    {{- /* 正文里没有图片时，把文章封面图补到最前面，保证订阅里能看到配图
-           （封面走一遍构建时处理，取最大的 WebP，抓不到才用原始外链） */ -}}
+    {{- /* ---------- 封面：给阅读器一个"原图直链" ----------
+           阅读器普遍不认 WebP、也不会执行懒加载 JS，所以这里用 img-src 返回的原始地址
+           （例如 R2 上那张 jpg/png），而不是构建时生成的 WebP，否则会出现"不显示"或
+           "只有一张特别小的模糊图"的问题。 */ -}}
     {{- $cover := .Params.image | default .Params.img -}}
-    {{- if and $full $cover (not (in $html "<img")) -}}
-      {{- $info := partial "img-src.html" (dict "src" $cover "page" . "widths" (slice 1200) "lqip" false) -}}
-      {{- if $info.ok -}}
-        {{- $cover = $info.src | absURL -}}
-      {{- else if not (or (hasPrefix $cover "http://") (hasPrefix $cover "https://")) -}}
-        {{- $cover = $cover | absURL -}}
-      {{- end -}}
-      {{- $html = printf "<p><img src=%q alt=%q loading=\"lazy\"></p>%s" $cover (.Title | plainify) $html -}}
+    {{- $coverURL := "" -}}
+    {{- with $cover -}}
+      {{- $info := partial "img-src.html" (dict "src" . "page" $ "widths" (slice 1200) "lqip" false) -}}
+      {{- $coverURL = $info.orig | default . | absURL -}}
     {{- end -}}
-    {{- /* 剔除脚本、嵌入播放器与残留标签（保留 <img> 等正文元素） */ -}}
+    {{- if and $full $coverURL (not (in $html "<img")) -}}
+      {{- $html = printf "<p><img src=%q alt=%q loading=\"lazy\"></p>%s" $coverURL (.Title | plainify) $html -}}
+    {{- end -}}
+    {{- /* ---------- 正文图片：把懒加载属性换成真实原图 ----------
+           管线输出的 <img> 只有 data-src（WebP），外加一张内联的模糊占位图。
+           阅读器不跑 JS，于是正文图要么空白、要么只剩那张极小的占位图。
+           这里统一：占位图删掉，data-orig（原图）优先，其次 data-src，最后 src。 */ -}}
+    {{- $html = replaceRE `(?s)<img\b[^>]*class="[^"]*img-pair-lqip[^"]*"[^>]*>` "" $html -}}
+    {{- range findRE `(?s)<img\b[^>]*>` $html -}}
+      {{- $tag := . -}}
+      {{- $u := "" -}}
+      {{- with (findRE `data-orig="([^"]+)"` $tag 1) -}}{{- $u = replaceRE `(?s).*data-orig="([^"]+)".*` "$1" (index . 0) -}}{{- end -}}
+      {{- if not $u -}}{{- with (findRE `data-src="([^"]+)"` $tag 1) -}}{{- $u = replaceRE `(?s).*data-src="([^"]+)".*` "$1" (index . 0) -}}{{- end -}}{{- end -}}
+      {{- if not $u -}}{{- with (findRE `[[:space:]]src="([^"]+)"` $tag 1) -}}{{- $u = replaceRE `(?s).*[[:space:]]src="([^"]+)".*` "$1" (index . 0) -}}{{- end -}}{{- end -}}
+      {{- $alt := "" -}}
+      {{- with (findRE `alt="([^"]*)"` $tag 1) -}}{{- $alt = replaceRE `(?s).*alt="([^"]*)".*` "$1" (index . 0) -}}{{- end -}}
+      {{- if and $u (not (hasPrefix $u "data:")) -}}
+        {{- $html = replace $html $tag (printf `<img src="%s" alt="%s" loading="lazy">` ($u | absURL) $alt) -}}
+      {{- else -}}
+        {{- $html = replace $html $tag "" -}}
+      {{- end -}}
+    {{- end -}}
+    {{- /* ---------- 视频/音频：阅读器里播不了，改成可点的超链接 ----------
+           （原来是整块删掉，订阅者完全看不到；现在至少给一个能点开的链接） */ -}}
+    {{- $html = replaceRE `(?s)<(?:video|audio)\b[^>]*>.*?<source\b[^>]*[[:space:]]src="([^"]+)"[^>]*>.*?</(?:video|audio)>` `<p>▶ <a href="$1">$1</a></p>` $html -}}
+    {{- $html = replaceRE `(?s)<iframe\b[^>]*[[:space:]]src="([^"]+)"[^>]*>(?:.*?</iframe>)?` `<p>▶ <a href="$1">$1</a></p>` $html -}}
+    {{- $html = replace $html `href="//` `href="https://` -}}
+    {{- /* 剔除脚本、残留的嵌入容器与无用的空标签（保留 <img>、<a> 等正文元素） */ -}}
     {{- $html = replaceRE `(?s)<script\b[^>]*>.*?</script>` "" $html -}}
     {{- $html = replaceRE $embedRe "" $html -}}
     {{- $html = replaceRE `(?s)<iframe\b.*?</iframe>` "" $html -}}
@@ -70,6 +95,13 @@
       {{- end }}
       <description>{{ $html | safeHTML }}</description>
       <content:encoded>{{ $html | safeHTML }}</content:encoded>
+      {{- /* 封面以 enclosure / media:thumbnail 形式给出来：多数阅读器用这两个字段显示列表缩略图 */ -}}
+      {{- with $coverURL }}
+      {{- $ctype := "image/jpeg" -}}
+      {{- if strings.HasSuffix . ".png" }}{{ $ctype = "image/png" }}{{ else if strings.HasSuffix . ".webp" }}{{ $ctype = "image/webp" }}{{ else if strings.HasSuffix . ".gif" }}{{ $ctype = "image/gif" }}{{ else if strings.HasSuffix . ".avif" }}{{ $ctype = "image/avif" }}{{ end -}}
+      <enclosure url="{{ . }}" type="{{ $ctype }}" length="0" />
+      <media:thumbnail url="{{ . }}" />
+      {{- end }}
     </item>
     {{- end }}
   </channel>

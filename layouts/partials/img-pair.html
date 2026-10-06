@@ -42,11 +42,13 @@
   <img class="{{ $imgCls }} img-pair-hd is-loaded"
        src="{{ $info.src }}" srcset="{{ $info.srcset }}" sizes="{{ $info.sizes }}"
        width="{{ $info.width }}" height="{{ $info.height }}"
+       data-orig="{{ $info.orig }}"
        alt="{{ $alt }}" decoding="async" fetchpriority="high">
   {{- else }}
   <img class="{{ $imgCls }} img-pair-hd"
        data-src="{{ $info.src }}" data-srcset="{{ $info.srcset }}" sizes="{{ $info.sizes }}"
        width="{{ $info.width }}" height="{{ $info.height }}"
+       data-orig="{{ $info.orig }}"
        alt="{{ $alt }}" decoding="async">
   {{- end }}
 </span>

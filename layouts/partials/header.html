@@ -31,22 +31,71 @@
     <button type="button" class="nav-toggle" aria-label="{{ i18n "nav-menu" | default "菜单" }}" aria-expanded="false" aria-controls="navLinks"><i class="fas fa-bars" aria-hidden="true"></i></button>
     <div class="nav-links" id="navLinks">
       <button type="button" class="nav-close" aria-label="{{ i18n "nav-close" | default "关闭菜单" }}">&times;</button>
+      {{- /* ------------------------------------------------------------
+           导航项全部来自 config 的菜单（menus.zh.toml / menus.en.toml），支持：
+             name        显示文字（可为空，配合 icon_only 做纯图标）
+             url         站内路径或外链
+             weight      排序（数字越小越靠前）
+             identifier / parent   父子关系 → 自动渲染成「点击展开的子菜单」
+             [main.params]
+               external  = true               外部链接（新标签页打开）
+               icon      = "fa-solid fa-xxx"  Font Awesome 图标
+               image     = "/img/x.svg"       自定义图片（与 icon 二选一）
+               icon_only = true               只显示图标，文字转为无障碍标签
+               position  = "controls"         放到右侧图标区（与主题/语言开关按 weight 统一排序）
+           ------------------------------------------------------------ */ -}}
+      {{- $themeWeight := .Site.Params.theme_switch_weight | default 90 -}}
+      {{- $langWeight := .Site.Params.lang_switch_weight | default 100 -}}
+      {{- $themeIcon := .Site.Params.theme_switch_icon | default "fas fa-sun" -}}
+      {{- $langIcon := .Site.Params.lang_switch_icon | default "fas fa-globe" -}}
       {{- range .Site.Menus.main -}}
-        {{- $href := .URL -}}
-        {{- if not .Params.external -}}{{- $href = .URL | relLangURL -}}{{- end -}}
-        {{- $isCurrent := or (eq (strings.TrimSuffix "/" $href) (strings.TrimSuffix "/" $.RelPermalink)) ($.HasMenuCurrent "main" .) -}}
-        {{- if .Params.external -}}
-      <a class="nav-link blog-link" href="{{ .URL }}" target="_blank" rel="noopener" data-i18n="nav-{{ .Name }}">{{ .Name }}</a>
-        {{- else -}}
-      <a class="nav-link{{ if $isCurrent }} active{{ end }}" data-section="{{ .Name }}" data-i18n="nav-{{ .Name }}" href="{{ $href }}"{{ if $isCurrent }} aria-current="page"{{ end }}>{{ .Name }}</a>
+        {{- if and (not .Parent) (ne (.Params.position | default "nav") "controls") -}}
+          {{- $href := .URL -}}
+          {{- $external := .Params.external -}}
+          {{- if and $href (not $external) -}}{{- $href = $href | relLangURL -}}{{- end -}}
+          {{- $isCurrent := and $href (not $external) (or (eq (strings.TrimSuffix "/" $href) (strings.TrimSuffix "/" $.RelPermalink)) ($.HasMenuCurrent "main" .)) -}}
+          {{- $iconOnly := .Params.icon_only | default false -}}
+          {{- if .HasChildren -}}
+      <div class="nav-item nav-item-sub">
+        <button type="button" class="nav-link nav-parent{{ if $iconOnly }} nav-link-icon{{ end }}" aria-expanded="false" aria-haspopup="true" data-nav-parent{{ if $iconOnly }} title="{{ .Name }}" aria-label="{{ .Name }}"{{ end }}>{{ with .Params.icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}{{ with .Params.image }}<img class="nav-icon-img" src="{{ . | relURL }}" alt="" aria-hidden="true" loading="lazy" decoding="async">{{ end }}{{ if not $iconOnly }}<span class="nav-label" data-i18n="nav-{{ .Name }}">{{ .Name }}</span>{{ end }}<i class="fas fa-chevron-down nav-caret" aria-hidden="true"></i></button>
+        <div class="nav-submenu" hidden>
+          {{- range .Children -}}
+            {{- $chref := .URL -}}
+            {{- if and $chref (not .Params.external) -}}{{- $chref = $chref | relLangURL -}}{{- end -}}
+          <a class="nav-submenu-link" href="{{ $chref }}"{{ if .Params.external }} target="_blank" rel="noopener"{{ end }}>{{ with .Params.icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}{{ with .Params.image }}<img class="nav-icon-img" src="{{ . | relURL }}" alt="" aria-hidden="true" loading="lazy" decoding="async">{{ end }}<span class="nav-label" data-i18n="nav-{{ .Name }}">{{ .Name }}</span></a>
+          {{- end }}
+        </div>
+      </div>
+          {{- else -}}
+      <a class="nav-link{{ if $external }} blog-link{{ end }}{{ if $isCurrent }} active{{ end }}{{ if $iconOnly }} nav-link-icon{{ end }}"{{ if $href }} href="{{ $href }}"{{ end }}{{ if $external }} target="_blank" rel="noopener"{{ end }}{{ if $iconOnly }} title="{{ .Name }}" aria-label="{{ .Name }}"{{ end }}{{ if $isCurrent }} aria-current="page"{{ end }}{{ if not $external }} data-section="{{ .Name }}"{{ end }}>{{ with .Params.icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}{{ with .Params.image }}<img class="nav-icon-img" src="{{ . | relURL }}" alt="" aria-hidden="true" loading="lazy" decoding="async">{{ end }}{{ if not $iconOnly }}<span class="nav-label" data-i18n="nav-{{ .Name }}">{{ .Name }}</span>{{ end }}</a>
+          {{- end -}}
         {{- end -}}
-      {{- end -}}
+      {{- end }}
       <div class="nav-controls">
-        {{- if .Site.Params.enable_theme_switch | default true }}
-        <button type="button" class="ctrl-btn" id="themeToggle" title="{{ i18n "theme-toggle" | default "切换主题" }}" aria-label="{{ i18n "theme-toggle" | default "切换主题" }}"><i class="fas fa-sun" aria-hidden="true"></i></button>
-        {{- end }}
-        {{- if .Site.Params.enable_lang_switch | default true }}
-        <button type="button" class="ctrl-btn" id="langToggle" title="{{ i18n "lang-toggle" | default "切换语言" }}" aria-label="{{ i18n "lang-toggle" | default "切换语言" }}"><i class="fas fa-globe" aria-hidden="true"></i></button>
+        {{- /* 右侧图标区：position="controls" 的菜单项 + 主题开关 + 语言开关，统一按 weight 排序 */ -}}
+        {{- $ctrlItems := slice -}}
+        {{- range .Site.Menus.main -}}
+          {{- if and (not .Parent) (eq (.Params.position | default "") "controls") -}}
+            {{- $ctrlItems = $ctrlItems | append (dict "kind" "menu" "weight" .Weight "entry" .) -}}
+          {{- end -}}
+        {{- end -}}
+        {{- if .Site.Params.enable_theme_switch | default true -}}
+          {{- $ctrlItems = $ctrlItems | append (dict "kind" "theme" "weight" $themeWeight) -}}
+        {{- end -}}
+        {{- if .Site.Params.enable_lang_switch | default true -}}
+          {{- $ctrlItems = $ctrlItems | append (dict "kind" "lang" "weight" $langWeight) -}}
+        {{- end -}}
+        {{- range sort $ctrlItems "weight" -}}
+          {{- if eq .kind "menu" -}}
+            {{- $e := .entry -}}
+            {{- $ehref := $e.URL -}}
+            {{- if and $ehref (not $e.Params.external) -}}{{- $ehref = $ehref | relLangURL -}}{{- end -}}
+        <a class="ctrl-btn nav-ctrl-link" href="{{ $ehref }}"{{ if $e.Params.external }} target="_blank" rel="noopener"{{ end }} title="{{ $e.Name }}" aria-label="{{ $e.Name }}">{{ with $e.Params.icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}{{ with $e.Params.image }}<img class="nav-icon-img" src="{{ . | relURL }}" alt="" aria-hidden="true" loading="lazy" decoding="async">{{ end }}{{ if not ($e.Params.icon_only | default false) }}<span class="nav-label" data-i18n="nav-{{ $e.Name }}">{{ $e.Name }}</span>{{ end }}</a>
+          {{- else if eq .kind "theme" -}}
+        <button type="button" class="ctrl-btn" id="themeToggle" title="{{ i18n "theme-toggle" | default "切换主题" }}" aria-label="{{ i18n "theme-toggle" | default "切换主题" }}"><i class="{{ $themeIcon }}" aria-hidden="true"></i></button>
+          {{- else -}}
+        <button type="button" class="ctrl-btn" id="langToggle" title="{{ i18n "lang-toggle" | default "切换语言" }}" aria-label="{{ i18n "lang-toggle" | default "切换语言" }}"><i class="{{ $langIcon }}" aria-hidden="true"></i></button>
+          {{- end -}}
         {{- end }}
       </div>
     </div>

@@ -308,6 +308,96 @@ a {
   background: rgba(0, 0, 0, 0.05);
 }
 
+/* ===== 导航子菜单（菜单项写 identifier/parent 即自动生成） =====
+   桌面端是浮层下拉；移动端抽屉里改为内联展开（见下面的媒体查询） */
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav-parent {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.nav-caret {
+  font-size: 0.62rem;
+  opacity: 0.6;
+  transition: transform 0.22s ease;
+}
+
+.nav-item.is-open .nav-caret {
+  transform: rotate(180deg);
+}
+
+.nav-submenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 150px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  z-index: 60;
+}
+
+.nav-submenu[hidden] {
+  display: none;
+}
+
+.nav-submenu-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.nav-submenu-link:hover {
+  color: var(--text);
+  background: var(--tag-bg);
+}
+
+/* 纯图标导航项（params.icon_only = true）：文字只作为无障碍标签 */
+.nav-link-icon {
+  padding: 4px 8px;
+}
+
+.nav-link-icon .nav-label {
+  display: none;
+}
+
+/* 导航项里的自定义图片图标（params.image） */
+.nav-icon-img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: -0.2em;
+}
+
+/* 放进右侧图标区的菜单项：外观跟主题/语言按钮保持一致 */
+.nav-controls a.ctrl-btn {
+  text-decoration: none;
+  color: var(--text-secondary);
+}
+
+.nav-controls a.ctrl-btn:hover {
+  color: var(--text);
+}
+
 .nav-controls {
   display: flex;
   align-items: center;
@@ -442,6 +532,46 @@ a {
 
   .nav-links .blog-link {
     display: block;
+  }
+
+  /* 抽屉里的子菜单：改成内联展开，跟着父项往下排 */
+  .nav-item {
+    display: block;
+    width: 100%;
+  }
+
+  .nav-links .nav-parent {
+    width: 100%;
+    justify-content: space-between;
+    padding: 14px 16px;
+    font-size: 1rem;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-submenu {
+    position: static;
+    min-width: 0;
+    padding: 0 0 0 14px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .nav-submenu-link {
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    white-space: normal;
+  }
+
+  /* 抽屉里图标项也把文字显示出来，方便点选 */
+  .nav-link-icon {
+    padding: 14px 16px;
+  }
+
+  .nav-link-icon .nav-label {
+    display: inline;
   }
 
   .nav-inner {
@@ -581,6 +711,21 @@ a {
 
 .footer .footer-center .footer-services a i {
   font-size: 0.9rem;
+}
+
+/* 服务项支持自定义图片（params: [[footer.services]] 里写 img = "…"） */
+.footer .footer-center .footer-services a img.footer-service-img {
+  width: auto;
+  height: 1.05em;
+  max-height: 18px;
+  display: inline-block;
+  vertical-align: -0.15em;
+  object-fit: contain;
+}
+
+/* 深色模式下如果图片本身是深色图标，可用 invert = true 让它反色 */
+.footer .footer-center .footer-services a img.footer-service-img-invert {
+  filter: invert(1);
 }
 
 .footer .footer-center .footer-icp {

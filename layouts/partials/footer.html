@@ -39,7 +39,10 @@
     {{- with $footer.services }}
     <nav class="footer-services" aria-label="{{ i18n "footer-services-label" | default "支持服务" }}">
       {{- range . }}
-      <a href="{{ .link }}" target="_blank" rel="noopener" title="{{ .name }}" aria-label="{{ .name }}"><i class="{{ .icon }}" aria-hidden="true"></i> {{ .name }}</a>
+      {{- $svc := . }}
+      {{- /* 图标二选一：img 填图片路径（站内相对路径或完整外链），否则用 icon 的 Font Awesome 类名；
+             invert = true 时给图片反色（深色模式下的黑色图标适用） */ -}}
+      <a href="{{ $svc.link }}" target="_blank" rel="noopener" title="{{ $svc.name }}" aria-label="{{ $svc.name }}">{{ with $svc.img }}<img class="footer-service-img{{ if $svc.invert }} footer-service-img-invert{{ end }}" src="{{ . | relURL }}" alt="" aria-hidden="true" loading="lazy" decoding="async">{{ else }}<i class="{{ $svc.icon }}" aria-hidden="true"></i>{{ end }} {{ $svc.name }}</a>
       {{- end }}
     </nav>
     {{- end }}

@@ -295,6 +295,29 @@
   margin: 16px 0;
 }
 
+/* --- 长串换行（移动端防止撑开页面）---
+   正文里像注册表路径、文件名、错误码、长 URL 这种没有空格的连续串，窄屏下会把整页撑宽
+   （实测某篇文章里 li 的内容宽 409px > 容器 271px，页面横向被撑到 480px）。
+   这类规则只在"放不下时"才会断行，普通文字完全不受影响。 */
+.article-body p,
+.article-body li,
+.article-body td,
+.article-body th,
+.article-body dd,
+.article-body blockquote,
+.article-body figcaption {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.article-body code,
+.article-body kbd,
+.article-body samp,
+.article-body a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .article-body code {
   font-family: 'Courier New', monospace;
   background: var(--tag-bg);
