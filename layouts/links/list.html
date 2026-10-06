@@ -1,0 +1,121 @@
+{{- /* ============================================================
+  links/list.html — 友链页（/links/）
+  ------------------------------------------------------------
+  结构：
+    选项卡：朋友动态 / 左邻右舍 / 站点联盟 / 申请友链
+    选项卡下方：评论系统（与文章页同一套）
+
+  数据来源（全部是文件，构建时不需要联网）：
+    data/links.yaml        朋友站点 + 站点联盟（手写）
+    data/linksstatus.json  检测脚本写入：在线状态 / 最后更新 / 分组 / 图标
+    data/friendfeed.json   检测脚本写入：朋友们的最新动态（RSS 聚合，最多保留若干条）
+  由 .github/scripts/check-links.mjs 在北京时间 02:00 / 11:00 / 20:00 自动更新。
+  ============================================================ */ -}}
+
+{{- define "styles" -}}
+{{- $linksCSS := resources.Get "css/links.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $linksCSS.RelPermalink }}">
+{{- end -}}
+
+{{- define "main" -}}
+{{- $d := site.Data -}}
+{{- $links := $d.links | default dict -}}
+{{- $friends := $links.friends | default slice -}}
+{{- $alliance := $links.alliance | default slice -}}
+{{- $status := $d.linksstatus | default dict -}}
+{{- $feed := $d.friendfeed | default dict -}}
+{{- $items := $feed.items | default slice -}}
+{{- $online := slice -}}
+{{- $lost := slice -}}
+{{- range $friends -}}
+  {{- $st := index $status .url | default dict -}}
+  {{- if eq ($st.group | default "active") "lost" -}}
+    {{- $lost = $lost | append (dict "site" . "st" $st) -}}
+  {{- else -}}
+    {{- $online = $online | append (dict "site" . "st" $st) -}}
+  {{- end -}}
+{{- end -}}
+
+<main class="main" id="main">
+  <section class="section links-page">
+    <h1 class="section-title">{{ i18n "links-title" | default "友链" }}</h1>
+    <p class="section-desc">{{ i18n "links-desc" | default "互联网的毛细血管里，依然流淌着真诚的联结。" }}</p>
+
+    <div class="links-tabs" role="tablist" aria-label="{{ i18n "links-title" | default "友链" }}">
+      <button type="button" class="links-tab is-active" role="tab" id="tab-feed" data-tab="feed" aria-selected="true" aria-controls="panel-feed">{{ i18n "links-tab-feed" | default "朋友动态" }}</button>
+      <button type="button" class="links-tab" role="tab" id="tab-neighbors" data-tab="neighbors" aria-selected="false" aria-controls="panel-neighbors">{{ i18n "links-tab-neighbors" | default "左邻右舍" }}</button>
+      <button type="button" class="links-tab" role="tab" id="tab-alliance" data-tab="alliance" aria-selected="false" aria-controls="panel-alliance">{{ i18n "links-tab-alliance" | default "站点联盟" }}</button>
+      <button type="button" class="links-tab" role="tab" id="tab-apply" data-tab="apply" aria-selected="false" aria-controls="panel-apply">{{ i18n "links-tab-apply" | default "申请友链" }}</button>
+    </div>
+
+    {{- /* ---------- 朋友动态 ---------- */ -}}
+    <section class="links-panel is-active" id="panel-feed" role="tabpanel" aria-labelledby="tab-feed">
+      {{- if $items }}
+      <div class="feed-grid" id="feedGrid">
+        {{- range $items }}
+        <article class="feed-card" data-feed-item>
+          <div class="feed-head">
+            <span class="feed-site">{{ .site }}</span>
+            {{- with .date }}<time class="feed-date" datetime="{{ . }}">{{ time.Format "2006-01-02" . }}</time>{{ end }}
+          </div>
+          <h3 class="feed-title"><a href="{{ .url }}" target="_blank" rel="noopener">{{ .title }}</a></h3>
+          {{- with .summary }}<p class="feed-desc">{{ . }}</p>{{ end }}
+        </article>
+        {{- end }}
+      </div>
+      <nav class="feed-pager" id="feedPager" aria-label="{{ i18n "links-feed-pager" | default "动态翻页" }}"></nav>
+      {{- else }}
+      <p class="links-empty">{{ i18n "links-feed-empty" | default "还没有抓到朋友们的动态。检测脚本每天运行三次（北京时间 02:00 / 11:00 / 20:00），稍后再来看看。" }}</p>
+      {{- end }}
+    </section>
+
+    {{- /* ---------- 左邻右舍 ---------- */ -}}
+    <section class="links-panel" id="panel-neighbors" role="tabpanel" aria-labelledby="tab-neighbors" hidden>
+      <h2 class="links-subtitle"><i class="fas fa-circle-check" aria-hidden="true"></i> {{ i18n "links-active" | default "活跃的朋友" }} <span class="links-count">{{ len $online }}</span></h2>
+      {{- if $online }}
+      <div class="neighbor-grid">
+        {{- range $online }}{{ partial "links-neighbor.html" . }}{{ end }}
+      </div>
+      {{- else }}
+      <p class="links-empty">{{ i18n "links-none-active" | default "暂无（等检测脚本跑一次就会显示）。" }}</p>
+      {{- end }}
+
+      {{- if $lost }}
+      <h2 class="links-subtitle is-lost"><i class="fas fa-sailboat" aria-hidden="true"></i> {{ i18n "links-lost" | default "迷失的小船" }} <span class="links-count">{{ len $lost }}</span></h2>
+      <p class="links-hint">{{ i18n "links-lost-hint" | default "超过 30 天无法访问、或 90 天没有新动态。" }}</p>
+      <div class="neighbor-grid is-lost">
+        {{- range $lost }}{{ partial "links-neighbor.html" . }}{{ end }}
+      </div>
+      {{- end }}
+    </section>
+
+    {{- /* ---------- 站点联盟 ---------- */ -}}
+    <section class="links-panel" id="panel-alliance" role="tabpanel" aria-labelledby="tab-alliance" hidden>
+      {{- if $alliance }}
+      <ul class="alliance-list">
+        {{- range $alliance }}
+        <li class="alliance-item"><a href="{{ .url }}" target="_blank" rel="noopener">{{ .name }}</a>{{ with .desc }}<span class="alliance-desc">{{ . }}</span>{{ end }}</li>
+        {{- end }}
+      </ul>
+      {{- else }}
+      <p class="links-empty">{{ i18n "links-alliance-empty" | default "暂未加入任何联盟。" }}</p>
+      {{- end }}
+    </section>
+
+    {{- /* ---------- 申请友链（内容来自 content/<lang>/links/_index.md） ---------- */ -}}
+    <section class="links-panel links-apply" id="panel-apply" role="tabpanel" aria-labelledby="tab-apply" hidden>
+      {{ .Content }}
+    </section>
+  </section>
+
+  {{- /* 评论：与文章页完全同一套 */ -}}
+  {{- if ne .Params.comments false -}}
+    {{- partial "comments/loader.html" . -}}
+  {{- end -}}
+</main>
+{{- end -}}
+
+{{- define "scripts" -}}
+{{- $linksJS := resources.Get "js/links.js" | minify | fingerprint -}}
+<script src="{{ $linksJS.RelPermalink }}"></script>
+{{- end -}}

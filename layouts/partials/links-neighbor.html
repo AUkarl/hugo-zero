@@ -1,0 +1,48 @@
+{{- /* ============================================================
+  links-neighbor.html — 左邻右舍里的一个站点格子
+  ------------------------------------------------------------
+  入参（dict）：
+    site  来自 data/links.yaml 的站点信息（name / url / desc / icon / email / rss）
+    st    来自 data/linksstatus.json 的检测结果（group / online / icon / rss / lastPost / daysSincePost…）
+
+  布局：左 3 右 7 两栏
+    左栏：网站图标（icon → 检测脚本抓到的 favicon → 邮箱 gravatar → 首字母占位）
+    右栏：上=网站名（加粗）/ 中=简介（最多两行）/ 下=在线状态 + RSS 图标 + 最近更新
+  ============================================================ */ -}}
+{{- $site := .site -}}
+{{- $st := .st | default dict -}}
+{{- $icon := $site.icon | default ($st.icon | default "") -}}
+{{- if and (not $icon) $site.email -}}
+  {{- $icon = printf "https://cravatar.cn/avatar/%s?s=96&d=mp" (md5 $site.email) -}}
+{{- end -}}
+{{- $rss := $site.rss | default ($st.rss | default "") -}}
+{{- $isOnline := $st.online | default false -}}
+{{- $group := $st.group | default "active" -}}
+<div class="neighbor{{ if eq $group "lost" }} is-lost{{ end }}">
+  <div class="neighbor-icon{{ if not $icon }} is-letter{{ end }}">
+    {{- with $icon }}
+    <img src="{{ . }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"
+         onerror="this.style.display='none';this.parentNode.classList.add('is-letter')">
+    {{- end -}}
+    <span class="neighbor-letter" aria-hidden="true">{{ substr ($site.name | default "?") 0 1 }}</span>
+  </div>
+  <div class="neighbor-body">
+    <div class="neighbor-top">
+      <a class="neighbor-name" href="{{ $site.url }}" target="_blank" rel="noopener">{{ $site.name }}</a>
+    </div>
+    <p class="neighbor-desc">{{ $site.desc | default ($st.desc | default "") }}</p>
+    <div class="neighbor-bottom">
+      <span class="neighbor-state {{ if $isOnline }}is-online{{ else }}is-offline{{ end }}">
+        <i class="fas {{ if $isOnline }}fa-circle-check{{ else }}fa-plug-circle-xmark{{ end }}" aria-hidden="true"></i>
+        {{ if $isOnline }}{{ i18n "links-online" | default "在线" }}{{ else }}{{ i18n "links-offline" | default "失联" }}{{ end }}
+      </span>
+      {{- with $st.daysSincePost }}
+      <span class="neighbor-updated">{{ i18n "links-updated-days" | default "最近更新" }} {{ . }} {{ i18n "links-days-ago" | default "天前" }}</span>
+      {{- end }}
+      <span class="neighbor-links">
+        {{- with $rss }}<a href="{{ . }}" target="_blank" rel="noopener" title="RSS" aria-label="RSS"><i class="fas fa-rss" aria-hidden="true"></i></a>{{ end }}
+        <a href="{{ $site.url }}" target="_blank" rel="noopener" title="{{ i18n "links-visit" | default "访问站点" }}" aria-label="{{ i18n "links-visit" | default "访问站点" }}"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+      </span>
+    </div>
+  </div>
+</div>

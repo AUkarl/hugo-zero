@@ -107,53 +107,7 @@
       <hr class="about-divider">
       {{- end }}
 
-      {{- /* 友情链接 */ -}}
-      {{- if $aboutCfg.show_friends | default true }}
-      <div class="about-section">
-        <div class="about-block-title"><i class="fas fa-heart"></i> <span data-i18n="about-friends-title">{{ i18n "about-friends-title" | default "友情链接" }}</span></div>
-        <div class="friend-links">
-          {{- range .Site.Params.friends -}}
-          <a href="{{ .url }}" target="_blank" rel="noopener">{{ .name }} <i class="fas fa-external-link-alt ext-arrow"></i></a>
-          {{- end }}
-        </div>
-      </div>
-
-      <hr class="about-divider">
-      {{- end }}
-
-      {{- /* 站点联盟 */ -}}
-      {{- if $aboutCfg.show_alliance | default true }}
-      <div class="about-section">
-        <div class="about-block-title"><i class="fas fa-handshake"></i> <span data-i18n="about-alliance-title">{{ i18n "about-alliance-title" | default "站点联盟" }}</span></div>
-        <div class="alliance-links">
-          {{- range .Site.Params.alliance -}}
-          <a href="{{ .url }}" target="_blank" rel="noopener">
-            <i class="{{ .icon }}"></i> {{ .name }}
-          </a>
-          {{- end }}
-        </div>
-      </div>
-
-      <hr class="about-divider">
-      {{- end }}
-
-      {{- /* 支持服务 */ -}}
-      {{- if and ($aboutCfg.show_supports | default true) .Site.Params.supports }}
-      <div class="about-section">
-        <div class="about-block-title"><i class="fas fa-server"></i> <span data-i18n="about-supports-title">{{ i18n "about-supports-title" | default "支持服务" }}</span></div>
-        <div class="support-links">
-          {{- range .Site.Params.supports -}}
-          <a href="{{ .url }}" target="_blank" rel="noopener">
-            <i class="{{ .icon }}"></i> {{ .name }}
-          </a>
-          {{- end }}
-        </div>
-      </div>
-
-      <hr class="about-divider">
-      {{- end }}
-
-      {{- /* 站点声明 */ -}}
+                        {{- /* 站点声明 */ -}}
       {{- if $aboutCfg.show_declaration | default true }}
       <div class="about-section">
         <div class="about-block-title"><i class="fas fa-shield-alt"></i> <span data-i18n="about-declaration-title">{{ i18n "about-declaration-title" | default "站点声明" }}</span></div>
@@ -188,9 +142,6 @@
       'about-tagline': '{{ $taglineZh | default (i18n "about-tagline-zh" | default "独立创作者 · 极简主义践行者 · 数字花园园丁") }}',
       'about-site-title': '{{ i18n "about-site-title-zh" | default "关于本站" }}',
       'about-findme-title': '{{ i18n "about-findme-title-zh" | default "找到我" }}',
-      'about-friends-title': '{{ i18n "about-friends-title-zh" | default "友情链接" }}',
-      'about-alliance-title': '{{ i18n "about-alliance-title-zh" | default "站点联盟" }}',
-      'about-supports-title': '{{ i18n "about-supports-title-zh" | default "支持服务" }}',
       'about-declaration-title': '{{ i18n "about-declaration-title-zh" | default "站点声明" }}'
       {{- range $i, $p := $aboutCfg.bio }},
       'about-bio-{{ $i }}': '{{ $p.text_zh }}'
@@ -208,9 +159,6 @@
       'about-tagline': '{{ $taglineEn | default $taglineZh | default (i18n "about-tagline-en" | default "Independent Creator · Minimalist · Digital Gardener") }}',
       'about-site-title': '{{ i18n "about-site-title-en" | default "About This Site" }}',
       'about-findme-title': '{{ i18n "about-findme-title-en" | default "Find Me" }}',
-      'about-friends-title': '{{ i18n "about-friends-title-en" | default "Friend Links" }}',
-      'about-alliance-title': '{{ i18n "about-alliance-title-en" | default "Site Alliance" }}',
-      'about-supports-title': '{{ i18n "about-supports-title-en" | default "Powered By" }}',
       'about-declaration-title': '{{ i18n "about-declaration-title-en" | default "Site Declaration" }}'
       {{- range $i, $p := $aboutCfg.bio }},
       'about-bio-{{ $i }}': '{{ $p.text_en | default $p.text_zh }}'
