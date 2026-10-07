@@ -162,6 +162,18 @@ moments-desc-zh: "分享生活点滴，记录瞬间感悟。"
 moments-title-en: "Moments"
 moments-desc-en: "Share life moments and thoughts."
 
+# ===== 时刻页：朋友圈式卡片（点赞 / 评论 / 相对时间）=====
+shuo-like: "赞"
+shuo-liked: "已赞"
+shuo-comment: "评论"
+shuo-just-now: "刚刚"
+shuo-minutes-ago: "分钟前"
+shuo-hours-ago: "小时前"
+shuo-yesterday: "昨天"
+shuo-days-ago: "天前"
+shuo-like-count: "人觉得赞"
+shuo-empty: "还没有发布时刻"
+
 # ===== 关于页 =====
 about-title: "关于"
 about-desc: "一个在数字世界里种花的人。"

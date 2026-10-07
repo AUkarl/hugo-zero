@@ -162,6 +162,18 @@ moments-desc-zh: "分享生活点滴，记录瞬间感悟。"
 moments-title-en: "Moments"
 moments-desc-en: "Share life moments and thoughts."
 
+# ===== Moments page: WeChat-style cards (like / comment / relative time) =====
+shuo-like: "Like"
+shuo-liked: "Liked"
+shuo-comment: "Comment"
+shuo-just-now: "just now"
+shuo-minutes-ago: "min ago"
+shuo-hours-ago: "h ago"
+shuo-yesterday: "yesterday"
+shuo-days-ago: "d ago"
+shuo-like-count: "likes"
+shuo-empty: "No moments yet"
+
 # ===== About page =====
 about-title: "About"
 about-desc: "A gardener in the digital world."

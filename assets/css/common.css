@@ -22,6 +22,7 @@
   --shuo-submit-color: #ffffff;
   /* 品牌色 #7beec7 在浅色底上只有 1.4:1，文字场景用这个加深版（白底 4.7:1） */
   --logo-accent-text: #0d8368;
+  --shuo-name: #576b95;   /* 朋友圈式卡片的昵称色（浅色） */
 }
 
 [data-theme="dark"] {
@@ -41,6 +42,7 @@
   --scroll-btn-color: #aaaaaa;
   --shuo-submit-color: #000000;
   --logo-accent-text: #7beec7;
+  --shuo-name: #7f9ed0;   /* 朋友圈式卡片的昵称色（深色下用亮一点的蓝） */
 }
 
 :root {
@@ -72,6 +74,7 @@
     --scroll-btn-bg: rgba(30, 30, 30, 0.9);
     --scroll-btn-color: #aaaaaa;
     --shuo-submit-color: #000000;
+    --shuo-name: #7f9ed0;
   }
 }
 

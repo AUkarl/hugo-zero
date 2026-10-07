@@ -2,7 +2,8 @@
   moments/list.html — 时刻页模板
   两种模式：
     online_publish = true  → 整页评论区（waline/twikoo/artalk）
-    online_publish = false → 说说卡片展示（无发布框、无点赞）
+    online_publish = false → 朋友圈式说说卡片（图片九宫格 / 音乐 / 视频 / 链接卡片，
+                             每条可点赞 + 评论，点赞数存在评论系统的计数器里）
   ============================================================ */ -}}
 {{- define "styles" -}}
 {{- $momentsCSS := resources.Get "css/shuo.css" | minify | fingerprint -}}
@@ -95,13 +96,29 @@
   {{- range $img := ($p.Params.images | default slice) -}}
     {{- $imgs = $imgs | append (partial "img-src.html" (dict "src" $img "page" $p "sizes" "(max-width: 768px) 30vw, 180px" "widths" (slice 400 800))) -}}
   {{- end -}}
+  {{- /* 链接卡片：支持 link 写成 map（url/title/desc/image），也兼容直接写一个地址字符串 */ -}}
+  {{- $lk := $p.Params.link -}}
+  {{- $linkURL := "" -}}{{- $linkTitle := "" -}}{{- $linkDesc := "" -}}{{- $linkImg := "" -}}
+  {{- if reflect.IsMap $lk -}}
+    {{- $linkURL = $lk.url | default "" -}}
+    {{- $linkTitle = $lk.title | default "" -}}
+    {{- $linkDesc = $lk.desc | default "" -}}
+    {{- $linkImg = $lk.image | default "" -}}
+  {{- else -}}
+    {{- $linkURL = $lk | default "" -}}
+  {{- end -}}
   {{- $.Scratch.Add "shuoItems" (dict
     "id" ($p.File.UniqueID | default "0")
     "text" ($p.Content | plainify)
     "images" $imgs
     "music" ($p.Params.music | default "")
+    "musicTitle" ($p.Params.music_title | default "")
+    "musicCover" ($p.Params.music_cover | default "")
     "video" ($p.Params.video | default "")
+    "videoPoster" ($p.Params.video_poster | default "")
+    "link" (dict "url" $linkURL "title" $linkTitle "desc" $linkDesc "image" $linkImg)
     "time" ($p.Date | time.Format "2006-01-02 15:04")
+    "iso" ($p.Date.Format "2006-01-02T15:04:05Z07:00")
     "nickname" ($p.Site.Params.aboutName | default "知 止")
     "avatarUrl" (($p.Site.Params.aboutAvatar | default "img/avatar.png") | relURL)
   ) -}}
@@ -139,7 +156,23 @@
     twikooEnvId: "{{ $offCfg.twikoo_env_id | default "" }}",
     twikooRegion: "{{ $offCfg.twikoo_region | default "" }}",
     artalkServer: "{{ $offCfg.artalk_server | default "" }}",
-    artalkSite: "{{ $offCfg.artalk_site | default "default" }}"
+    artalkSite: "{{ $offCfg.artalk_site | default "default" }}",
+    /* 点赞：用评论系统的计数器（Waline 的 reaction0），数据与评论同一套存储 */
+    likeEnabled: {{ if and .Site.Params.comment.enable (eq ($offCfg.comment_provider | default "") "waline") (ne ($offCfg.waline_server_url | default "") "") }}true{{ else }}false{{ end }},
+    likeType: "reaction0",
+    lang: "{{ .Site.Language.Lang | default "zh" }}",
+    i18n: {
+      like: "{{ i18n "shuo-like" | default "赞" }}",
+      liked: "{{ i18n "shuo-liked" | default "已赞" }}",
+      comment: "{{ i18n "shuo-comment" | default "评论" }}",
+      justNow: "{{ i18n "shuo-just-now" | default "刚刚" }}",
+      minutesAgo: "{{ i18n "shuo-minutes-ago" | default "分钟前" }}",
+      hoursAgo: "{{ i18n "shuo-hours-ago" | default "小时前" }}",
+      yesterday: "{{ i18n "shuo-yesterday" | default "昨天" }}",
+      daysAgo: "{{ i18n "shuo-days-ago" | default "天前" }}",
+      likeCount: "{{ i18n "shuo-like-count" | default "人觉得赞" }}",
+      noMoments: "{{ i18n "shuo-empty" | default "还没有发布时刻" }}"
+    }
   };
 </script>
 {{- end -}}

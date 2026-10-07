@@ -1,6 +1,6 @@
 /* ============================================================
    shuo.css — 时刻页样式
-   横幅、说说卡片、九宫格图片、评论交互
+   横幅、朋友圈式说说卡片、九宫格图片、音乐/视频/链接卡片、点赞与评论
    支持在线模式（整页评论）和离线模式（卡片展示）
    ============================================================ */
 
@@ -104,42 +104,44 @@
   width: 100%;
 }
 
-/* ===== 离线模式说说容器 ===== */
+/* ============================================================
+   离线模式：朋友圈式说说列表
+   结构：左头像 + 右内容列（正文 / 图片网格 / 音乐卡片 / 视频 / 链接卡片），
+        下方一条「时间 · 赞 · 评论」，互动区是浅灰底（点赞 + 评论）
+   ============================================================ */
 .shuo-wrapper {
-  max-width: 640px;
+  max-width: 680px;
   margin: 0 auto;
   width: 100%;
 }
 
-/* ===== 说说条目 ===== */
+.shuo-empty {
+  padding: 32px 0;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
 .shuo-item {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 20px;
-  margin-bottom: 24px;
-  transition: transform 0.2s;
-}
-
-.shuo-item:hover {
-  transform: translateY(-2px);
-}
-
-/* --- 头部：头像 + 昵称 + 时间 --- */
-.shuo-item .shuo-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  margin-bottom: 12px;
+  padding: 18px 2px;
+  border-bottom: 1px solid var(--border);
 }
 
+.shuo-item:last-child {
+  border-bottom: 0;
+}
+
+/* 左头像：朋友圈是小圆角方形 */
 .shuo-item .shuo-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border-radius: 5px;
   overflow: hidden;
-  flex-shrink: 0;
+  background: var(--tag-bg);
 }
 
 .shuo-item .shuo-avatar img {
@@ -149,112 +151,422 @@
   display: block;
 }
 
+.shuo-item .shuo-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .shuo-item .shuo-name {
-  font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--shuo-name, #576b95);
+  margin-bottom: 4px;
 }
 
-.shuo-item .shuo-time {
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-  margin-left: auto;
-}
-
-/* --- 正文内容 --- */
 .shuo-item .shuo-content {
-  font-size: 0.98rem;
+  font-size: 0.97rem;
   line-height: 1.7;
-  margin-bottom: 12px;
   color: var(--text);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  margin-bottom: 8px;
 }
 
-/* ===== 九宫格图片布局 ===== */
+/* --- 图片：1 张按原比例缩放，2/4 张两列，其余三列九宫格 --- */
 .shuo-images {
   display: grid;
   gap: 4px;
-  grid-template-columns: repeat(3, 1fr);
-  max-width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 78%;
+  margin-bottom: 8px;
+}
+
+.shuo-images.count-1 {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 60%;
+}
+
+.shuo-images.count-2,
+.shuo-images.count-4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 62%;
+}
+
+.shuo-img-link {
+  display: block;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--tag-bg);
 }
 
 .shuo-images .shuo-img {
+  display: block;
   width: 100%;
+  height: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;
+}
+
+.shuo-images.count-1 .shuo-img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 320px;
+  aspect-ratio: auto;
+}
+
+/* --- 音乐卡片：封面 + 歌名 + 播放 --- */
+.shuo-music {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 78%;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
   border-radius: 4px;
-  background: #f0f0f0;
-  cursor: pointer;
-  transition: opacity 0.2s;
+  background: var(--card-bg);
 }
 
-.shuo-images .shuo-img:hover {
-  opacity: 0.8;
+.shuo-music-cover {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--tag-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--logo-accent-text, #0d8368);
 }
 
-/* --- 根据图片数量自适应列数 --- */
-.shuo-images.count-1 {
-  grid-template-columns: 1fr;
-  max-width: 60%;
-}
-.shuo-images.count-2 {
-  grid-template-columns: 1fr 1fr;
-}
-.shuo-images.count-3 {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-.shuo-images.count-4 {
-  grid-template-columns: 1fr 1fr;
-}
-.shuo-images.count-5,
-.shuo-images.count-6,
-.shuo-images.count-7,
-.shuo-images.count-8,
-.shuo-images.count-9 {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-/* --- 视频/音频 --- */
-.shuo-video {
+.shuo-music-cover img {
   width: 100%;
-  max-height: 400px;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.shuo-music-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.shuo-music-title {
+  display: block;
+  font-size: 0.86rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shuo-music-play {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.7rem;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.shuo-music-play:hover {
+  color: var(--logo-accent-text, #0d8368);
+  border-color: var(--logo-accent-text, #0d8368);
+}
+
+.shuo-music.is-playing .shuo-music-title {
+  color: var(--logo-accent-text, #0d8368);
+}
+
+/* --- 视频 --- */
+.shuo-video-wrap {
+  max-width: 88%;
+  margin-bottom: 8px;
+}
+
+.shuo-video {
+  display: block;
+  width: 100%;
+  max-height: 380px;
   border-radius: 4px;
   background: #000;
 }
 
-.shuo-audio {
-  width: 100%;
-  margin-top: 8px;
-}
-
-/* ===== 评论操作栏 ===== */
-.shuo-actions-bar {
+/* --- 链接卡片：标题 + 摘要 + 域名 + 缩略图 --- */
+.shuo-link {
   display: flex;
-  gap: 20px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
+  align-items: stretch;
+  gap: 10px;
+  max-width: 88%;
+  margin-bottom: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--tag-bg);
+  text-decoration: none;
 }
 
-.shuo-actions-bar button {
-  background: none;
-  border: none;
+.shuo-link-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.shuo-link-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.shuo-link-desc {
+  font-size: 0.78rem;
+  line-height: 1.5;
   color: var(--text-secondary);
-  font-size: 0.85rem;
-  cursor: pointer;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.shuo-link-host {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.shuo-link-thumb {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--card-bg);
+}
+
+.shuo-link-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.shuo-link:hover {
+  border-color: var(--logo-accent-text, #0d8368);
+}
+
+.shuo-link:hover .shuo-link-title {
+  color: var(--logo-accent-text, #0d8368);
+}
+
+/* --- 底栏：时间 + 赞 / 评论 --- */
+.shuo-bar {
   display: flex;
   align-items: center;
-  gap: 4px;
-  transition: color 0.2s;
-  padding: 4px 8px;
-  border-radius: var(--radius);
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
 }
 
-.shuo-actions-bar button:hover {
-  color: var(--text);
+.shuo-time {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.shuo-bar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 4px;
   background: var(--tag-bg);
 }
 
-.shuo-actions-bar button i {
-  font-size: 1rem;
+.shuo-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease;
+}
+
+.shuo-act:hover {
+  color: var(--text);
+  background: var(--tag-active-bg);
+}
+
+.shuo-act.is-liked,
+.shuo-act.is-active {
+  color: var(--logo-accent-text, #0d8368);
+}
+
+.shuo-act i {
+  font-size: 0.8rem;
+}
+
+/* --- 互动区（点赞 + 评论）：朋友圈那种浅灰底 --- */
+.shuo-interact {
+  margin-top: 8px;
+  background: var(--tag-bg);
+  border-radius: 4px;
+}
+
+.shuo-interact[hidden] {
+  display: none;
+}
+
+.shuo-likes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.shuo-likes[hidden] {
+  display: none;
+}
+
+.shuo-likes i {
+  font-size: 0.8rem;
+  color: var(--logo-accent-text, #0d8368);
+}
+
+.shuo-likes:not([hidden]) + .shuo-comments {
+  border-top: 1px solid var(--border);
+}
+
+/* --- 评论：列表默认显示，编辑框折叠起来 --- */
+.shuo-comments {
+  padding: 8px 10px;
+}
+
+.shuo-comments .comment-container {
+  min-width: 0;
+}
+
+/* 折叠态只藏编辑框（输入区 + 提交按钮）和空状态，已有评论照常显示 */
+.shuo-comments.is-collapsed .wl-panel,
+.shuo-comments.is-collapsed .wl-empty {
+  display: none;
+}
+
+.shuo-comments .wl-cards {
+  margin: 0;
+}
+
+.shuo-comments .wl-card {
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 1px dashed var(--border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.shuo-comments .wl-card:last-child {
+  border-bottom: 0;
+}
+
+.shuo-comments .wl-comment {
+  padding: 0;
+}
+
+.shuo-comments .wl-content,
+.shuo-comments .wl-content p {
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.shuo-comments .wl-nick {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--shuo-name, #576b95);
+}
+
+.shuo-comments .wl-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+}
+
+.shuo-comments .wl-editor {
+  min-height: 64px;
+  font-size: 0.86rem;
+}
+
+.shuo-comments .wl-btn {
+  padding: 4px 10px;
+  font-size: 0.76rem;
+}
+
+.shuo-comments .wl-meta-foot,
+.shuo-comments .wl-power,
+.shuo-comments .wl-rss {
+  font-size: 0.68rem;
+  opacity: 0.72;
+}
+
+/* 卡片里的评论头像收窄到朋友圈那种小尺寸
+   （common.css 里为了修「竖椭圆」把头像统一锁成 48px，这里按更近的选择器 + !important 覆盖） */
+.shuo-comments .wl-avatar,
+.shuo-comments .wl-user .wl-avatar,
+.shuo-comments .wl-user .wl-user-avatar,
+.shuo-comments .wl-user-avatar,
+.shuo-comments .wl-user img,
+.shuo-comments .wl-avatar img,
+.shuo-comments .wl-user .wl-avatar img,
+.shuo-comments .wl-user .wl-user-avatar img,
+.shuo-comments .wl-user-avatar img,
+.shuo-comments .wl-comment .wl-avatar,
+.shuo-comments .wl-comment .wl-avatar img {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  max-width: 30px !important;
+  max-height: 30px !important;
+}
+
+/* --- 详情页的返回入口 --- */
+.moment-back {
+  margin: 16px 0 40px;
+}
+
+.moment-back .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.moment-back .back-link:hover {
+  color: var(--logo-accent-text, #0d8368);
 }
 
 /* ===== 响应式 ===== */
@@ -263,7 +575,24 @@
     max-width: 100%;
     padding: 0 10px;
   }
-  .shuo-images.count-1 {
+  .shuo-item {
+    gap: 10px;
+    padding: 16px 0;
+  }
+  .shuo-item .shuo-avatar {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+  }
+  .shuo-images,
+  .shuo-images.count-1,
+  .shuo-images.count-2,
+  .shuo-images.count-4 {
+    max-width: 82%;
+  }
+  .shuo-music,
+  .shuo-link,
+  .shuo-video-wrap {
     max-width: 100%;
   }
   .moment-comment-wrapper {
@@ -284,6 +613,4 @@
 }
 
 /* Waline 评论头像的尺寸/圆形裁切统一在 common.css（含防止 flex 把头像拉成竖椭圆），此处不再重复 */
-
 /* Waline 的配色（深色模式等）也统一在 common.css 里用 --waline-* 变量映射，此处不再重复 */
-

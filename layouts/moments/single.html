@@ -1,6 +1,6 @@
 {{- /* ============================================================
-  shuo/single.html — 时刻详情页
-  简化版模板，用于单独访问时刻内容
+  moments/single.html — 时刻详情页
+  复用列表页那套朋友圈式结构（shuo-* 类），样式不用再写一遍
   ============================================================ */ -}}
 {{- define "styles" -}}
 {{- $momentsCSS := resources.Get "css/shuo.css" | minify | fingerprint -}}
@@ -8,40 +8,90 @@
 {{- end -}}
 
 {{- define "main" -}}
+{{- $nickname := .Site.Params.aboutName | default "知 止" -}}
+{{- $avatar := (.Site.Params.aboutAvatar | default "img/avatar.png") | relURL -}}
+{{- /* 链接卡片：支持 map（url/title/desc/image），也兼容直接写一个地址字符串 */ -}}
+{{- $lk := .Params.link -}}
+{{- $linkURL := "" -}}{{- $linkTitle := "" -}}{{- $linkDesc := "" -}}{{- $linkImg := "" -}}
+{{- if reflect.IsMap $lk -}}
+  {{- $linkURL = $lk.url | default "" -}}
+  {{- $linkTitle = $lk.title | default "" -}}
+  {{- $linkDesc = $lk.desc | default "" -}}
+  {{- $linkImg = $lk.image | default "" -}}
+{{- else -}}
+  {{- $linkURL = $lk | default "" -}}
+{{- end -}}
 <main class="main" id="main">
   <section class="section">
-    <div class="moment-single">
-      <div class="moment-content">
-        <div class="moment-time">
-          <i class="far fa-clock"></i> {{ .Date.Format "2006-01-02 15:04" }}
-        </div>
-        <div class="moment-text">
-          {{ .Content }}
-        </div>
-        {{- with .Params.images }}
-        <div class="moment-images">
-          {{- range . }}
-          {{ partial "img-pair.html" (dict "src" . "alt" "Moment image" "page" $ "sizes" "(max-width: 820px) 92vw, 560px") }}
+    <div class="shuo-wrapper">
+      <article class="shuo-item">
+        <div class="shuo-avatar"><img src="{{ $avatar }}" alt="" loading="lazy"></div>
+        <div class="shuo-body">
+          <div class="shuo-name">{{ $nickname }}</div>
+          {{- with .Content }}<div class="shuo-content">{{ . | plainify }}</div>{{ end }}
+
+          {{- with .Params.images }}
+          <div class="shuo-images count-{{ math.Min (len .) 9 }}">
+            {{- range . }}
+            {{- $info := partial "img-src.html" (dict "src" . "page" $ "sizes" "(max-width: 820px) 82vw, 400px" "widths" (slice 400 800)) -}}
+            {{- $href := $info.orig | default . -}}
+            <a class="shuo-img-link" href="{{ $href }}" target="_blank" rel="noopener">
+              {{- if $info.ok }}
+              <img class="shuo-img" data-src="{{ $info.src }}" data-srcset="{{ $info.srcset }}" sizes="{{ $info.sizes }}"{{ with $info.lqip }} style="background-image:url({{ . }});background-size:cover;background-position:center"{{ end }} alt="Moment image" decoding="async">
+              {{- else }}
+              <img class="shuo-img" src="{{ $href }}" alt="Moment image" loading="lazy">
+              {{- end }}
+            </a>
+            {{- end }}
+          </div>
           {{- end }}
+
+          {{- with .Params.music }}
+          <div class="shuo-music">
+            <span class="shuo-music-cover">
+              {{- with $.Params.music_cover }}<img src="{{ . }}" alt="" loading="lazy">{{ else }}<i class="fas fa-music" aria-hidden="true"></i>{{ end }}
+            </span>
+            <span class="shuo-music-info"><span class="shuo-music-title">{{ $.Params.music_title | default . }}</span></span>
+            <button type="button" class="shuo-music-play" aria-label="播放"><i class="fas fa-play" aria-hidden="true"></i></button>
+            <audio preload="none" src="{{ . }}"></audio>
+          </div>
+          {{- end }}
+
+          {{- with .Params.video }}
+          <div class="shuo-video-wrap">
+            <video class="shuo-video" controls preload="metadata"{{ with $.Params.video_poster }} poster="{{ . }}"{{ end }} src="{{ . }}"></video>
+          </div>
+          {{- end }}
+
+          {{- with $linkURL }}
+          <a class="shuo-link" href="{{ . }}" target="_blank" rel="noopener">
+            <span class="shuo-link-main">
+              <span class="shuo-link-title">{{ $linkTitle | default . }}</span>
+              {{- with $linkDesc }}<span class="shuo-link-desc">{{ . }}</span>{{ end }}
+              <span class="shuo-link-host">{{ (urls.Parse .).Host }}</span>
+            </span>
+            {{- with $linkImg }}<span class="shuo-link-thumb"><img src="{{ . }}" alt="" loading="lazy"></span>{{ end }}
+          </a>
+          {{- end }}
+
+          <div class="shuo-bar">
+            <time class="shuo-time" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "2006-01-02 15:04" }}</time>
+          </div>
         </div>
-        {{- end }}
-        {{- with .Params.music }}
-        <div class="moment-music">
-          <i class="fas fa-music"></i> <a href="{{ . }}" target="_blank">{{ . }}</a>
-        </div>
-        {{- end }}
-        {{- with .Params.video }}
-        <div class="moment-video">
-          <video controls src="{{ . }}"></video>
-        </div>
-        {{- end }}
-      </div>
+      </article>
+
       <div class="moment-back">
-        <a href="{{ "/moments/" | relLangURL }}" class="back-link">
-          <i class="fas fa-arrow-left"></i> {{ i18n "moments-back" | default "返回时刻" }}
+        <a href="{{ "moments/" | relLangURL }}" class="back-link">
+          <i class="fas fa-arrow-left" aria-hidden="true"></i> {{ i18n "moments-back" | default "返回时刻" }}
         </a>
       </div>
     </div>
   </section>
 </main>
+{{- end -}}
+
+{{- define "scripts" -}}
+{{- /* 音乐卡片播放按钮、图片懒加载复用列表页那套交互（shuo.js 在没有 #shuoList 时不会渲染列表） */ -}}
+{{- $shuoJS := resources.Get "js/shuo.js" | minify | fingerprint -}}
+<script src="{{ $shuoJS.RelPermalink }}"></script>
 {{- end -}}
