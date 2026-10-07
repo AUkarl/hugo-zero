@@ -242,6 +242,9 @@
 </head>
 <body>
 
+  {{- /* 页面加载过渡动画（404 也是独立模板，单独引入一次） */ -}}
+  {{- partial "page-loader.html" . -}}
+
   {{- /* 无障碍：跳过导航直达主内容 */ -}}
   <a class="skip-link" href="#main">{{ i18n "skip-to-content" | default "跳到主要内容" }}</a>
 

@@ -486,6 +486,8 @@
   </style>
 </head>
 <body>
+  {{- /* 页面加载过渡动画（首页是独立模板，不经过 baseof，这里单独引入一次） */ -}}
+  {{- partial "page-loader.html" . -}}
   {{- /* 无障碍：跳过导航直达主内容（落地页主内容即下方主视觉区） */ -}}
   <a class="skip-link" href="#main">{{ i18n "skip-to-content" | default "跳到主要内容" }}</a>
   <!-- 边框装饰 -->

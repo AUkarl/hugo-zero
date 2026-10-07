@@ -20,17 +20,16 @@
 {{- /* 关键样式内联：遮罩必须第一帧就是正确的颜色，不能等 CSS 文件 */ -}}
 <style>
   .page-loader{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
-    background:var(--bg,#fff);transition:opacity .45s ease,visibility .45s ease}
-  html[data-theme="dark"] .page-loader{background:var(--bg,#1e1e1e)}
+    background:var(--bg,var(--bg-color,#fff));transition:opacity .45s ease,visibility .45s ease}
   .page-loader.is-done{opacity:0;visibility:hidden;pointer-events:none}
   .page-loader-inner{display:flex;flex-direction:column;align-items:center;gap:14px}
   .page-loader-dots{display:inline-flex;gap:7px}
-  .page-loader-dots i{width:8px;height:8px;border-radius:50%;background:var(--logo-accent-text,#0d8368);
+  .page-loader-dots i{width:8px;height:8px;border-radius:50%;background:var(--logo-accent-text,var(--accent-color,#0d8368));
     animation:pageLoaderDot 1.05s ease-in-out infinite}
   .page-loader-dots i:nth-child(2){animation-delay:.15s}
   .page-loader-dots i:nth-child(3){animation-delay:.3s}
   @keyframes pageLoaderDot{0%,100%{opacity:.22;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
-  .page-loader-text{margin:0;font-size:.85rem;letter-spacing:.08em;color:var(--text-secondary,#555)}
+  .page-loader-text{margin:0;font-size:.85rem;letter-spacing:.08em;color:var(--text-secondary,var(--text-color,#555))}
   @media (prefers-reduced-motion:reduce){
     .page-loader-dots i{animation:none;opacity:.72}
   }
