@@ -216,6 +216,31 @@ a {
   position: relative;
 }
 
+/* ===== Waline 配色跟随站点主题 =====
+   Waline v3 的颜色全部走它自己的 --waline-* 变量（默认只有浅色一套，没有深色模式，
+   CSS 里既没有 prefers-color-scheme 也没有 .dark）。这里把它的变量映射到站点主题变量，
+   主题变量本身会随 data-theme（light / dark）与系统深色切换，
+   所以深色、浅色、跟随系统三种情况一次搞定，不用按主题各写一遍。
+
+   选择器用 [data-waline]：那是 Waline 挂在它根节点的属性，
+   评论页（#waline）、文章页、时刻页（#comment-*）所有挂载点都能覆盖到，
+   而且它比 Waline 写在 :root 的默认值更靠近元素，优先级够。
+   注意：--waline-theme-color（主按钮绿色）与 --waline-white（按钮文字）保持原样。 */
+[data-waline] {
+  --waline-color: var(--text, #444);                        /* 正文 / 输入框 / 次级按钮文字 */
+  --waline-dark-grey: var(--text, #666);                    /* 昵称、引用文字 */
+  --waline-light-grey: var(--text-secondary, #999);         /* 页脚、RSS、评分等弱化文字 */
+  --waline-bg-color: var(--card-bg, #fff);                  /* 面板、表情/GIF 弹层 */
+  --waline-bg-color-light: var(--tag-bg, #f8f8f8);          /* 输入框聚焦、行内 code、分隔线 */
+  --waline-bg-color-hover: var(--tag-active-bg, #f0f0f0);   /* 表情按钮悬停 */
+  --waline-border-color: var(--border, #ddd);               /* 面板 / 输入框 / 按钮边框 */
+  --waline-disable-bg-color: var(--tag-bg, #f8f8f8);        /* 禁用按钮底色 */
+  --waline-disable-color: var(--text-secondary, #999);      /* 禁用按钮文字 */
+  --waline-info-bg-color: var(--tag-bg, #f8f8f8);           /* 「浏览器 / 系统」等小标签底色 */
+  --waline-info-color: var(--text-secondary, #999);         /* 小标签文字 */
+  --waline-bq-color: var(--tag-bg, #f0f0f0);                /* 引用块底色 */
+}
+
 /* ===== Waline 评论头像：一律正方形 + 圆形，防止被 flex 拉成竖椭圆 =====
    登录后评论框左侧那个头像是 Waline 的 .wl-cards .wl-user .wl-user-avatar
    （div 里包着 img），在窄屏下会被 flex 纵向拉伸：宽度 48px 不变、高度被撑高，
