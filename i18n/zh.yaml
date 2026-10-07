@@ -171,8 +171,9 @@ shuo-minutes-ago: "分钟前"
 shuo-hours-ago: "小时前"
 shuo-yesterday: "昨天"
 shuo-days-ago: "天前"
-shuo-like-count: "人觉得赞"
 shuo-empty: "还没有发布时刻"
+shuo-loading: "评论加载中…"
+shuo-load-error: "评论加载失败，请刷新页面重试"
 
 # ===== 关于页 =====
 about-title: "关于"

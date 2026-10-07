@@ -8,6 +8,11 @@
 {{- define "styles" -}}
 {{- $momentsCSS := resources.Get "css/shuo.css" | minify | fingerprint -}}
 <link rel="stylesheet" href="{{ $momentsCSS.RelPermalink }}">
+{{- /* 离线模式的卡片正文支持和文章一样的短代码，所以短代码样式也要加载 */ -}}
+{{- if not (.Site.Params.moment.online_publish | default false) -}}
+{{- $shortcodeCSS := resources.Get "css/shortcodes.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $shortcodeCSS.RelPermalink }}">
+{{- end -}}
 {{- end -}}
 
 {{- define "main" -}}
@@ -91,10 +96,17 @@
 {{- $moments = $moments.ByDate.Reverse -}}
 {{- $.Scratch.Set "shuoItems" (slice) -}}
 {{- range $p := $moments -}}
-  {{- /* 说说配图也走构建时处理：LQIP + 400/800 WebP（拿不到就留原链） */ -}}
+  {{- /* 配图走构建时处理：LQIP + WebP（拿不到就留原链）。
+         尺寸按这一条有几张图来定：单图给大图（否则会被取成 30vw 的糊图），
+         2/4 张给半宽，其余按九宫格小图。 */ -}}
+  {{- $n := len ($p.Params.images | default slice) -}}
+  {{- $sizes := "(max-width: 768px) 30vw, 180px" -}}
+  {{- if eq $n 1 -}}{{- $sizes = "(max-width: 768px) 62vw, 420px" -}}
+  {{- else if or (eq $n 2) (eq $n 4) -}}{{- $sizes = "(max-width: 768px) 31vw, 200px" -}}
+  {{- end -}}
   {{- $imgs := slice -}}
   {{- range $img := ($p.Params.images | default slice) -}}
-    {{- $imgs = $imgs | append (partial "img-src.html" (dict "src" $img "page" $p "sizes" "(max-width: 768px) 30vw, 180px" "widths" (slice 400 800))) -}}
+    {{- $imgs = $imgs | append (partial "img-src.html" (dict "src" $img "page" $p "sizes" $sizes "widths" (slice 400 800))) -}}
   {{- end -}}
   {{- /* 链接卡片：支持 link 写成 map（url/title/desc/image），也兼容直接写一个地址字符串 */ -}}
   {{- $lk := $p.Params.link -}}
@@ -110,6 +122,7 @@
   {{- $.Scratch.Add "shuoItems" (dict
     "id" ($p.File.UniqueID | default "0")
     "text" ($p.Content | plainify)
+    "contentHtml" $p.Content
     "images" $imgs
     "music" ($p.Params.music | default "")
     "musicTitle" ($p.Params.music_title | default "")
@@ -170,8 +183,9 @@
       hoursAgo: "{{ i18n "shuo-hours-ago" | default "小时前" }}",
       yesterday: "{{ i18n "shuo-yesterday" | default "昨天" }}",
       daysAgo: "{{ i18n "shuo-days-ago" | default "天前" }}",
-      likeCount: "{{ i18n "shuo-like-count" | default "人觉得赞" }}",
-      noMoments: "{{ i18n "shuo-empty" | default "还没有发布时刻" }}"
+      noMoments: "{{ i18n "shuo-empty" | default "还没有发布时刻" }}",
+      loading: "{{ i18n "shuo-loading" | default "评论加载中…" }}",
+      loadError: "{{ i18n "shuo-load-error" | default "评论加载失败，请刷新页面重试" }}"
     }
   };
 </script>

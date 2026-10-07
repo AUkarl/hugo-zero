@@ -172,7 +172,7 @@
   margin-bottom: 8px;
 }
 
-/* --- 图片：1 张按原比例缩放，2/4 张两列，其余三列九宫格 --- */
+/* --- 图片：1 张按原比例铺满内容列（按原图比例占位），2/4 张两列，其余三列九宫格 --- */
 .shuo-images {
   display: grid;
   gap: 4px;
@@ -182,8 +182,8 @@
 }
 
 .shuo-images.count-1 {
-  grid-template-columns: minmax(0, 1fr);
-  max-width: 60%;
+  display: block;
+  max-width: 62%;
 }
 
 .shuo-images.count-2,
@@ -207,12 +207,26 @@
   object-fit: cover;
 }
 
+/* 单图：外层按原图比例占位（行内 aspect-ratio），图片铺满、不再裁切 */
+.shuo-images.count-1 .shuo-img-link {
+  width: 100%;
+}
+
 .shuo-images.count-1 .shuo-img {
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 320px;
+  width: 100%;
+  height: 100%;
   aspect-ratio: auto;
+  object-fit: cover;
+}
+
+/* 原图比例拿不到时（外链图）：不锁比例，让图片自己撑开，先给最小高度避免塌成细线 */
+.shuo-images.count-1 .shuo-img-link.no-ratio {
+  aspect-ratio: auto;
+}
+
+.shuo-images.count-1 .no-ratio .shuo-img {
+  height: auto;
+  min-height: 140px;
 }
 
 /* --- 音乐卡片：封面 + 歌名 + 播放 --- */
@@ -425,46 +439,56 @@
   font-size: 0.8rem;
 }
 
-/* --- 互动区（点赞 + 评论）：朋友圈那种浅灰底 --- */
-.shuo-interact {
+/* 计数（几个人赞过 / 几条评论）：有数字时只显示数字，没有就显示「赞 / 评论」 */
+.shuo-act-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.shuo-act-label[hidden],
+.shuo-act-count[hidden] {
+  display: none;
+}
+
+/* --- 正文里的短代码媒体（音频 / 视频 / 内嵌播放器）--- */
+.shuo-media {
+  margin-bottom: 8px;
+  max-width: 88%;
+}
+
+.shuo-media[hidden] {
+  display: none;
+}
+
+.shuo-media > * {
+  max-width: 100%;
+}
+
+/* --- 评论：只有真的有评论（或点开了编辑框）时才出现，浅灰底 --- */
+.shuo-comments {
   margin-top: 8px;
+  padding: 8px 10px;
   background: var(--tag-bg);
   border-radius: 4px;
 }
 
-.shuo-interact[hidden] {
+.shuo-comments[hidden],
+.shuo-content[hidden] {
   display: none;
-}
-
-.shuo-likes {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 10px;
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-}
-
-.shuo-likes[hidden] {
-  display: none;
-}
-
-.shuo-likes i {
-  font-size: 0.8rem;
-  color: var(--logo-accent-text, #0d8368);
-}
-
-.shuo-likes:not([hidden]) + .shuo-comments {
-  border-top: 1px solid var(--border);
-}
-
-/* --- 评论：列表默认显示，编辑框折叠起来 --- */
-.shuo-comments {
-  padding: 8px 10px;
 }
 
 .shuo-comments .comment-container {
   min-width: 0;
+}
+
+.shuo-comments-loading {
+  margin: 0;
+  padding: 4px 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.shuo-comments-loading.is-error {
+  color: #b4534b;
 }
 
 /* 折叠态只藏编辑框（输入区 + 提交按钮）和空状态，已有评论照常显示 */

@@ -171,8 +171,9 @@ shuo-minutes-ago: "min ago"
 shuo-hours-ago: "h ago"
 shuo-yesterday: "yesterday"
 shuo-days-ago: "d ago"
-shuo-like-count: "likes"
 shuo-empty: "No moments yet"
+shuo-loading: "Loading comments…"
+shuo-load-error: "Failed to load comments, please refresh the page"
 
 # ===== About page =====
 about-title: "About"

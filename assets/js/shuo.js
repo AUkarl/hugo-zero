@@ -1,12 +1,11 @@
 // ============================================================
 // shuo.js — 时刻页离线展示模式（朋友圈式卡片）
-//   · 卡片结构照搬移动端微信朋友圈：左头像 + 右内容列，
-//     正文 / 图片九宫格 / 音乐卡片 / 视频 / 链接卡片，
-//     底部一条「时间 · 赞 · 评论」，互动区是浅灰底
-//   · 点赞：数据存在评论系统里（Waline 计数器 reaction0），
-//     同一浏览器记住「已赞」，再点一次取消
-//   · 评论：默认显示已有评论，编辑框折叠起来，点「评论」才展开
-//   · 受 window.momentConfig 控制（模板注入）
+//   · 卡片结构照搬移动端微信朋友圈：左头像 + 右内容列
+//   · 正文里的短代码（音频/视频/网易云/B站…）会像文章页一样渲染出来
+//   · 底栏「时间 · 赞 N · 评论 N」：点赞数走评论系统的计数器（Waline reaction0），
+//     评论数走评论系统的评论计数接口
+//   · 评论列表只有「真的有评论」时才显示；编辑框默认折叠，点「评论」才展开
+//   · 内容可以是文本/图片/音乐/视频/链接的任意一个或任意组合
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -41,12 +40,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // 朋友圈那种「刚刚 / x 分钟前 / x 小时前 / 昨天 / x 天前」
   function relTime(item) {
-    var iso = item.iso;
     var fallback = item.time || '';
-    if (!iso) return fallback;
-    var then = Date.parse(iso);
+    if (!item.iso) return fallback;
+    var then = Date.parse(item.iso);
     if (isNaN(then)) return fallback;
     var diff = Date.now() - then;
     if (diff < 0) diff = 0;
@@ -65,54 +62,75 @@ document.addEventListener('DOMContentLoaded', function () {
   function likedKey(id) { return 'shuo-liked:' + likePath(id); }
   function isLiked(id) { try { return localStorage.getItem(likedKey(id)) === '1'; } catch (e) { return false; } }
   function setLiked(id, v) {
-    try { if (v) localStorage.setItem(likedKey(id), '1'); else localStorage.removeItem(likedKey(id)); } catch (e) { /* 隐私模式下忽略 */ }
+    try { if (v) localStorage.setItem(likedKey(id), '1'); else localStorage.removeItem(likedKey(id)); } catch (e) { /* 忽略 */ }
   }
 
-  // ==================== 图片 / 音乐 / 视频 / 链接 ====================
-  function buildImagesHtml(images) {
-    if (!images || !images.length) return '';
-    var cls = 'count-' + Math.min(images.length, 9);
-    var html = '<div class="shuo-images ' + cls + '">';
+  /* 正文拆分：短代码渲染出来的媒体块单独拿出来，其余当纯文本（朋友圈那种） */
+  var MEDIA_SEL = 'audio, video, iframe, .audio-player, .video-player, .video-embed, .shortcode-embed, .gallery, figure';
+  function splitContent(rawHtml, fallbackText) {
+    if (!rawHtml) return { text: fallbackText || '', media: [] };
+    var box = document.createElement('div');
+    box.innerHTML = rawHtml;
+    var media = [];
+    var textParts = [];
+    Array.prototype.slice.call(box.childNodes).forEach(function (node) {
+      if (node.nodeType === 1 && node.querySelector && node.querySelector(MEDIA_SEL)) {
+        media.push(node);
+        return;
+      }
+      var txt = (node.textContent || '').replace(/\u00a0/g, ' ').trim();
+      if (txt) textParts.push(txt);
+    });
+    return { text: textParts.join('\n') || (fallbackText || ''), media: media };
+  }
+
+  // ==================== 图片 ====================
+  function buildImagesHtml(item) {
+    var images = item.images || [];
+    if (!images.length) return '';
+    var count = Math.min(images.length, 9);
+    var html = '<div class="shuo-images count-' + count + '">';
     images.forEach(function (img) {
-      var src = '', orig = '', srcset = '', sizes = '', dims = '', bg = '';
+      var src = '', orig = '', srcset = '', sizes = '', dims = '', bg = '', ratio = '';
       if (img && typeof img === 'object') {
         src = img.src || '';
         orig = img.orig || src;
         srcset = img.srcset || '';
-        sizes = img.sizes || '33vw';
-        if (img.w && img.h) dims = ' width="' + img.w + '" height="' + img.h + '"';
+        sizes = img.sizes || '';
+        if (img.w && img.h) { dims = ' width="' + img.w + '" height="' + img.h + '"'; ratio = img.w + ' / ' + img.h; }
         if (img.lqip) bg = ' style="background-image:url(' + img.lqip + ');background-size:cover;background-position:center"';
       } else if (img) {
         src = String(img);
         orig = src;
       }
       if (!src && !orig) return;
-      // 点图看原图（构建时处理过的那张原图优先）
-      html += '<a class="shuo-img-link" href="' + esc(orig || src) + '" target="_blank" rel="noopener">';
+      // 单图：按原图比例先占好位置（比例拿不到就用 no-ratio 兜底，避免塌成一条细线）
+      var linkStyle = (count === 1 && ratio) ? ' style="aspect-ratio:' + ratio + '"' : '';
+      var linkCls = 'shuo-img-link' + (count === 1 && !ratio ? ' no-ratio' : '');
+      html += '<a class="' + linkCls + '" href="' + esc(orig || src) + '" target="_blank" rel="noopener"' + linkStyle + '>';
       if (src) {
-        html += '<img class="shuo-img" data-src="' + esc(src) + '" data-srcset="' + esc(srcset) + '" sizes="' + esc(sizes) + '"' + dims + bg + ' alt="image" decoding="async">';
+        html += '<img class="shuo-img" data-src="' + esc(src) + '" data-srcset="' + esc(srcset) + '" sizes="' + esc(sizes) + '"' + dims + bg + ' alt="" decoding="async">';
       } else {
-        html += '<img class="shuo-img" src="' + esc(orig) + '" alt="image" loading="lazy">';
+        html += '<img class="shuo-img" src="' + esc(orig) + '" alt="" loading="lazy">';
       }
       html += '</a>';
     });
     return html + '</div>';
   }
 
-  function buildMusicHtml(item, id) {
+  // ==================== 音乐 / 视频 / 链接 ====================
+  function buildMusicHtml(item) {
     var cover = item.musicCover
       ? '<img src="' + esc(item.musicCover) + '" alt="" loading="lazy">'
       : '<i class="fas fa-music" aria-hidden="true"></i>';
     var title = item.musicTitle || '';
     if (!title) {
-      // 从链接里猜歌名，但只认「像文件名」的（带扩展名），
-      // 像 music.163.com/.../outer/url?id=123 这种接口地址就退回默认文案
       try {
         var last = decodeURIComponent(String(item.music).split('/').pop().split('?')[0]);
         if (/\.[a-z0-9]{2,5}$/i.test(last)) title = last;
       } catch (e) { title = ''; }
     }
-    return '<div class="shuo-music" data-id="' + esc(id) + '">' +
+    return '<div class="shuo-music">' +
       '<span class="shuo-music-cover">' + cover + '</span>' +
       '<span class="shuo-music-info"><span class="shuo-music-title">' + esc(title || '音乐') + '</span></span>' +
       '<button type="button" class="shuo-music-play" aria-label="播放"><i class="fas fa-play" aria-hidden="true"></i></button>' +
@@ -141,209 +159,281 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ==================== 单条卡片 ====================
+  function actButton(kind, id, icon, label) {
+    return '<button type="button" class="shuo-act shuo-' + kind + '" data-id="' + esc(id) + '">' +
+      '<i class="' + icon + '" aria-hidden="true"></i>' +
+      '<span class="shuo-act-label">' + esc(label) + '</span>' +
+      '<span class="shuo-act-count" hidden>0</span>' +
+      '</button>';
+  }
+
   function buildShuoItemHtml(item) {
     var id = esc(item.id);
-
-    var likeBtn = likeEnabled
-      ? '<button type="button" class="shuo-act shuo-like" data-id="' + id + '">' +
-          '<i class="far fa-thumbs-up" aria-hidden="true"></i>' +
-          '<span class="shuo-like-label">' + esc(t.like || '赞') + '</span>' +
-        '</button>'
+    var likeBtn = likeEnabled ? actButton('like', item.id, 'far fa-thumbs-up', t.like || '赞') : '';
+    var commentBtn = commentEnabled ? actButton('comment', item.id, 'far fa-comment-dots', t.comment || '评论') : '';
+    var commentsHtml = commentEnabled
+      ? '<div class="shuo-comments is-collapsed" id="shuo-comments-' + id + '" hidden>' +
+          '<div class="comment-container" id="comment-' + id + '"></div>' +
+        '</div>'
       : '';
-    var commentBtn = commentEnabled
-      ? '<button type="button" class="shuo-act shuo-comment" data-id="' + id + '">' +
-          '<i class="far fa-comment-dots" aria-hidden="true"></i>' +
-          '<span>' + esc(t.comment || '评论') + '</span>' +
-        '</button>'
-      : '';
-
-    var interactHtml = '';
-    if (likeEnabled || commentEnabled) {
-      interactHtml = '<div class="shuo-interact" hidden>' +
-        (likeEnabled
-          ? '<div class="shuo-likes" hidden><i class="fas fa-thumbs-up" aria-hidden="true"></i>' +
-            '<span class="shuo-like-count">0</span><span class="shuo-like-suffix"></span></div>'
-          : '') +
-        (commentEnabled
-          ? '<div class="shuo-comments is-collapsed" id="shuo-comments-' + id + '">' +
-              '<div class="comment-container" id="comment-' + id + '"></div>' +
-            '</div>'
-          : '') +
-        '</div>';
-    }
 
     return '<article class="shuo-item" data-id="' + id + '">' +
       '<div class="shuo-avatar"><img src="' + esc(item.avatarUrl || '/img/avatar.webp') + '" alt="" loading="lazy"></div>' +
       '<div class="shuo-body">' +
         '<div class="shuo-name">' + esc(item.nickname || '博主') + '</div>' +
-        (item.text ? '<div class="shuo-content">' + esc(item.text) + '</div>' : '') +
-        buildImagesHtml(item.images) +
-        (item.music ? buildMusicHtml(item, item.id) : '') +
+        '<div class="shuo-content" hidden></div>' +
+        buildImagesHtml(item) +
+        '<div class="shuo-media" hidden></div>' +
+        (item.music ? buildMusicHtml(item) : '') +
         (item.video ? buildVideoHtml(item) : '') +
         (item.link && item.link.url ? buildLinkHtml(item.link) : '') +
         '<div class="shuo-bar">' +
           '<time class="shuo-time"' + (item.iso ? ' datetime="' + esc(item.iso) + '"' : '') + '>' + esc(relTime(item)) + '</time>' +
           '<span class="shuo-bar-actions">' + likeBtn + commentBtn + '</span>' +
         '</div>' +
-        interactHtml +
+        commentsHtml +
       '</div>' +
     '</article>';
   }
 
-  // ==================== 点赞（Waline 计数器） ====================
-  function fetchLike(item, el) {
-    if (!likeEnabled) return;
-    var url = serverURL + '/api/article?path=' + encodeURIComponent(likePath(item.id)) +
-      '&type=' + encodeURIComponent(likeType) + '&lang=' + encodeURIComponent(lang);
-    fetch(url, { headers: { accept: 'application/json' } })
-      .then(function (r) { return r.json(); })
-      .then(function (res) {
-        var d = res && res.data && res.data[0];
-        el.__likeCount = d ? Number(d[likeType] || 0) : 0;
-        renderLike(item, el);
-      })
-      .catch(function () { /* 拿不到就只显示按钮，不显示计数 */ });
+  /* 把正文（纯文本 + 短代码媒体）填进卡片 */
+  function fillContent(el, item) {
+    var parts = splitContent(item.contentHtml, item.text);
+    var textEl = el.querySelector('.shuo-content');
+    if (textEl && parts.text) {
+      textEl.textContent = parts.text;
+      textEl.hidden = false;
+    }
+    var mediaEl = el.querySelector('.shuo-media');
+    if (mediaEl && parts.media.length) {
+      parts.media.forEach(function (node) { mediaEl.appendChild(node); });
+      mediaEl.hidden = false;
+    }
   }
 
-  function renderLike(item, el) {
-    var liked = isLiked(item.id);
-    var count = el.__likeCount || 0;
+  /* 详情页（模板已经渲染好 HTML）：同样把媒体块拆出来 */
+  function fillContentFromTemplate(el) {
+    var raw = el.querySelector('template.shuo-raw');
+    if (!raw) return;
+    var parts = splitContent(raw.innerHTML, '');
+    var textEl = el.querySelector('.shuo-content');
+    if (textEl && parts.text) { textEl.textContent = parts.text; textEl.hidden = false; }
+    var mediaEl = el.querySelector('.shuo-media');
+    if (mediaEl && parts.media.length) {
+      parts.media.forEach(function (node) { mediaEl.appendChild(node); });
+      mediaEl.hidden = false;
+    }
+    raw.remove();
+  }
 
+  // ==================== 计数（点赞 + 评论） ====================
+  function renderCount(el, kind, count) {
+    var btn = el.querySelector('.shuo-' + kind);
+    if (!btn) return;
+    var label = btn.querySelector('.shuo-act-label');
+    var num = btn.querySelector('.shuo-act-count');
+    if (!num) return;
+    if (count > 0) {
+      num.textContent = count;
+      num.hidden = false;
+      if (label) label.hidden = true;
+    } else {
+      num.hidden = true;
+      if (label) label.hidden = false;
+    }
+  }
+
+  function renderLike(el) {
+    var id = el.dataset.id;
+    var liked = isLiked(id);
     var btn = el.querySelector('.shuo-like');
     if (btn) {
       btn.classList.toggle('is-liked', liked);
-      var label = btn.querySelector('.shuo-like-label');
-      if (label) label.textContent = liked ? (t.liked || '已赞') : (t.like || '赞');
       var icon = btn.querySelector('i');
       if (icon) icon.className = (liked ? 'fas' : 'far') + ' fa-thumbs-up';
     }
-
-    var row = el.querySelector('.shuo-likes');
-    if (row) {
-      row.hidden = count <= 0;
-      if (count > 0) {
-        var c = row.querySelector('.shuo-like-count');
-        if (c) c.textContent = count;
-        var suffix = row.querySelector('.shuo-like-suffix');
-        if (suffix) suffix.textContent = t.likeCount || '人觉得赞';
-      }
-    }
-    updateInteractVisibility(el);
+    renderCount(el, 'like', el.__likeCount || 0);
   }
 
-  function toggleLike(item, el, btn) {
+  function renderComment(el) {
+    renderCount(el, 'comment', el.__commentCount || 0);
+    updateCommentsVisibility(el);
+  }
+
+  function updateCommentsVisibility(el) {
+    var box = el.querySelector('.shuo-comments');
+    if (!box) return;
+    var revealed = box.dataset.revealed === '1';
+    // 有没有评论：以计数接口为准，DOM 里出现评论条目也算（兼容 Waline 各版本的类名）
+    var hasComments = (el.__commentCount || 0) > 0 || !!box.querySelector('.wl-cards .wl-card-item, .wl-cards .wl-card');
+    box.hidden = !(hasComments || revealed);
+  }
+
+  function apiGet(url) {
+    return fetch(url, { headers: { accept: 'application/json' } }).then(function (r) { return r.json(); });
+  }
+
+  function fetchLike(el) {
+    if (!likeEnabled) return;
+    apiGet(serverURL + '/api/article?path=' + encodeURIComponent(likePath(el.dataset.id)) +
+      '&type=' + encodeURIComponent(likeType) + '&lang=' + encodeURIComponent(lang))
+      .then(function (res) {
+        var d = res && res.data && res.data[0];
+        el.__likeCount = d ? Number(d[likeType] || 0) : 0;
+        renderLike(el);
+      })
+      .catch(function () { /* 拿不到就只显示按钮 */ });
+  }
+
+  function fetchCommentCount(el) {
+    if (!commentEnabled) return;
+    apiGet(serverURL + '/api/comment?type=count&url=' + encodeURIComponent(likePath(el.dataset.id)) + '&lang=' + encodeURIComponent(lang))
+      .then(function (res) {
+        var n = res && res.data ? Number(res.data[0] || 0) : 0;
+        el.__commentCount = n;
+        renderComment(el);
+        // 有评论才去初始化评论列表；没有就不打扰评论系统（点「评论」时才初始化编辑框）
+        if (n > 0) ensureComment(el, false);
+      })
+      .catch(function () { /* 忽略 */ });
+  }
+
+  function toggleLike(el, btn) {
     if (!likeEnabled || btn.dataset.busy === '1') return;
     btn.dataset.busy = '1';
 
-    var liked = isLiked(item.id);
+    var id = el.dataset.id;
+    var liked = isLiked(id);
     var before = el.__likeCount || 0;
-    // 先本地立即反馈（服务端写入偶尔要几秒，等响应再变会有「点了没反应」的感觉）
     el.__likeCount = Math.max(0, before + (liked ? -1 : 1));
-    setLiked(item.id, !liked);
-    renderLike(item, el);
+    setLiked(id, !liked);
+    renderLike(el);
 
     fetch(serverURL + '/api/article?lang=' + encodeURIComponent(lang), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ path: likePath(item.id), type: likeType, action: liked ? 'desc' : 'inc' })
+      body: JSON.stringify({ path: likePath(id), type: likeType, action: liked ? 'desc' : 'inc' })
     })
       .then(function (r) { return r.json(); })
       .then(function (res) {
         var d = res && res.data && res.data[0];
-        if (d && d[likeType] != null) {          // 用服务端返回的计数校准
-          el.__likeCount = Number(d[likeType] || 0);
-          renderLike(item, el);
-        }
+        if (d && d[likeType] != null) { el.__likeCount = Number(d[likeType] || 0); renderLike(el); }
       })
-      .catch(function () {                        // 失败就回滚到点击前的样子
-        setLiked(item.id, liked);
-        el.__likeCount = before;
-        renderLike(item, el);
-      })
+      .catch(function () { el.__likeCount = before; setLiked(id, liked); renderLike(el); })
       .then(function () { btn.dataset.busy = '0'; });
   }
 
   // ==================== 评论 ====================
-  function ensureComment(id) {
-    if (!commentEnabled || commentInited[id]) return;
+  function ensureComment(el, reveal) {
+    var id = el.dataset.id;
+    if (!commentEnabled) return;
+    if (commentInited[id]) { if (reveal) revealEditor(el); return; }
     commentInited[id] = true;
+
+    // 加载态：点开后立刻有反馈，不让用户以为点了没反应
+    if (reveal) {
+      var box = el.querySelector('.shuo-comments');
+      if (box && !box.querySelector('.shuo-comments-loading')) {
+        var tip = document.createElement('p');
+        tip.className = 'shuo-comments-loading';
+        tip.textContent = t.loading || '评论加载中…';
+        box.appendChild(tip);
+      }
+    }
+
     initComment(id);
+    watchComments(el);
+
+    if (reveal) {
+      var tries = 0;
+      (function wait() {
+        var box = el.querySelector('.shuo-comments');
+        var editor = box && box.querySelector('.wl-editor');
+        if (editor) { revealEditor(el); return; }
+        // 已经确定加载失败就不要再等了（错误提示会留在那里）
+        if (box && box.querySelector('.shuo-comments-loading.is-error')) return;
+        if (tries++ < 60) setTimeout(wait, 150);   // 最多等 9 秒（CDN 慢也能等到）
+      })();
+    }
   }
 
-  function watchComments(id, el) {
-    var target = document.getElementById('comment-' + id);
-    if (!target || !window.MutationObserver) return;
-    var mo = new MutationObserver(function () { updateInteractVisibility(el); });
-    mo.observe(target, { childList: true, subtree: true });
-  }
-
-  function updateInteractVisibility(el) {
-    var box = el.querySelector('.shuo-interact');
-    if (!box) return;
-    var commentsBox = box.querySelector('.shuo-comments');
-    var revealed = commentsBox ? !commentsBox.classList.contains('is-collapsed') : false;
-    var hasComments = !!box.querySelector('.wl-cards .wl-card');
-    var likeRow = box.querySelector('.shuo-likes');
-    var hasLikes = !!likeRow && !likeRow.hidden;
-    box.hidden = !(hasComments || hasLikes || revealed);
-  }
-
-  function toggleComment(id, el, btn) {
+  function revealEditor(el) {
     var box = el.querySelector('.shuo-comments');
     if (!box) return;
-    var collapsed = box.classList.contains('is-collapsed');
-    if (collapsed) {
-      box.classList.remove('is-collapsed');
-      ensureComment(id);
-      focusEditor(id);
-    } else {
-      box.classList.add('is-collapsed');
+    var tip = box.querySelector('.shuo-comments-loading');
+    if (tip) tip.remove();
+    box.dataset.revealed = '1';
+    box.hidden = false;
+    var editor = box.querySelector('.wl-editor');
+    if (editor) {
+      try { editor.focus(); } catch (e) { /* 忽略 */ }
+      var target = box.querySelector('.wl-panel') || box;
+      var top = target.getBoundingClientRect().top + window.scrollY - 120;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     }
-    if (btn) btn.classList.toggle('is-active', collapsed);
-    updateInteractVisibility(el);
   }
 
-  function focusEditor(id) {
-    var tries = 0;
-    (function attempt() {
-      var box = document.getElementById('comment-' + id);
-      var editor = box && box.querySelector('.wl-editor');
-      if (editor) {
-        try { editor.focus(); } catch (e) { /* 忽略 */ }
-        var interact = box.closest('.shuo-interact');
-        if (interact) {
-          var top = interact.getBoundingClientRect().top + window.scrollY - 120;
-          window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-        }
-        return;
-      }
-      if (tries++ < 20) setTimeout(attempt, 150);
-    })();
+  function toggleComment(el, btn) {
+    var box = el.querySelector('.shuo-comments');
+    if (!box) return;
+    var revealed = box.dataset.revealed === '1';
+    if (revealed) {
+      box.dataset.revealed = '0';
+      box.classList.add('is-collapsed');
+      var tip = box.querySelector('.shuo-comments-loading');
+      if (tip) tip.remove();
+      btn.classList.remove('is-active');
+    } else {
+      box.classList.remove('is-collapsed');
+      btn.classList.add('is-active');
+      ensureComment(el, true);
+    }
+    updateCommentsVisibility(el);
+  }
+
+  function watchComments(el) {
+    var target = el.querySelector('.comment-container');
+    if (!target || !window.MutationObserver) return;
+    var timer = null;
+    var mo = new MutationObserver(function () {
+      updateCommentsVisibility(el);
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        apiGet(serverURL + '/api/comment?type=count&url=' + encodeURIComponent(likePath(el.dataset.id)) + '&lang=' + encodeURIComponent(lang))
+          .then(function (res) { el.__commentCount = res && res.data ? Number(res.data[0] || 0) : el.__commentCount; renderComment(el); })
+          .catch(function () { /* 忽略 */ });
+      }, 1200);
+    });
+    mo.observe(target, { childList: true, subtree: true });
   }
 
   // ==================== 事件绑定 ====================
   function bindItemEvents(root) {
     root.querySelectorAll('.shuo-like').forEach(function (btn) {
+      if (btn.dataset.bound) return;
+      btn.dataset.bound = '1';
       btn.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
         var el = btn.closest('.shuo-item');
-        var item = byId[btn.dataset.id];
-        if (el && item) toggleLike(item, el, btn);
+        if (el) toggleLike(el, btn);
       });
     });
 
     root.querySelectorAll('.shuo-comment').forEach(function (btn) {
+      if (btn.dataset.bound) return;
+      btn.dataset.bound = '1';
       btn.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
         var el = btn.closest('.shuo-item');
-        if (el) toggleComment(btn.dataset.id, el, btn);
+        if (el) toggleComment(el, btn);
       });
     });
 
-    // 音乐卡片：一个播放时暂停其他
     root.querySelectorAll('.shuo-music').forEach(function (box) {
+      if (box.dataset.bound) return;
+      box.dataset.bound = '1';
       var audio = box.querySelector('audio');
       var btn = box.querySelector('.shuo-music-play');
       if (!audio || !btn) return;
@@ -353,27 +443,18 @@ document.addEventListener('DOMContentLoaded', function () {
         if (audio.paused) {
           document.querySelectorAll('.shuo-music audio').forEach(function (a) { if (a !== audio) a.pause(); });
           var p = audio.play();
-          if (p && p.catch) p.catch(function () { /* 自动播放被拦，交给用户再点一次 */ });
+          if (p && p.catch) p.catch(function () { /* 浏览器拦住自动播放就等用户再点 */ });
         } else {
           audio.pause();
         }
       });
-      audio.addEventListener('play', function () {
-        box.classList.add('is-playing');
-        btn.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
-      });
-      audio.addEventListener('pause', function () {
-        box.classList.remove('is-playing');
-        btn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
-      });
-      audio.addEventListener('ended', function () {
-        box.classList.remove('is-playing');
-        btn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
-      });
+      audio.addEventListener('play', function () { box.classList.add('is-playing'); btn.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>'; });
+      audio.addEventListener('pause', function () { box.classList.remove('is-playing'); btn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>'; });
+      audio.addEventListener('ended', function () { box.classList.remove('is-playing'); btn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>'; });
     });
   }
 
-  // ==================== 进入视口才拉数据（省请求） ====================
+  // ==================== 进入视口才拉数据 ====================
   var cardObserver = null;
   function observeCard(el) {
     if (!('IntersectionObserver' in window)) { activateCard(el); return; }
@@ -391,14 +472,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function activateCard(el) {
-    var item = byId[el.dataset.id];
-    if (!item) return;
-    if (likeEnabled) fetchLike(item, el);
-    if (commentEnabled) {
-      // 评论列表默认就要能看到，所以这里就初始化；编辑框由 CSS 折叠
-      ensureComment(item.id);
-      watchComments(item.id, el);
-    }
+    if (likeEnabled) fetchLike(el);
+    if (commentEnabled) fetchCommentCount(el);
   }
 
   // ==================== 列表渲染（无限滚动） ====================
@@ -425,15 +500,14 @@ document.addEventListener('DOMContentLoaded', function () {
     for (var i = renderedCount; i < end; i++) {
       temp.innerHTML = buildShuoItemHtml(shuoData[i]);
       var itemEl = temp.firstElementChild;
-      if (itemEl) {
-        fragment.appendChild(itemEl);
-        observeCard(itemEl);
-      }
+      if (!itemEl) continue;
+      fillContent(itemEl, shuoData[i]);
+      fragment.appendChild(itemEl);
+      observeCard(itemEl);
     }
 
     list.appendChild(fragment);
     bindItemEvents(list);
-    // 图片进入视口前 200px 再加载高清（先显示 LQIP 占位）
     if (window.Motion) window.Motion.lazyImages(list);
     renderedCount = end;
 
@@ -485,21 +559,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function initWaline(id) {
     if (!serverURL || !document.getElementById('comment-' + id)) return;
-    import('https://cdn.jsdelivr.net/npm/@waline/client@latest/dist/waline.js').then(function (Waline) {
-      try {
-        Waline.init({
-          el: '#comment-' + id,
-          serverURL: serverURL,
-          path: '/moments/' + id,
-          emoji: cfg.walineEmoji || [],
-          lang: lang
-        });
-      } catch (e) {
-        console.warn('Waline init failed for moment', id, e);
-      }
-    }).catch(function (e) {
-      console.warn('Waline import failed for moment', id, e);
-    });
+    // waline.js 走 CDN，偶尔会慢或失败：重试几次，实在不行给出提示，别让用户一直等
+    var tries = 0;
+    (function load() {
+      import('https://cdn.jsdelivr.net/npm/@waline/client@latest/dist/waline.js').then(function (Waline) {
+        try {
+          Waline.init({
+            el: '#comment-' + id,
+            serverURL: serverURL,
+            path: '/moments/' + id,
+            emoji: cfg.walineEmoji || [],
+            lang: lang
+          });
+        } catch (e) {
+          console.warn('Waline init failed for moment', id, e);
+        }
+      }).catch(function (e) {
+        if (tries++ < 2) { setTimeout(load, 1200); return; }
+        console.warn('Waline import failed for moment', id, e);
+        showCommentError(id);
+      });
+    })();
+  }
+
+  /* 评论系统加载失败时，把加载提示换成可读的错误提示 */
+  function showCommentError(id) {
+    var box = document.getElementById('shuo-comments-' + id);
+    if (!box) return;
+    var tip = box.querySelector('.shuo-comments-loading');
+    if (!tip) {
+      tip = document.createElement('p');
+      tip.className = 'shuo-comments-loading';
+      box.appendChild(tip);
+    }
+    tip.classList.add('is-error');
+    tip.textContent = t.loadError || '评论加载失败，请刷新页面重试';
   }
 
   function initArtalk(id) {
@@ -523,7 +617,10 @@ document.addEventListener('DOMContentLoaded', function () {
   if (document.getElementById('shuoList')) {
     renderShuo();
   } else {
-    // 详情页（模板里已经是静态卡片）：只需要绑事件 + 图片懒加载
+    // 详情页：模板已渲染好结构，这里只处理正文媒体 + 绑事件 + 图片懒加载
+    Array.prototype.slice.call(document.querySelectorAll('.shuo-item')).forEach(function (el) {
+      fillContentFromTemplate(el);
+    });
     bindItemEvents(document);
     if (window.Motion) window.Motion.lazyImages(document);
   }

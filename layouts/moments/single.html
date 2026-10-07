@@ -1,10 +1,13 @@
 {{- /* ============================================================
   moments/single.html — 时刻详情页
-  复用列表页那套朋友圈式结构（shuo-* 类），样式不用再写一遍
+  复用列表页那套朋友圈式结构（shuo-* 类），样式不用再写一遍；
+  正文里的短代码媒体由 shuo.js 从 <template> 里拆出来渲染（与列表页同一套逻辑）
   ============================================================ */ -}}
 {{- define "styles" -}}
 {{- $momentsCSS := resources.Get "css/shuo.css" | minify | fingerprint -}}
 <link rel="stylesheet" href="{{ $momentsCSS.RelPermalink }}">
+{{- $shortcodeCSS := resources.Get "css/shortcodes.css" | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $shortcodeCSS.RelPermalink }}">
 {{- end -}}
 
 {{- define "main" -}}
@@ -21,6 +24,7 @@
 {{- else -}}
   {{- $linkURL = $lk | default "" -}}
 {{- end -}}
+{{- $n := len (.Params.images | default slice) -}}
 <main class="main" id="main">
   <section class="section">
     <div class="shuo-wrapper">
@@ -28,23 +32,29 @@
         <div class="shuo-avatar"><img src="{{ $avatar }}" alt="" loading="lazy"></div>
         <div class="shuo-body">
           <div class="shuo-name">{{ $nickname }}</div>
-          {{- with .Content }}<div class="shuo-content">{{ . | plainify }}</div>{{ end }}
+          <div class="shuo-content" hidden></div>
+          <template class="shuo-raw">{{ .Content }}</template>
 
           {{- with .Params.images }}
           <div class="shuo-images count-{{ math.Min (len .) 9 }}">
             {{- range . }}
-            {{- $info := partial "img-src.html" (dict "src" . "page" $ "sizes" "(max-width: 820px) 82vw, 400px" "widths" (slice 400 800)) -}}
+            {{- $sizes := "(max-width: 820px) 62vw, 420px" -}}
+            {{- if gt $n 1 -}}{{- $sizes = "(max-width: 820px) 31vw, 200px" -}}{{- end -}}
+            {{- $info := partial "img-src.html" (dict "src" . "page" $ "sizes" $sizes "widths" (slice 400 800)) -}}
             {{- $href := $info.orig | default . -}}
-            <a class="shuo-img-link" href="{{ $href }}" target="_blank" rel="noopener">
+            <a class="shuo-img-link{{ if and (eq $n 1) (not (and $info.width $info.height)) }} no-ratio{{ end }}"
+               href="{{ $href }}" target="_blank" rel="noopener"{{ if and (eq $n 1) $info.width $info.height }} style="aspect-ratio:{{ $info.width }} / {{ $info.height }}"{{ end }}>
               {{- if $info.ok }}
-              <img class="shuo-img" data-src="{{ $info.src }}" data-srcset="{{ $info.srcset }}" sizes="{{ $info.sizes }}"{{ with $info.lqip }} style="background-image:url({{ . }});background-size:cover;background-position:center"{{ end }} alt="Moment image" decoding="async">
+              <img class="shuo-img" data-src="{{ $info.src }}" data-srcset="{{ $info.srcset }}" sizes="{{ $info.sizes }}"{{ with $info.lqip }} style="background-image:url({{ . }});background-size:cover;background-position:center"{{ end }} alt="" decoding="async">
               {{- else }}
-              <img class="shuo-img" src="{{ $href }}" alt="Moment image" loading="lazy">
+              <img class="shuo-img" src="{{ $href }}" alt="" loading="lazy">
               {{- end }}
             </a>
             {{- end }}
           </div>
           {{- end }}
+
+          <div class="shuo-media" hidden></div>
 
           {{- with .Params.music }}
           <div class="shuo-music">
@@ -91,7 +101,7 @@
 {{- end -}}
 
 {{- define "scripts" -}}
-{{- /* 音乐卡片播放按钮、图片懒加载复用列表页那套交互（shuo.js 在没有 #shuoList 时不会渲染列表） */ -}}
+{{- /* 正文短代码媒体、音乐卡片播放、图片懒加载：复用列表页那套逻辑 */ -}}
 {{- $shuoJS := resources.Get "js/shuo.js" | minify | fingerprint -}}
 <script src="{{ $shuoJS.RelPermalink }}"></script>
 {{- end -}}
