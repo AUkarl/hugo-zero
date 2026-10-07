@@ -12,7 +12,7 @@
 {{- /* 优先使用 author_profile 配置（params.toml 中可编辑） */ -}}
 <div class="article-author">
   <div class="author-avatar">
-    <img src="{{ $profileCfg.avatar | default "img/avatar.png" | relURL }}" alt="{{ $profileCfg.nickname | default "作者" }}">
+    <img src="{{ $profileCfg.avatar | default "img/avatar.webp" | relURL }}" alt="{{ $profileCfg.nickname | default "作者" }}">
     {{- if $profileCfg.donate }}
     <button class="author-donate-btn" id="donateBtn"><i class="fas fa-coffee"></i> <span data-i18n="article-donate">{{ i18n "article-donate" | default "赞赏" }}</span></button>
     {{- end }}
@@ -54,7 +54,7 @@
 {{- /* 无 author_profile 配置时回退到 data/authors.yaml */ -}}
 <div class="article-author">
   <div class="author-avatar">
-    <img src="{{ $author.avatar | default .Site.Params.authorAvatar | default "img/avatar.png" | relURL }}" alt="{{ $author.name | default "作者" }}">
+    <img src="{{ $author.avatar | default .Site.Params.authorAvatar | default "img/avatar.webp" | relURL }}" alt="{{ $author.name | default "作者" }}">
     {{- if $author.donate }}
     <button class="author-donate-btn" id="donateBtn"><i class="fas fa-coffee"></i> <span data-i18n="article-donate">{{ i18n "article-donate" | default "赞赏" }}</span></button>
     {{- else if .Site.Params.donate }}
@@ -100,7 +100,7 @@
 {{- /* 最终回退到站点参数 */ -}}
 <div class="article-author">
   <div class="author-avatar">
-    <img src="{{ .Site.Params.authorAvatar | default "img/avatar.png" | relURL }}" alt="{{ i18n "author" | default "作者" }}">
+    <img src="{{ .Site.Params.authorAvatar | default "img/avatar.webp" | relURL }}" alt="{{ i18n "author" | default "作者" }}">
     {{- if .Site.Params.donate }}
     <button class="author-donate-btn" id="donateBtn"><i class="fas fa-coffee"></i> <span data-i18n="article-donate">{{ i18n "article-donate" | default "赞赏" }}</span></button>
     {{- end }}

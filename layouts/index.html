@@ -14,8 +14,10 @@
   {{- range .AlternativeOutputFormats -}}
   {{ printf "<link rel=%q type=%q href=%q title=%q>" .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
   {{- end }}
-  <link rel="icon" href="{{ "img/logo.png" | relURL }}">
-  <link rel="apple-touch-icon" href="{{ "img/logo.png" | relURL }}">
+  {{- /* 图标跟普通页保持一致：读配置里的 favicon（首页是独立模板，之前写死了 logo 路径） */ -}}
+  {{- $favicon := .Site.Params.favicon | default "img/logo-favicon.png" }}
+  <link rel="icon" href="{{ $favicon | relURL }}">
+  <link rel="apple-touch-icon" href="{{ $favicon | relURL }}">
   {{- /* 预连接外部资源，减少首屏建连等待 */ -}}
       <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   {{- /* 以下两个外部样式表改为非阻塞加载（原先是同步加载，占掉约 2.3s 首屏时间）。
@@ -344,8 +346,8 @@
     /* ===== 主视觉区域 ===== */
     .box-intro {
       {{- $landing := .Site.Params.landing -}}
-      {{- if and ($landing.show_background | default true) ($landing.background_image | default "img/bj.jpg") -}}
-      background: url('{{ $landing.background_image | default "img/bj.jpg" | relURL }}') center/cover no-repeat, linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      {{- if and ($landing.show_background | default true) ($landing.background_image | default "img/bj.webp") -}}
+      background: url('{{ $landing.background_image | default "img/bj.webp" | relURL }}') center/cover no-repeat, linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       {{- else }}
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       {{- end }}
@@ -504,7 +506,7 @@
         <div class="box-logo">
           <a href="{{ "/" | relLangURL }}">
             {{- $lang := .Site.Language.Lang | default "zh" -}}
-            {{- $logoPath := .Site.Params.logo | default "/img/logo.png" -}}
+            {{- $logoPath := .Site.Params.logo | default "/img/logo-nav.webp" -}}
             {{- if eq $lang "en" -}}
               {{- $logoPath = .Site.Params.logo_en | default $logoPath -}}
             {{- else -}}

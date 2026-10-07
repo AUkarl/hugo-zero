@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     return '<article class="shuo-item" data-id="' + id + '">' +
-      '<div class="shuo-avatar"><img src="' + esc(item.avatarUrl || '/img/avatar.png') + '" alt="" loading="lazy"></div>' +
+      '<div class="shuo-avatar"><img src="' + esc(item.avatarUrl || '/img/avatar.webp') + '" alt="" loading="lazy"></div>' +
       '<div class="shuo-body">' +
         '<div class="shuo-name">' + esc(item.nickname || '博主') + '</div>' +
         (item.text ? '<div class="shuo-content">' + esc(item.text) + '</div>' : '') +

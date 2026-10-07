@@ -19,7 +19,7 @@
   {{- if $online -}}
     {{- $b := $mCfg.online.banner -}}
     {{- if $b.show_background -}}
-    <div class="moments-header-banner" style="background-image: url('{{ $b.background_image | default "img/bj.jpg" | relURL }}');">
+    <div class="moments-header-banner" style="background-image: url('{{ $b.background_image | default "img/bj.webp" | relURL }}');">
     {{- else -}}
     <div class="moments-header-banner moments-header-no-bg">
     {{- end -}}
@@ -27,7 +27,7 @@
       <div class="moments-header-content">
         {{- if $b.show_avatar -}}
         <div class="moments-header-avatar">
-          <img src="{{ .Site.Params.aboutAvatar | default "img/avatar.png" | relURL }}" alt="avatar">
+          <img src="{{ .Site.Params.aboutAvatar | default "img/avatar.webp" | relURL }}" alt="avatar">
         </div>
         {{- end -}}
         <div class="moments-header-info">
@@ -44,7 +44,7 @@
     {{- $b := $mCfg.offline.banner -}}
     {{- $p := $mCfg.offline.profile -}}
     {{- if $b.show_background -}}
-    <div class="moments-header-banner" style="background-image: url('{{ $b.background_image | default "img/bj.jpg" | relURL }}');">
+    <div class="moments-header-banner" style="background-image: url('{{ $b.background_image | default "img/bj.webp" | relURL }}');">
     {{- else -}}
     <div class="moments-header-banner moments-header-no-bg">
     {{- end -}}
@@ -52,7 +52,7 @@
       <div class="moments-header-content">
         {{- if $p.show_avatar | default true }}
         <div class="moments-header-avatar">
-          <img src="{{ $p.default_avatar | default "img/avatar.png" | relURL }}" alt="avatar">
+          <img src="{{ $p.default_avatar | default "img/avatar.webp" | relURL }}" alt="avatar">
         </div>
         {{- end }}
         <div class="moments-header-info">
@@ -120,7 +120,7 @@
     "time" ($p.Date | time.Format "2006-01-02 15:04")
     "iso" ($p.Date.Format "2006-01-02T15:04:05Z07:00")
     "nickname" ($p.Site.Params.aboutName | default "知 止")
-    "avatarUrl" (($p.Site.Params.aboutAvatar | default "img/avatar.png") | relURL)
+    "avatarUrl" (($p.Site.Params.aboutAvatar | default "img/avatar.webp") | relURL)
   ) -}}
 {{- end -}}
 <script type="application/json" id="shuoData">

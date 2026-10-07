@@ -9,7 +9,7 @@
 
 {{- define "main" -}}
 {{- $nickname := .Site.Params.aboutName | default "知 止" -}}
-{{- $avatar := (.Site.Params.aboutAvatar | default "img/avatar.png") | relURL -}}
+{{- $avatar := (.Site.Params.aboutAvatar | default "img/avatar.webp") | relURL -}}
 {{- /* 链接卡片：支持 map（url/title/desc/image），也兼容直接写一个地址字符串 */ -}}
 {{- $lk := .Params.link -}}
 {{- $linkURL := "" -}}{{- $linkTitle := "" -}}{{- $linkDesc := "" -}}{{- $linkImg := "" -}}

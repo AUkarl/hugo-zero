@@ -33,7 +33,7 @@
       <div class="about-section">
         <div class="about-me-header">
           {{- if $aboutCfg.show_avatar | default true }}
-          <img class="about-avatar" src="{{ .Site.Params.aboutAvatar | default "img/avatar.png" | relURL }}" alt="Avatar">
+          <img class="about-avatar" src="{{ .Site.Params.aboutAvatar | default "img/avatar.webp" | relURL }}" alt="Avatar">
           {{- end }}
           <div class="about-me-info">
             {{- if $aboutCfg.show_name | default true }}

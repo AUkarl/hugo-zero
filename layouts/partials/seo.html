@@ -23,7 +23,7 @@
 {{- /* ---------- 分享图：页面 image/img → 配置默认 → 站点 logo ---------- */ -}}
 {{- $image := .Params.image | default .Params.img -}}
 {{- if not $image }}{{ $image = $seo.og_image_default }}{{ end -}}
-{{- if not $image }}{{ $image = .Site.Params.favicon | default "img/logo.png" }}{{ end -}}
+{{- if not $image }}{{ $image = .Site.Params.favicon | default "img/logo-nav.webp" }}{{ end -}}
 {{- /* 抓得到就换成构建时处理过的 1200w WebP（外链也能处理），拿不到就退回原地址 */ -}}
 {{- $ogInfo := partial "img-src.html" (dict "src" $image "page" . "widths" (slice 1200) "lqip" false) -}}
 {{- if $ogInfo.ok -}}
@@ -107,7 +107,7 @@
 
 {{- /* ---------- 结构化数据 ---------- */ -}}
 {{- if $seo.enable_jsonld | default true -}}
-  {{- $publisherLogo := $seo.publisher_logo | default .Site.Params.logo | default "img/logo.png" -}}
+  {{- $publisherLogo := $seo.publisher_logo | default .Site.Params.logo | default "img/logo-nav.webp" -}}
   {{- if not (or (hasPrefix $publisherLogo "http://") (hasPrefix $publisherLogo "https://")) -}}
     {{- $publisherLogo = $publisherLogo | absURL -}}
   {{- end -}}
