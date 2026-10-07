@@ -337,7 +337,9 @@
 }
 
 @media (max-width: 768px) {
-  .links-apply { grid-template-columns: 1fr; gap: 20px; }
+  /* 同样要带上 .is-active：上面那条 .links-apply.is-active 权重更高，否则窄屏仍是两栏 */
+  .links-apply,
+  .links-apply.is-active { grid-template-columns: 1fr; gap: 20px; }
   .neighbor-grid { grid-template-columns: 1fr; }
   .feed-grid { grid-template-columns: 1fr; }
   .alliance-list { grid-template-columns: 1fr; }
