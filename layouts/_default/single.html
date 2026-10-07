@@ -106,6 +106,13 @@
 
 {{- define "scripts" -}}
 {{- $profileCfg := .Site.Params.author_profile -}}
+{{- /* 图片点击放大查看（只在同一篇文章的图片之间左右切换） */ -}}
+{{- $lbJS := resources.Get "js/lightbox.js" | minify | fingerprint -}}
+<script src="{{ $lbJS.RelPermalink }}"
+        data-close="{{ i18n "lightbox-close" | default "关闭" }}"
+        data-prev="{{ i18n "lightbox-prev" | default "上一张" }}"
+        data-next="{{ i18n "lightbox-next" | default "下一张" }}"
+        data-view="{{ i18n "lightbox-view" | default "查看大图" }}"></script>
 {{- range .Translations -}}
 <script>window.translatedPageUrl = "{{ .RelPermalink }}";</script>
 {{- end -}}

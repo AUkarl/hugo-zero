@@ -185,7 +185,8 @@
       daysAgo: "{{ i18n "shuo-days-ago" | default "天前" }}",
       noMoments: "{{ i18n "shuo-empty" | default "还没有发布时刻" }}",
       loading: "{{ i18n "shuo-loading" | default "评论加载中…" }}",
-      loadError: "{{ i18n "shuo-load-error" | default "评论加载失败，请刷新页面重试" }}"
+      loadError: "{{ i18n "shuo-load-error" | default "评论加载失败，请刷新页面重试" }}",
+      view: "{{ i18n "lightbox-view" | default "查看大图" }}"
     }
   };
 </script>
@@ -258,5 +259,12 @@
   {{- end -}}
   {{- $shuoJS := resources.Get "js/shuo.js" | minify | fingerprint -}}
 <script src="{{ $shuoJS.RelPermalink }}"></script>
+  {{- /* 图片点击放大查看（只在同一条时刻的图片之间切换） */ -}}
+  {{- $lbJS := resources.Get "js/lightbox.js" | minify | fingerprint -}}
+<script src="{{ $lbJS.RelPermalink }}"
+        data-close="{{ i18n "lightbox-close" | default "关闭" }}"
+        data-prev="{{ i18n "lightbox-prev" | default "上一张" }}"
+        data-next="{{ i18n "lightbox-next" | default "下一张" }}"
+        data-view="{{ i18n "lightbox-view" | default "查看大图" }}"></script>
 {{- end -}}
 {{- end -}}

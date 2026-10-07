@@ -175,6 +175,12 @@ shuo-empty: "No moments yet"
 shuo-loading: "Loading comments…"
 shuo-load-error: "Failed to load comments, please refresh the page"
 
+# ===== Image lightbox =====
+lightbox-close: "Close"
+lightbox-prev: "Previous"
+lightbox-next: "Next"
+lightbox-view: "View larger"
+
 # ===== About page =====
 about-title: "About"
 about-desc: "A gardener in the digital world."

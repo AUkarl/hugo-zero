@@ -175,6 +175,12 @@ shuo-empty: "还没有发布时刻"
 shuo-loading: "评论加载中…"
 shuo-load-error: "评论加载失败，请刷新页面重试"
 
+# ===== 图片放大查看 =====
+lightbox-close: "关闭"
+lightbox-prev: "上一张"
+lightbox-next: "下一张"
+lightbox-view: "查看大图"
+
 # ===== 关于页 =====
 about-title: "关于"
 about-desc: "一个在数字世界里种花的人。"

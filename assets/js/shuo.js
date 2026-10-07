@@ -65,23 +65,46 @@ document.addEventListener('DOMContentLoaded', function () {
     try { if (v) localStorage.setItem(likedKey(id), '1'); else localStorage.removeItem(likedKey(id)); } catch (e) { /* 忽略 */ }
   }
 
-  /* 正文拆分：短代码渲染出来的媒体块单独拿出来，其余当纯文本（朋友圈那种） */
+  /* 正文拆分：短代码渲染出来的媒体块单独拿出来，其余当纯文本（朋友圈那种）。
+     注意：像网易云音乐这种短代码，除了占位 div 还会输出一段内联 <script> 把占位换成 iframe；
+     用 innerHTML 搬动节点时脚本不会执行，所以这里把脚本也收集起来，插入后再跑一次。 */
   var MEDIA_SEL = 'audio, video, iframe, .audio-player, .video-player, .video-embed, .shortcode-embed, .gallery, figure';
   function splitContent(rawHtml, fallbackText) {
-    if (!rawHtml) return { text: fallbackText || '', media: [] };
+    if (!rawHtml) return { text: fallbackText || '', media: [], scripts: [] };
     var box = document.createElement('div');
     box.innerHTML = rawHtml;
     var media = [];
+    var scripts = [];
     var textParts = [];
     Array.prototype.slice.call(box.childNodes).forEach(function (node) {
-      if (node.nodeType === 1 && node.querySelector && node.querySelector(MEDIA_SEL)) {
+      if (node.nodeType === 1 && node.tagName === 'SCRIPT') {
+        scripts.push(node.textContent || '');
+        return;
+      }
+      // 注意要判断「节点自己」也算媒体：网易云的占位 div 本身就是 .video-embed，
+      // 里面并没有 iframe/audio 之类的子孙，只看子孙会把它当正文文本丢掉
+      if (node.nodeType === 1 && ((node.matches && node.matches(MEDIA_SEL)) || (node.querySelector && node.querySelector(MEDIA_SEL)))) {
         media.push(node);
         return;
       }
       var txt = (node.textContent || '').replace(/\u00a0/g, ' ').trim();
       if (txt) textParts.push(txt);
     });
-    return { text: textParts.join('\n') || (fallbackText || ''), media: media };
+    return { text: textParts.join('\n') || (fallbackText || ''), media: media, scripts: scripts };
+  }
+
+  /* innerHTML 搬过来的 <script> 不会自动执行，这里重建再执行。
+     必须在卡片已经插入文档之后执行：游离节点里插脚本不会跑，
+     而且网易云那种脚本是全局查找占位节点的，游离时也找不到。 */
+  function runScripts(host, codes) {
+    var target = (host && host.isConnected) ? host : document.body;
+    codes.forEach(function (code) {
+      if (!code.trim()) return;
+      var s = document.createElement('script');
+      s.textContent = code;
+      target.appendChild(s);
+      s.remove();
+    });
   }
 
   // ==================== 图片 ====================
@@ -107,13 +130,14 @@ document.addEventListener('DOMContentLoaded', function () {
       // 单图：按原图比例先占好位置（比例拿不到就用 no-ratio 兜底，避免塌成一条细线）
       var linkStyle = (count === 1 && ratio) ? ' style="aspect-ratio:' + ratio + '"' : '';
       var linkCls = 'shuo-img-link' + (count === 1 && !ratio ? ' no-ratio' : '');
-      html += '<a class="' + linkCls + '" href="' + esc(orig || src) + '" target="_blank" rel="noopener"' + linkStyle + '>';
+      // 外层用按钮：点了只放大查看，不跳转外链
+      html += '<button type="button" class="' + linkCls + '" aria-label="' + esc(t.view || '查看大图') + '"' + linkStyle + '>';
       if (src) {
         html += '<img class="shuo-img" data-src="' + esc(src) + '" data-srcset="' + esc(srcset) + '" sizes="' + esc(sizes) + '"' + dims + bg + ' alt="" decoding="async">';
       } else {
         html += '<img class="shuo-img" src="' + esc(orig) + '" alt="" loading="lazy">';
       }
-      html += '</a>';
+      html += '</button>';
     });
     return html + '</div>';
   }
@@ -196,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
     '</article>';
   }
 
-  /* 把正文（纯文本 + 短代码媒体）填进卡片 */
+  /* 把正文（纯文本 + 短代码媒体）填进卡片；返回正文里带的脚本，交给插入文档后再执行 */
   function fillContent(el, item) {
     var parts = splitContent(item.contentHtml, item.text);
     var textEl = el.querySelector('.shuo-content');
@@ -209,6 +233,7 @@ document.addEventListener('DOMContentLoaded', function () {
       parts.media.forEach(function (node) { mediaEl.appendChild(node); });
       mediaEl.hidden = false;
     }
+    return parts.scripts;
   }
 
   /* 详情页（模板已经渲染好 HTML）：同样把媒体块拆出来 */
@@ -223,6 +248,7 @@ document.addEventListener('DOMContentLoaded', function () {
       parts.media.forEach(function (node) { mediaEl.appendChild(node); });
       mediaEl.hidden = false;
     }
+    if (mediaEl && parts.scripts.length) runScripts(mediaEl, parts.scripts);
     raw.remove();
   }
 
@@ -496,17 +522,20 @@ document.addEventListener('DOMContentLoaded', function () {
     var end = Math.min(renderedCount + batchSize, shuoData.length);
     var fragment = document.createDocumentFragment();
     var temp = document.createElement('div');
+    var pending = [];        // 等卡片进文档后再跑的短代码脚本
 
     for (var i = renderedCount; i < end; i++) {
       temp.innerHTML = buildShuoItemHtml(shuoData[i]);
       var itemEl = temp.firstElementChild;
       if (!itemEl) continue;
-      fillContent(itemEl, shuoData[i]);
+      var scripts = fillContent(itemEl, shuoData[i]);
+      if (scripts && scripts.length) pending.push({ el: itemEl, scripts: scripts });
       fragment.appendChild(itemEl);
       observeCard(itemEl);
     }
 
     list.appendChild(fragment);
+    pending.forEach(function (p) { runScripts(p.el.querySelector('.shuo-media') || p.el, p.scripts); });
     bindItemEvents(list);
     if (window.Motion) window.Motion.lazyImages(list);
     renderedCount = end;
