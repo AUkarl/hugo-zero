@@ -386,6 +386,9 @@ document.addEventListener('DOMContentLoaded', function () {
   function revealEditor(el) {
     var box = el.querySelector('.shuo-comments');
     if (!box) return;
+    // 初始化是异步的：等它好的这段时间里用户可能已经点了别的时刻，
+    // 那就不要再把这个旧的编辑框弹出来（否则又会同时出现两个）
+    if (activeEditorEl !== el) return;
     var tip = box.querySelector('.shuo-comments-loading');
     if (tip) tip.remove();
     box.dataset.revealed = '1';
@@ -399,21 +402,42 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  /* 同时只允许一个评论编辑框：打开新的之前把其余的都收起来 */
+  var activeEditorEl = null;
+
+  function closeEditor(el) {
+    var box = el.querySelector('.shuo-comments');
+    if (!box) return;
+    box.dataset.revealed = '0';
+    box.classList.add('is-collapsed');
+    var tip = box.querySelector('.shuo-comments-loading');
+    if (tip) tip.remove();
+    var btn = el.querySelector('.shuo-comment');
+    if (btn) btn.classList.remove('is-active');
+    if (activeEditorEl === el) activeEditorEl = null;
+    updateCommentsVisibility(el);
+  }
+
+  function closeOtherEditors(except) {
+    Array.prototype.slice.call(document.querySelectorAll('.shuo-item')).forEach(function (el) {
+      if (el === except) return;
+      var box = el.querySelector('.shuo-comments');
+      if (box && box.dataset.revealed === '1') closeEditor(el);
+    });
+  }
+
   function toggleComment(el, btn) {
     var box = el.querySelector('.shuo-comments');
     if (!box) return;
-    var revealed = box.dataset.revealed === '1';
-    if (revealed) {
-      box.dataset.revealed = '0';
-      box.classList.add('is-collapsed');
-      var tip = box.querySelector('.shuo-comments-loading');
-      if (tip) tip.remove();
-      btn.classList.remove('is-active');
-    } else {
-      box.classList.remove('is-collapsed');
-      btn.classList.add('is-active');
-      ensureComment(el, true);
+    if (box.dataset.revealed === '1') {
+      closeEditor(el);
+      return;
     }
+    closeOtherEditors(el);          // 旧的自动关掉，只留最新点的这个
+    activeEditorEl = el;
+    box.classList.remove('is-collapsed');
+    btn.classList.add('is-active');
+    ensureComment(el, true);
     updateCommentsVisibility(el);
   }
 
