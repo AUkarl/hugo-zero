@@ -128,82 +128,11 @@
   margin-left: 2px;
 }
 
-/* ===== 友情链接 ===== */
-.friend-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.friend-links a {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 16px;
-  background: var(--tag-bg);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  font-size: 0.88rem;
-  color: var(--text-secondary);
-  transition: all 0.25s ease;
-  text-decoration: none;
-}
-
-.friend-links a:hover {
-  border-color: var(--text);
-  color: var(--text);
-  background: var(--tag-active-bg);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-}
-
-/* ===== 站点联盟 ===== */
-.alliance-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.alliance-links a {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 20px;
-  background: var(--tag-bg);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  font-size: 0.88rem;
-  color: var(--text-secondary);
-  transition: all 0.25s ease;
-  text-decoration: none;
-}
-
-.alliance-links a:hover {
-  border-color: var(--text);
-  color: var(--text);
-  background: var(--tag-active-bg);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-}
-
 /* ===== 站点声明 ===== */
 .site-declaration p {
   font-size: 0.88rem;
   color: var(--text-secondary);
   line-height: 1.8;
-}
-
-/* ===== 投稿 ===== */
-.submit-info p {
-  font-size: 0.92rem;
-  color: var(--text-secondary);
-  line-height: 1.8;
-}
-
-.submit-info a {
-  color: var(--text);
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 /* ===== 响应式 ===== */

@@ -30,7 +30,7 @@
 {{- else if $onNeighbors -}}{{- $active = "neighbors" -}}
 {{- else if $onAlliance -}}{{- $active = "alliance" -}}
 {{- else if $onApply -}}{{- $active = "apply" -}}{{- end -}}
-{{- $d := site.Data -}}
+{{- $d := hugo.Data -}}
 {{- $links := $d.links | default dict -}}
 {{- $friends := $links.friends | default slice -}}
 {{- $alliance := $links.alliance | default slice -}}

@@ -233,7 +233,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // 抽屉里的点击行为：
     //   · 普通链接 / 子菜单项 → 关闭抽屉（普通链接本来就会跳转，子项点击后收起）
     //   · 带子菜单的父项（.nav-parent）→ 只展开/收起子菜单，抽屉保持打开
-    document.querySelectorAll('#navLinks .nav-link:not(.nav-parent), #navLinks .blog-link, #navLinks .nav-submenu-link').forEach(link => {
+    //   注：外链项（.blog-link）本身就是 .nav-link，不必再单独列一次
+    document.querySelectorAll('#navLinks .nav-link:not(.nav-parent), #navLinks .nav-submenu-link').forEach(link => {
       link.addEventListener('click', function() {
         closeDrawer();
       });

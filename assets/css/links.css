@@ -258,6 +258,13 @@
   background: var(--card-bg);
   font-size: 0.88rem;
   overflow: hidden;
+  /* 悬停动画与左邻右舍 / 朋友动态的卡片保持一致 */
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+.alliance-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--logo-accent-text, #0d8368);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.07);
 }
 .alliance-item a { color: var(--text); text-decoration: none; font-weight: 600; white-space: nowrap; }
 .alliance-item a:hover { color: var(--logo-accent-text, #0d8368); }
@@ -308,8 +315,6 @@
   background: var(--card-bg);
 }
 .apply-block h2 { margin-top: 0; }
-.apply-block > div > p:last-child,
-.apply-block > div > ul:last-child { margin-bottom: 0; }
 
 .apply-copy {
   position: absolute;
