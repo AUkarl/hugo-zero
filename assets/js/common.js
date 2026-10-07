@@ -230,8 +230,10 @@ document.addEventListener('DOMContentLoaded', function() {
       navClose.addEventListener('click', closeDrawer);
     }
 
-    // 点击导航链接关闭抽屉（不阻止跳转）
-    document.querySelectorAll('#navLinks .nav-link, #navLinks .blog-link').forEach(link => {
+    // 抽屉里的点击行为：
+    //   · 普通链接 / 子菜单项 → 关闭抽屉（普通链接本来就会跳转，子项点击后收起）
+    //   · 带子菜单的父项（.nav-parent）→ 只展开/收起子菜单，抽屉保持打开
+    document.querySelectorAll('#navLinks .nav-link:not(.nav-parent), #navLinks .blog-link, #navLinks .nav-submenu-link').forEach(link => {
       link.addEventListener('click', function() {
         closeDrawer();
       });

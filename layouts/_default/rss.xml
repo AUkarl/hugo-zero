@@ -31,16 +31,25 @@
     {{- $html := .Summary -}}
     {{- if $full }}{{ $html = .Content }}{{ end -}}
     {{- /* ---------- 封面：给阅读器一个"原图直链" ----------
-           阅读器普遍不认 WebP、也不会执行懒加载 JS，所以这里直接用封面原始地址
-           （例如 R2 上那张 jpg/png），而不是构建时生成的 WebP，否则会出现"不显示"或
-           "只有一张特别小的模糊图"的问题。
-           注意：这里刻意不再调用 img-src.html —— 那会为每篇文章做一次远程取图，
+           支持的写法：image / img / cover 单个字段，或 images 列表（取第一张）。
+           注意：这里刻意不调用 img-src.html —— 那会为每篇文章做一次远程取图，
            既拖慢构建又多一次网络依赖；直接用原地址转绝对路径就够了。 */ -}}
-    {{- $cover := .Params.image | default .Params.img -}}
+    {{- $cover := .Params.image | default .Params.img | default .Params.cover -}}
+    {{- if not $cover -}}
+      {{- with .Params.images -}}
+        {{- if reflect.IsSlice . -}}{{- $cover = index . 0 -}}{{- else -}}{{- $cover = . -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
     {{- $coverURL := "" -}}
     {{- with $cover -}}{{- $coverURL = . | absURL -}}{{- end -}}
-    {{- if and $full $coverURL (not (in $html "<img")) -}}
-      {{- $html = printf "<p><img src=%q alt=%q loading=\"lazy\"></p>%s" $coverURL (.Title | plainify) $html -}}
+    {{- /* 正文里没有这张封面时，把它补到最前面：
+           阅读器只看正文里的 <img>，正文有插图但没封面时照样要显示封面。
+           已经出现过（同一个地址）就不重复插。 */ -}}
+    {{- if and $full $coverURL -}}
+      {{- $dup := or (in $html $coverURL) (in $html $cover) -}}
+      {{- if not $dup -}}
+        {{- $html = printf "<p><img src=%q alt=%q loading=\"lazy\"></p>%s" $coverURL (.Title | plainify) $html -}}
+      {{- end -}}
     {{- end -}}
     {{- /* ---------- 正文图片：把懒加载属性换成真实原图 ----------
            管线输出的 <img> 只有 data-src（WebP），外加一张内联的模糊占位图。

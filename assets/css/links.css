@@ -269,8 +269,11 @@
   white-space: nowrap;
 }
 
-/* ---------- 申请友链：两栏 ---------- */
-.links-apply {
+/* ---------- 申请友链：两栏 ----------
+   注意：面板本身带着 .links-panel，激活时是 display:block，
+   会盖掉这里的 grid（.links-panel.is-active 权重更高），所以必须再写 .is-active 这一条。 */
+.links-apply,
+.links-apply.is-active {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 28px;
@@ -294,6 +297,37 @@
   border-radius: 4px;
   font-size: 0.85em;
 }
+
+/* 我的信息 / 提交示例：带复制按钮的内容框 */
+.apply-block {
+  position: relative;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--card-bg);
+}
+.apply-block h2 { margin-top: 0; }
+.apply-block > div > p:last-child,
+.apply-block > div > ul:last-child { margin-bottom: 0; }
+
+.apply-copy {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--tag-bg);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.apply-copy:hover { color: var(--text); border-color: var(--logo-accent-text, #0d8368); }
+.apply-copy.is-done { color: #0d8368; border-color: #0d8368; }
 
 /* ---------- 响应式 ---------- */
 @media (max-width: 1024px) {

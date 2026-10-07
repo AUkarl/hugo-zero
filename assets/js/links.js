@@ -47,7 +47,8 @@
   /* ---------- 2) 朋友动态分页（每页 20 条） ---------- */
   var grid = document.getElementById('feedGrid');
   var pager = document.getElementById('feedPager');
-  var PER_PAGE = 20;
+  // 每页条数由 params.toml 的 [links] per_page 决定（模板写到 data-per-page）
+  var PER_PAGE = parseInt((grid && grid.getAttribute('data-per-page')) || '20', 10) || 20;
 
   if (grid && pager) {
     var items = Array.prototype.slice.call(grid.querySelectorAll('[data-feed-item]'));
@@ -89,5 +90,41 @@
     }
 
     render();
+  }
+
+  /* ---------- 3) 我的信息 / 提交示例 的复制按钮 ---------- */
+  Array.prototype.slice.call(document.querySelectorAll('.apply-copy')).forEach(function (btn) {
+    var id = btn.getAttribute('data-copy-target');
+    var box = id ? document.getElementById(id) : null;
+    if (!box) return;
+    var original = btn.textContent;
+    btn.addEventListener('click', function () {
+      var text = (box.innerText || box.textContent || '').trim();
+      var done = function () {
+        btn.textContent = '已复制';
+        btn.classList.add('is-done');
+        setTimeout(function () { btn.textContent = original; btn.classList.remove('is-done'); }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () { fallback(text, done); });
+      } else {
+        fallback(text, done);
+      }
+    });
+  });
+
+  // 剪贴板 API 不可用（http 环境、旧浏览器）时的兜底
+  function fallback(text, done) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      done();
+    } catch (e) { /* 复制不了就算了 */ }
   }
 })();

@@ -18,6 +18,7 @@
 {{- end -}}
 
 {{- define "main" -}}
+{{- $lc := site.Params.links | default dict -}}
 {{- $d := site.Data -}}
 {{- $links := $d.links | default dict -}}
 {{- $friends := $links.friends | default slice -}}
@@ -42,16 +43,24 @@
     <p class="section-desc">{{ i18n "links-desc" | default "互联网的毛细血管里，依然流淌着真诚的联结。" }}</p>
 
     <div class="links-tabs" role="tablist" aria-label="{{ i18n "links-title" | default "友链" }}">
+      {{- if $lc.feed | default true }}
       <button type="button" class="links-tab is-active" role="tab" id="tab-feed" data-tab="feed" aria-selected="true" aria-controls="panel-feed">{{ i18n "links-tab-feed" | default "朋友动态" }}</button>
+      {{- end }}
+      {{- if $lc.neighbors | default true }}
       <button type="button" class="links-tab" role="tab" id="tab-neighbors" data-tab="neighbors" aria-selected="false" aria-controls="panel-neighbors">{{ i18n "links-tab-neighbors" | default "左邻右舍" }}</button>
+      {{- end }}
+      {{- if $lc.alliance | default true }}
       <button type="button" class="links-tab" role="tab" id="tab-alliance" data-tab="alliance" aria-selected="false" aria-controls="panel-alliance">{{ i18n "links-tab-alliance" | default "站点联盟" }}</button>
+      {{- end }}
+      {{- if $lc.apply | default true }}
       <button type="button" class="links-tab" role="tab" id="tab-apply" data-tab="apply" aria-selected="false" aria-controls="panel-apply">{{ i18n "links-tab-apply" | default "申请友链" }}</button>
+      {{- end }}
     </div>
 
     {{- /* ---------- 朋友动态 ---------- */ -}}
     <section class="links-panel is-active" id="panel-feed" role="tabpanel" aria-labelledby="tab-feed">
       {{- if $items }}
-      <div class="feed-grid" id="feedGrid">
+      <div class="feed-grid" id="feedGrid" data-per-page="{{ $lc.per_page | default 20 }}">
         {{- range $items }}
         <article class="feed-card" data-feed-item>
           <div class="feed-head">
