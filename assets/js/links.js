@@ -130,11 +130,14 @@
     } catch (e) { /* 复制不了就算了 */ }
   }
 
-  /* ---------- 4) 朋友动态左侧封面：加载完成后淡入（失败就交给首字母占位） ---------- */
+  /* ---------- 4) 朋友动态左侧封面：加载完成后淡入 ----------
+     只给「还没加载完」的图加 is-loading，加载好就摘掉（失败也一样，交给首字母占位），
+     所以 JS 没执行时图片照常直接显示，不会白图。 */
   Array.prototype.slice.call(document.querySelectorAll('.feed-cover img')).forEach(function (img) {
-    var mark = function () { img.classList.add('is-loaded'); };
-    if (img.complete && img.naturalWidth) { mark(); return; }
-    img.addEventListener('load', mark);
-    img.addEventListener('error', mark);
+    var done = function () { img.classList.remove('is-loading'); };
+    if (img.complete && img.naturalWidth) return;                 // 已经在缓存里：直接显示
+    img.classList.add('is-loading');
+    img.addEventListener('load', done);
+    img.addEventListener('error', done);
   });
 })();

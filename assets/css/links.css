@@ -141,13 +141,15 @@
 }
 .feed-cover.is-letter .feed-letter { display: flex; }
 
-/* 图片加载完成前的淡入（只有 JS 可用时才隐藏，避免无 JS 时白图） */
-.js .feed-cover img {
-  opacity: 0;
-  transform: scale(1.06);
+/* 封面加载完成后淡入（is-loading 由 links.js 只加给「还没加载完」的图，
+   这样即使 JS 没跑也不会出现白图） */
+.feed-cover img {
   transition: opacity 0.5s ease, transform 0.6s ease;
 }
-.js .feed-cover img.is-loaded { opacity: 1; transform: none; }
+.feed-cover img.is-loading {
+  opacity: 0;
+  transform: scale(1.06);
+}
 
 .feed-body {
   min-width: 0;
