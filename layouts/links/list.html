@@ -35,6 +35,10 @@
 {{- $friends := $links.friends | default slice -}}
 {{- $alliance := $links.alliance | default slice -}}
 {{- $status := $d.linksstatus | default dict -}}
+{{- $icons := $d.linksicons | default dict -}}
+{{- /* 朋友 URL → 条目：朋友动态的封面要回查手填的 image / icon / email */ -}}
+{{- $byURL := dict -}}
+{{- range $friends -}}{{- $byURL = merge $byURL (dict .url .) -}}{{- end -}}
 {{- $feed := $d.friendfeed | default dict -}}
 {{- $items := $feed.items | default slice -}}
 {{- $online := slice -}}
@@ -72,15 +76,34 @@
     {{- if $onFeed }}
     <section class="links-panel{{ if eq $active "feed" }} is-active{{ end }}" id="panel-feed" role="tabpanel" aria-labelledby="tab-feed"{{ if ne $active "feed" }} hidden{{ end }}>
       {{- if $items }}
-      <div class="feed-grid" id="feedGrid" data-per-page="{{ $lc.per_page | default 20 }}">
+      <div class="feed-grid" id="feedGrid" data-per-page="{{ $lc.per_page | default 10 }}">
         {{- range $items }}
+        {{- /* 左侧封面：文章自带图 → links.yaml 里手填的 image → 站点 icon → 邮箱头像 → 首字母 */ -}}
+        {{- $fr := index $byURL .siteurl | default dict -}}
+        {{- $st := index $status .siteurl | default dict -}}
+        {{- $cover := .image | default ($fr.image | default "") -}}
+        {{- if not $cover -}}
+          {{- $cover = $st.icon | default ($fr.icon | default "") -}}
+          {{- if and (not $cover) $fr.email -}}
+            {{- $cover = printf "https://cravatar.cn/avatar/%s?s=128&d=mp" (md5 $fr.email) -}}
+          {{- end -}}
+        {{- end -}}
         <article class="feed-card" data-feed-item>
-          <div class="feed-head">
-            <span class="feed-site">{{ .site }}</span>
-            {{- with .date }}<time class="feed-date" datetime="{{ . }}">{{ time.Format "2006-01-02" . }}</time>{{ end }}
+          <span class="feed-cover{{ if not $cover }} is-letter{{ end }}">
+            {{- with $cover }}
+            <img src="{{ . }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"
+                 onerror="this.style.display='none';this.parentNode.classList.add('is-letter')">
+            {{- end -}}
+            <span class="feed-letter" aria-hidden="true">{{ substr (.site | default "?") 0 1 }}</span>
+          </span>
+          <div class="feed-body">
+            <div class="feed-head">
+              <span class="feed-site">{{ .site }}</span>
+              {{- with .date }}<time class="feed-date" datetime="{{ . }}">{{ time.Format "2006-01-02" . }}</time>{{ end }}
+            </div>
+            <h3 class="feed-title"><a href="{{ .url }}" target="_blank" rel="noopener">{{ .title }}</a></h3>
+            {{- with .summary }}<p class="feed-desc">{{ . }}</p>{{ end }}
           </div>
-          <h3 class="feed-title"><a href="{{ .url }}" target="_blank" rel="noopener">{{ .title }}</a></h3>
-          {{- with .summary }}<p class="feed-desc">{{ . }}</p>{{ end }}
         </article>
         {{- end }}
       </div>
@@ -119,7 +142,18 @@
       {{- if $alliance }}
       <ul class="alliance-list">
         {{- range $alliance }}
-        <li class="alliance-item"><a href="{{ .url }}" target="_blank" rel="noopener">{{ .name }}</a>{{ with .desc }}<span class="alliance-desc">{{ . }}</span>{{ end }}</li>
+        {{- /* 左侧图标：links.yaml 手填 icon → data/linksicons.json（检测脚本自动抓） → 首字母 */ -}}
+        {{- $icon := .icon | default (index $icons .url | default "") -}}
+        <li class="alliance-item">
+          <span class="alliance-icon{{ if not $icon }} is-letter{{ end }}">
+            {{- with $icon }}
+            <img src="{{ . }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"
+                 onerror="this.style.display='none';this.parentNode.classList.add('is-letter')">
+            {{- end -}}
+            <span class="alliance-letter" aria-hidden="true">{{ substr (.name | default "?") 0 1 }}</span>
+          </span>
+          <a href="{{ .url }}" target="_blank" rel="noopener">{{ .name }}</a>{{ with .desc }}<span class="alliance-desc">{{ . }}</span>{{ end }}
+        </li>
         {{- end }}
       </ul>
       {{- else }}

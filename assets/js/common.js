@@ -146,21 +146,46 @@ document.addEventListener('DOMContentLoaded', function() {
       const item = btn.closest('.nav-item');
       const menu = item && item.querySelector('.nav-submenu');
       if (!menu) return;
-      btn.addEventListener('click', e => {
-        e.preventDefault();
-        e.stopPropagation();
-        const isOpen = btn.getAttribute('aria-expanded') === 'true';
+
+      function openMenu() {
         closeAll(btn);                                  // 同时只开一个
-        if (isOpen) {
-          btn.setAttribute('aria-expanded', 'false');
-          item.classList.remove('is-open');
-          menu.hidden = true;
-          return;
-        }
         btn.setAttribute('aria-expanded', 'true');
         item.classList.add('is-open');
         menu.hidden = false;
         placeMenu(btn, menu);                           // 先摆好位置再显示，避免闪一下
+      }
+      function closeMenu() {
+        btn.setAttribute('aria-expanded', 'false');
+        item.classList.remove('is-open');
+        menu.hidden = true;
+      }
+
+      // 桌面端：鼠标移入展开、移开收起（下拉菜单本身在 .nav-item 内，
+      // 所以从按钮移到菜单上不会触发真正的移出；留一点延迟更稳）
+      let hoverTimer = null;
+      item.addEventListener('mouseenter', () => {
+        if (isDrawer()) return;
+        clearTimeout(hoverTimer);
+        openMenu();
+      });
+      item.addEventListener('mouseleave', () => {
+        if (isDrawer()) return;
+        clearTimeout(hoverTimer);
+        hoverTimer = setTimeout(closeMenu, 140);
+      });
+
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const isOpen = btn.getAttribute('aria-expanded') === 'true';
+        // 桌面端鼠标点击交给 hover 管（点了不要反而关掉）；键盘回车（detail === 0）与移动端仍走切换
+        if (!isDrawer() && e.detail !== 0) {
+          if (!isOpen) openMenu();
+          return;
+        }
+        closeAll(btn);                                  // 同时只开一个
+        if (isOpen) { closeMenu(); return; }
+        openMenu();
       });
     });
 

@@ -1,0 +1,58 @@
+{{- /* ============================================================
+  page-loader.html — 页面加载过渡动画
+  ------------------------------------------------------------
+  进入页面时先盖一层与页面同色的遮罩，中间是加载动画，下方一句话。
+  加载完成后淡出（最少展示约 0.3s，最长 2.6s 兜底，绝不卡住页面）。
+
+  可配置（config/_default/params.toml）：
+    [page_loader]
+      enable = true          # 关掉就完全不输出
+      text   = ""            # 留空则用 i18n 的 loader-text
+  ============================================================ */ -}}
+{{- if site.Params.page_loader.enable | default true -}}
+{{- $text := site.Params.page_loader.text | default (i18n "loader-text" | default "我们的相逢，恰如其实") -}}
+<div class="page-loader" id="pageLoader" aria-hidden="true">
+  <div class="page-loader-inner">
+    <span class="page-loader-dots"><i></i><i></i><i></i></span>
+    <p class="page-loader-text">{{ $text }}</p>
+  </div>
+</div>
+{{- /* 关键样式内联：遮罩必须第一帧就是正确的颜色，不能等 CSS 文件 */ -}}
+<style>
+  .page-loader{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+    background:var(--bg,#fff);transition:opacity .45s ease,visibility .45s ease}
+  html[data-theme="dark"] .page-loader{background:var(--bg,#1e1e1e)}
+  .page-loader.is-done{opacity:0;visibility:hidden;pointer-events:none}
+  .page-loader-inner{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .page-loader-dots{display:inline-flex;gap:7px}
+  .page-loader-dots i{width:8px;height:8px;border-radius:50%;background:var(--logo-accent-text,#0d8368);
+    animation:pageLoaderDot 1.05s ease-in-out infinite}
+  .page-loader-dots i:nth-child(2){animation-delay:.15s}
+  .page-loader-dots i:nth-child(3){animation-delay:.3s}
+  @keyframes pageLoaderDot{0%,100%{opacity:.22;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+  .page-loader-text{margin:0;font-size:.85rem;letter-spacing:.08em;color:var(--text-secondary,#555)}
+  @media (prefers-reduced-motion:reduce){
+    .page-loader-dots i{animation:none;opacity:.72}
+  }
+</style>
+<script>
+  (function () {
+    var el = document.getElementById('pageLoader');
+    if (!el) return;
+    var shownAt = Date.now(), MIN_SHOW = 320, done = false;
+    function hide() {
+      if (done) return;
+      done = true;
+      el.classList.add('is-done');
+      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 600);
+    }
+    function schedule() {
+      setTimeout(hide, Math.max(0, MIN_SHOW - (Date.now() - shownAt)) + 120);
+    }
+    if (document.readyState === 'complete') schedule();
+    else window.addEventListener('load', schedule);
+    setTimeout(hide, 2600);                                        // 兜底，避免遮罩挡住页面
+    window.addEventListener('pageshow', function (e) { if (e.persisted) hide(); });  // 后退/前进缓存
+  })();
+</script>
+{{- end -}}

@@ -1,7 +1,9 @@
 /* ============================================================
    links.js — 友链页交互
      1) 选项卡切换（点击 / 左右方向键 / URL hash 记忆）
-     2) 朋友动态分页：每页 20 条，纯前端翻页（不刷新页面）
+     2) 朋友动态分页：每页条数读 params.toml 的 [links] per_page（模板写进 data-per-page）
+     3) 我的信息 / 提交示例 的复制按钮
+     4) 朋友动态左侧封面：加载完成后淡入
    ============================================================ */
 (function () {
   'use strict';
@@ -44,11 +46,11 @@
     });
   }
 
-  /* ---------- 2) 朋友动态分页（每页 20 条） ---------- */
+  /* ---------- 2) 朋友动态分页（每页条数由 [links] per_page 决定） ---------- */
   var grid = document.getElementById('feedGrid');
   var pager = document.getElementById('feedPager');
-  // 每页条数由 params.toml 的 [links] per_page 决定（模板写到 data-per-page）
-  var PER_PAGE = parseInt((grid && grid.getAttribute('data-per-page')) || '20', 10) || 20;
+  // 模板把配置值写到 data-per-page；取不到就退回 10（= 两列五行）
+  var PER_PAGE = parseInt((grid && grid.getAttribute('data-per-page')) || '10', 10) || 10;
 
   if (grid && pager) {
     var items = Array.prototype.slice.call(grid.querySelectorAll('[data-feed-item]'));
@@ -127,4 +129,12 @@
       done();
     } catch (e) { /* 复制不了就算了 */ }
   }
+
+  /* ---------- 4) 朋友动态左侧封面：加载完成后淡入（失败就交给首字母占位） ---------- */
+  Array.prototype.slice.call(document.querySelectorAll('.feed-cover img')).forEach(function (img) {
+    var mark = function () { img.classList.add('is-loaded'); };
+    if (img.complete && img.naturalWidth) { mark(); return; }
+    img.addEventListener('load', mark);
+    img.addEventListener('error', mark);
+  });
 })();

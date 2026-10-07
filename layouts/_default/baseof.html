@@ -42,6 +42,8 @@
   {{- with .Site.Params.custom.head_html }}{{ . | safeHTML }}{{ end -}}
 </head>
 <body>
+  {{- /* 页面加载过渡动画（可在 params.toml 的 [page_loader] 里关闭或改文案） */ -}}
+  {{- partial "page-loader.html" . -}}
   {{- /* 跳过导航，直接到主内容（键盘/读屏用户） */ -}}
   <a class="skip-link" href="#main">{{ i18n "skip-to-content" | default "跳到主要内容" }}</a>
   {{- /* 根据页面类型选择不同布局 */ -}}

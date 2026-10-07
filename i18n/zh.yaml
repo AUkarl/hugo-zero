@@ -20,6 +20,9 @@ site-footer-label: "站点页脚"
 footer-services-label: "支持服务"
 skip-to-content: "跳到主要内容"
 
+# ===== 页面加载过渡动画 =====
+loader-text: "我们的相逢，恰如其实"
+
 # ===== 新版主页（bento 布局）=====
 hb-featured: "精选"
 hb-featured-sub: "值得先读的几篇"

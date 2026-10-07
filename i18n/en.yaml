@@ -20,6 +20,9 @@ site-footer-label: "Site footer"
 footer-services-label: "Support services"
 skip-to-content: "Skip to main content"
 
+# ===== Page loading transition =====
+loader-text: "Our meeting, just as it is"
+
 # ===== Home page (bento layout) =====
 hb-featured: "Featured"
 hb-featured-sub: "A few worth reading first"
