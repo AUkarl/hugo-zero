@@ -19,6 +19,17 @@
 
 {{- define "main" -}}
 {{- $lc := site.Params.links | default dict -}}
+{{- /* 四个板块的开关（config/_default/params.toml 的 [links]），默认全开。
+       面板与标签用同一组开关；默认激活第一个启用的板块，全开时就是「朋友动态」。 */ -}}
+{{- $onFeed := $lc.feed | default true -}}
+{{- $onNeighbors := $lc.neighbors | default true -}}
+{{- $onAlliance := $lc.alliance | default true -}}
+{{- $onApply := $lc.apply | default true -}}
+{{- $active := "" -}}
+{{- if $onFeed -}}{{- $active = "feed" -}}
+{{- else if $onNeighbors -}}{{- $active = "neighbors" -}}
+{{- else if $onAlliance -}}{{- $active = "alliance" -}}
+{{- else if $onApply -}}{{- $active = "apply" -}}{{- end -}}
 {{- $d := site.Data -}}
 {{- $links := $d.links | default dict -}}
 {{- $friends := $links.friends | default slice -}}
@@ -43,22 +54,23 @@
     <p class="section-desc">{{ i18n "links-desc" | default "互联网的毛细血管里，依然流淌着真诚的联结。" }}</p>
 
     <div class="links-tabs" role="tablist" aria-label="{{ i18n "links-title" | default "友链" }}">
-      {{- if $lc.feed | default true }}
-      <button type="button" class="links-tab is-active" role="tab" id="tab-feed" data-tab="feed" aria-selected="true" aria-controls="panel-feed">{{ i18n "links-tab-feed" | default "朋友动态" }}</button>
+      {{- if $onFeed }}
+      <button type="button" class="links-tab{{ if eq $active "feed" }} is-active{{ end }}" role="tab" id="tab-feed" data-tab="feed" aria-selected="{{ if eq $active "feed" }}true{{ else }}false{{ end }}" aria-controls="panel-feed">{{ i18n "links-tab-feed" | default "朋友动态" }}</button>
       {{- end }}
-      {{- if $lc.neighbors | default true }}
-      <button type="button" class="links-tab" role="tab" id="tab-neighbors" data-tab="neighbors" aria-selected="false" aria-controls="panel-neighbors">{{ i18n "links-tab-neighbors" | default "左邻右舍" }}</button>
+      {{- if $onNeighbors }}
+      <button type="button" class="links-tab{{ if eq $active "neighbors" }} is-active{{ end }}" role="tab" id="tab-neighbors" data-tab="neighbors" aria-selected="{{ if eq $active "neighbors" }}true{{ else }}false{{ end }}" aria-controls="panel-neighbors">{{ i18n "links-tab-neighbors" | default "左邻右舍" }}</button>
       {{- end }}
-      {{- if $lc.alliance | default true }}
-      <button type="button" class="links-tab" role="tab" id="tab-alliance" data-tab="alliance" aria-selected="false" aria-controls="panel-alliance">{{ i18n "links-tab-alliance" | default "站点联盟" }}</button>
+      {{- if $onAlliance }}
+      <button type="button" class="links-tab{{ if eq $active "alliance" }} is-active{{ end }}" role="tab" id="tab-alliance" data-tab="alliance" aria-selected="{{ if eq $active "alliance" }}true{{ else }}false{{ end }}" aria-controls="panel-alliance">{{ i18n "links-tab-alliance" | default "站点联盟" }}</button>
       {{- end }}
-      {{- if $lc.apply | default true }}
-      <button type="button" class="links-tab" role="tab" id="tab-apply" data-tab="apply" aria-selected="false" aria-controls="panel-apply">{{ i18n "links-tab-apply" | default "申请友链" }}</button>
+      {{- if $onApply }}
+      <button type="button" class="links-tab{{ if eq $active "apply" }} is-active{{ end }}" role="tab" id="tab-apply" data-tab="apply" aria-selected="{{ if eq $active "apply" }}true{{ else }}false{{ end }}" aria-controls="panel-apply">{{ i18n "links-tab-apply" | default "申请友链" }}</button>
       {{- end }}
     </div>
 
     {{- /* ---------- 朋友动态 ---------- */ -}}
-    <section class="links-panel is-active" id="panel-feed" role="tabpanel" aria-labelledby="tab-feed">
+    {{- if $onFeed }}
+    <section class="links-panel{{ if eq $active "feed" }} is-active{{ end }}" id="panel-feed" role="tabpanel" aria-labelledby="tab-feed"{{ if ne $active "feed" }} hidden{{ end }}>
       {{- if $items }}
       <div class="feed-grid" id="feedGrid" data-per-page="{{ $lc.per_page | default 20 }}">
         {{- range $items }}
@@ -77,9 +89,11 @@
       <p class="links-empty">{{ i18n "links-feed-empty" | default "还没有抓到朋友们的动态。检测脚本每天运行三次（北京时间 02:00 / 11:00 / 20:00），稍后再来看看。" }}</p>
       {{- end }}
     </section>
+    {{- end }}
 
     {{- /* ---------- 左邻右舍 ---------- */ -}}
-    <section class="links-panel" id="panel-neighbors" role="tabpanel" aria-labelledby="tab-neighbors" hidden>
+    {{- if $onNeighbors }}
+    <section class="links-panel{{ if eq $active "neighbors" }} is-active{{ end }}" id="panel-neighbors" role="tabpanel" aria-labelledby="tab-neighbors"{{ if ne $active "neighbors" }} hidden{{ end }}>
       <h2 class="links-subtitle"><i class="fas fa-circle-check" aria-hidden="true"></i> {{ i18n "links-active" | default "活跃的朋友" }} <span class="links-count">{{ len $online }}</span></h2>
       {{- if $online }}
       <div class="neighbor-grid">
@@ -97,9 +111,11 @@
       </div>
       {{- end }}
     </section>
+    {{- end }}
 
     {{- /* ---------- 站点联盟 ---------- */ -}}
-    <section class="links-panel" id="panel-alliance" role="tabpanel" aria-labelledby="tab-alliance" hidden>
+    {{- if $onAlliance }}
+    <section class="links-panel{{ if eq $active "alliance" }} is-active{{ end }}" id="panel-alliance" role="tabpanel" aria-labelledby="tab-alliance"{{ if ne $active "alliance" }} hidden{{ end }}>
       {{- if $alliance }}
       <ul class="alliance-list">
         {{- range $alliance }}
@@ -110,11 +126,14 @@
       <p class="links-empty">{{ i18n "links-alliance-empty" | default "暂未加入任何联盟。" }}</p>
       {{- end }}
     </section>
+    {{- end }}
 
     {{- /* ---------- 申请友链（内容来自 content/<lang>/links/_index.md） ---------- */ -}}
-    <section class="links-panel links-apply" id="panel-apply" role="tabpanel" aria-labelledby="tab-apply" hidden>
+    {{- if $onApply }}
+    <section class="links-panel links-apply{{ if eq $active "apply" }} is-active{{ end }}" id="panel-apply" role="tabpanel" aria-labelledby="tab-apply"{{ if ne $active "apply" }} hidden{{ end }}>
       {{ .Content }}
     </section>
+    {{- end }}
   </section>
 
   {{- /* 评论：与文章页完全同一套 */ -}}
