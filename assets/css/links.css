@@ -85,6 +85,7 @@
   display: flex;
   align-items: stretch;
   gap: 12px;
+  min-width: 0;              /* 栅格项默认 min-width:auto，窄屏会被内容撑破 */
   padding: 12px;
   background: var(--card-bg);
   border: 1px solid var(--border);
@@ -158,6 +159,11 @@
   flex-direction: column;
   gap: 6px;
   padding: 4px 2px 2px 0;
+}
+/* 标题/摘要里可能有超长链接，允许从任意位置断行，避免把卡片顶宽 */
+.feed-title,
+.feed-desc {
+  overflow-wrap: anywhere;
 }
 .feed-head {
   display: flex;
@@ -435,7 +441,9 @@
   .links-apply,
   .links-apply.is-active { grid-template-columns: 1fr; gap: 20px; }
   .neighbor-grid { grid-template-columns: 1fr; }
-  .feed-grid { grid-template-columns: 1fr; }
+  /* 用 minmax(0,1fr) 而不是 1fr：1fr 的最小值是 min-content，
+     卡片里的封面 + 内容会把栅格顶宽（实测 358px 的栅格被撑到 381px） */
+  .feed-grid { grid-template-columns: minmax(0, 1fr); }
   .alliance-list { grid-template-columns: 1fr; }
   /* 窄屏封面窄一点，正文留够宽度 */
   .feed-cover { flex: 0 0 96px; width: 96px; min-height: 72px; }

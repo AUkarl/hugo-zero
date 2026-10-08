@@ -45,12 +45,17 @@
 {{- $lost := slice -}}
 {{- range $friends -}}
   {{- $st := index $status .url | default dict -}}
+  {{- /* 排序用：最近更新时间（ISO 字符串按字典序排就是时间序），没有的排最后 */ -}}
+  {{- $row := dict "site" . "st" $st "sortKey" ($st.latestPost | default "") -}}
   {{- if eq ($st.group | default "active") "lost" -}}
-    {{- $lost = $lost | append (dict "site" . "st" $st) -}}
+    {{- $lost = $lost | append $row -}}
   {{- else -}}
-    {{- $online = $online | append (dict "site" . "st" $st) -}}
+    {{- $online = $online | append $row -}}
   {{- end -}}
 {{- end -}}
+{{- /* 最近更新的排前面；没有更新时间的（例如没配 RSS）放最后 */ -}}
+{{- $online = sort $online "sortKey" "desc" -}}
+{{- $lost = sort $lost "sortKey" "desc" -}}
 
 <main class="main" id="main">
   <section class="section links-page">

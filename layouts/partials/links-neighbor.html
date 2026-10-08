@@ -36,8 +36,11 @@
         <i class="fas {{ if $isOnline }}fa-circle-check{{ else }}fa-plug-circle-xmark{{ end }}" aria-hidden="true"></i>
         {{ if $isOnline }}{{ i18n "links-online" | default "在线" }}{{ else }}{{ i18n "links-offline" | default "失联" }}{{ end }}
       </span>
-      {{- with $st.daysSincePost }}
-      <span class="neighbor-updated">{{ i18n "links-updated-days" | default "最近更新" }} {{ . }} {{ i18n "links-days-ago" | default "天前" }}</span>
+      {{- /* 有最新文章时间才显示更新信息；天数为 0（今天更新）也要显示——
+             直接用 with 会把 0 当空值吞掉，所以用 latestPost 判断有没有数据 */ -}}
+      {{- with $st.latestPost }}
+      {{- $d := $st.daysSincePost | default 0 }}
+      <span class="neighbor-updated">{{ if gt (int $d) 0 }}{{ i18n "links-updated-days" | default "最近更新" }} {{ $d }} {{ i18n "links-days-ago" | default "天前" }}{{ else }}{{ i18n "links-updated-today" | default "今天更新" }}{{ end }}</span>
       {{- end }}
       <span class="neighbor-links">
         {{- with $rss }}<a href="{{ . }}" target="_blank" rel="noopener" title="RSS" aria-label="RSS"><i class="fas fa-rss" aria-hidden="true"></i></a>{{ end }}
